@@ -1,0 +1,60 @@
+/* 階段 0 測試頁共用樣式（iPad 直向 820×1180 為主；所有文字 >= 13px） */
+:root {
+  --bg: #1f2326; --panel: #2b3034; --panel2: #353b40; --fg: #eef1f3; --muted: #aab3ba;
+  --accent: #7fa650; --accent-fg: #14210a; --danger: #d6604d; --line: #444c52;
+  --sq-light: #ecdcb8; --sq-dark: #b58863;
+}
+* { box-sizing: border-box; }
+html { font-size: 16px; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.55 -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+}
+.page { max-width: 820px; margin: 0 auto; padding: 12px 16px 48px; }
+h1 { font-size: 24px; margin: 8px 0 4px; }
+h2 { font-size: 18px; margin: 20px 0 8px; }
+p, li { font-size: 16px; }
+.muted { color: var(--muted); font-size: 14px; }
+a { color: #9ccc65; }
+
+.topbar { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.btn-back {
+  display: inline-flex; align-items: center; justify-content: center; min-height: 56px; min-width: 112px; padding: 0 22px;
+  font-size: 18px; font-weight: 600; color: var(--fg); background: var(--panel2); border: 1px solid var(--line);
+  border-radius: 14px; text-decoration: none;
+}
+.btn {
+  min-height: 52px; padding: 0 18px; font: inherit; font-size: 16px; font-weight: 600; color: var(--fg);
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 12px; cursor: pointer;
+  touch-action: manipulation;
+}
+.btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.btn:active { filter: brightness(1.2); }
+.btn[disabled] { opacity: .5; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0; }
+
+.board-box { width: 100%; max-width: 760px; margin: 8px auto; aspect-ratio: 1 / 1; position: relative; }
+.board-box .cg-wrap { width: 100%; height: 100%; }
+.status { min-height: 28px; font-size: 18px; font-weight: 600; margin: 8px 0; }
+.moves { background: var(--panel); border-radius: 12px; padding: 10px 14px; font-size: 16px; min-height: 48px; word-break: break-word; }
+
+/* 覆蓋 Chessground 預設 9px 座標字（規定最細 13px） */
+.cg-wrap coords { font-size: 13px !important; font-weight: 600; }
+
+/* 升變選擇 */
+.promo-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,.6); display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.promo-box { background: var(--panel); border-radius: 18px; padding: 18px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,.5); }
+.promo-box h3 { margin: 0 0 12px; font-size: 18px; }
+.promo-list { display: flex; gap: 12px; }
+.promo-list button { width: 92px; height: 92px; padding: 0; border: 2px solid var(--line); border-radius: 14px; background: var(--sq-light); touch-action: manipulation; }
+.promo-list piece { position: static !important; display: block; width: 100% !important; height: 100% !important; background-size: cover; }
+.promo-cancel { margin-top: 12px; }
+
+/* 測試結果表格 */
+table.res { width: 100%; border-collapse: collapse; font-size: 14px; margin: 8px 0; }
+table.res th, table.res td { border-bottom: 1px solid var(--line); padding: 8px 6px; text-align: left; vertical-align: top; }
+pre.log { background: #14171a; color: #cfe3c0; padding: 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; max-height: 360px; overflow: auto; }
+.ok { color: #9ccc65; } .bad { color: var(--danger); }
+.card { background: var(--panel); border-radius: 14px; padding: 14px 16px; margin: 12px 0; }

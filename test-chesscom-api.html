@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>chess.com 介面測試</title>
+<link rel="stylesheet" href="css/test.css">
+</head>
+<body>
+<div class="page">
+  <div class="topbar"><a class="btn-back" href="./">‹ 返回</a></div>
+  <h1>chess.com 公開資料介面測試</h1>
+  <p class="muted">喺瀏覽器直接 fetch 公開 API，睇有冇 CORS 問題、可唔可以攞到棋譜（PGN）。測試帳戶：hikaru（公開帳戶）。</p>
+  <div class="row"><button class="btn primary" id="run">開始測試</button><button class="btn" id="copy">複製結果</button></div>
+  <div class="card" id="origin"></div>
+  <table class="res" id="tbl"><tr><th>步驟</th><th>結果</th><th>詳情</th></tr></table>
+  <pre class="log" id="log"></pre>
+</div>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+  var results = { origin: location.origin, steps: [] };
+  $("origin").textContent = "目前網頁來源（Origin）：" + location.origin;
+  function row(name, ok, detail) {
+    results.steps.push({ name: name, ok: ok, detail: detail });
+    var tr = document.createElement("tr");
+    tr.innerHTML = "<td>" + name + "</td><td class='" + (ok ? "ok" : "bad") + "'>" + (ok ? "成功" : "失敗") + "</td><td></td>";
+    tr.lastChild.textContent = detail;
+    $("tbl").appendChild(tr);
+  }
+  function get(url) {
+    var t0 = performance.now();
+    return fetch(url, { mode: "cors", headers: { "Accept": "application/json" } }).then(function (res) {
+      var ms = Math.round(performance.now() - t0);
+      return res.json().then(function (j) { return { res: res, json: j, ms: ms }; });
+    });
+  }
+  async function run() {
+    $("run").disabled = true; results.steps = [];
+    $("tbl").innerHTML = "<tr><th>步驟</th><th>結果</th><th>詳情</th></tr>";
+    var base = "https://api.chess.com/pub/player/hikaru";
+    var archives = null;
+    try {
+      var a = await get(base + "/games/archives");
+      archives = a.json.archives || [];
+      row("1. 攞月份列表 /games/archives", archives.length > 0, "HTTP " + a.res.status + "，" + a.ms + " ms，共 " + archives.length + " 個月份；最新：" + archives[archives.length - 1]);
+    } catch (e) {
+      row("1. 攞月份列表 /games/archives", false, "fetch 失敗（" + e.name + ": " + e.message + "）— 瀏覽器入面最常見原因係 CORS 或者網絡");
+    }
+    if (archives && archives.length) {
+      try {
+        var m = await get(archives[archives.length - 1]);
+        var games = m.json.games || [];
+        var withPgn = games.filter(function (g) { return typeof g.pgn === "string" && g.pgn.indexOf("[Event") === 0; }).length;
+        row("2. 攞最新月份嘅對局", games.length > 0, "HTTP " + m.res.status + "，" + m.ms + " ms，" + games.length + " 局，其中 " + withPgn + " 局有 PGN 棋譜");
+        if (games[0]) {
+          var g = games[0];
+          row("3. 單局欄位", !!g.pgn, "time_class=" + g.time_class + "，rules=" + g.rules + "，有 pgn=" + !!g.pgn + "，有 white.rating=" + (g.white && g.white.rating) + "，有 accuracies=" + !!g.accuracies + "，PGN 首 60 字：" + String(g.pgn || "").slice(0, 60).replace(/\n/g, " "));
+        }
+      } catch (e2) {
+        row("2. 攞最新月份嘅對局", false, "fetch 失敗（" + e2.name + ": " + e2.message + "）");
+      }
+    }
+    try {
+      var s = await get(base + "/stats");
+      row("4. 攞評分統計 /stats", !!s.json, "HTTP " + s.res.status + "，有 chess_rapid=" + !!s.json.chess_rapid + "，有 tactics=" + !!s.json.tactics);
+    } catch (e3) { row("4. 攞評分統計 /stats", false, "fetch 失敗（" + e3.name + ": " + e3.message + "）"); }
+    $("log").textContent = JSON.stringify(results, null, 1);
+    $("run").disabled = false; window.__done = true; window.__results = results;
+  }
+  $("run").onclick = run;
+  $("copy").onclick = function () {
+    var text = JSON.stringify(results, null, 1);
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).catch(function () { $("log").textContent = text; });
+  };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>設計預覽：國際象棋 Ops</title>
+<link rel="stylesheet" href="preview.css">
+<link rel="stylesheet" href="../vendor/chessground/chessground.cburnett.css">
+</head>
+<body data-theme="A">
+<div class="pv-bar">
+  <a class="pv-btn" href="../" style="display:inline-flex;align-items:center;text-decoration:none">‹ 返回</a>
+  <div class="pv-group"><span>風格</span>
+    <button class="pv-btn" type="button" data-design="A" aria-pressed="true">A 深色經典</button>
+    <button class="pv-btn" type="button" data-design="B" aria-pressed="false">B 清爽淺色</button>
+    <button class="pv-btn" type="button" data-design="C" aria-pressed="false">C 夜空金色</button>
+  </div>
+  <div class="pv-group"><span>畫面</span>
+    <button class="pv-btn" type="button" data-screen="home" aria-pressed="true">主頁</button>
+    <button class="pv-btn" type="button" data-screen="puzzle" aria-pressed="false">謎題</button>
+    <button class="pv-btn" type="button" data-screen="play" aria-pressed="false">對電腦下棋</button>
+  </div>
+</div>
+<p class="pv-note">設計預覽（iPad 直向約 820×1180）。圖示同版面均為原創；撳「提示」「級別」可試互動。</p>
+<main class="screen" id="screen"></main>
+
+<script src="../js/positions.js"></script>
+<script src="../js/state.js"></script>
+<script src="preview.js"></script>
+</body>
+</html>
