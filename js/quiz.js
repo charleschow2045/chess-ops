@@ -60,7 +60,7 @@ function showQuestion() {
       const right = q.options.find(o => o.key === q.answer);
       if (!ok) detail = "正確答案：" + right.text + "。" + q.explain;
     } else if (!ok) {
-      detail = "綠色箭咀標示了正確的走法。" + q.explain;
+      detail = "綠色箭頭標示了正確的走法。" + q.explain;
     }
     CO.Feedback.show(fb, { ok, title: ok ? "答對了！" : "答錯了", text: detail });
     next.classList.remove("hidden");

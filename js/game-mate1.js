@@ -86,7 +86,7 @@ function play(level) {
       board.setInteractive(false);
       const mates = board.game.moves({ verbose: true }).filter(m => { const c = new Chess(board.game.fen()); c.move({ from: m.from, to: m.to, promotion: m.promotion }); return c.isCheckmate(); });
       board.setShapes(mates.map(m => ({ orig: m.from, dest: m.to, brush: "green" })));
-      CO.Feedback.show(fb, { ok: false, title: "答案", text: "綠色箭咀是將死的走法。這題不計分。" });
+      CO.Feedback.show(fb, { ok: false, title: "答案", text: "綠色箭頭是將死的走法。這題不計分。" });
       showBtn.classList.add("hidden"); nextBtn.classList.remove("hidden");
     });
     nextBtn.addEventListener("click", () => { index++; index < puzzles.length ? show() : result(); window.scrollTo(0, 0); });

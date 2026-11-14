@@ -438,7 +438,7 @@ function stripComments(src, kind) {
   src = src.replace(/\/\*[\s\S]*?\*\//g, "");
   return src.split(/\r?\n/).map(line => line.replace(/(^|[^:"'\\])\/\/.*$/, "$1")).join("\n");
 }
-const CANTONESE = /[嘅咗唔佢喺俾啲嘢冇哋嚟嗰咁乜咩啱睇揀攞嘥畀係諗仲晒呢哩囉喇喎撳搵揸]|點樣|點解|邊個|而家/;
+const CANTONESE = /[嘅咗唔佢喺俾啲嘢冇哋嚟嗰咁乜咩啱睇揀攞嘥畀係諗仲晒呢哩囉喇喎撳搵揸咀隻]|點樣|點解|邊個|而家/;
 test("App 顯示文字一律用書面語：首頁、規則快測、小遊戲、設計預覽、題庫、js 內沒有廣東話用字", () => {
   const files = walk(ROOT, [".html", ".js", ".css"]).filter(f => {
     const rel = path.relative(ROOT, f).replace(/\\/g, "/");
@@ -456,6 +456,8 @@ test("App 顯示文字一律用書面語：首頁、規則快測、小遊戲、�
 test("廣東話掃描本身有效：會抓到「找出最好嘅一步」，不會誤判書面語「找出最好的一步」", () => {
   ok(CANTONESE.test("找出最好嘅一步"));
   ok(!CANTONESE.test("找出最好的一步"));
+  for (const w of ["箭咀", "一隻馬", "冇", "係", "揀", "晒", "啱", "嚟", "咁", "睇", "撳", "畀", "嘢"]) ok(CANTONESE.test(w), "應抓到 " + w);
+  for (const w of ["箭頭", "一枚馬", "這枚棋子", "只有", "是", "選擇", "完", "正確"]) ok(!CANTONESE.test(w), "不應誤判 " + w);
   eq(stripComments("var a = 1; // 嘅註解\n/* 唔 */ var b = 'http://x';", "js").includes("嘅"), false);
   ok(stripComments("var b = 'http://x';", "js").includes("http://x"));
 });
@@ -692,6 +694,57 @@ test("首頁：「戰術謎題」入口已開放並顯示真實謎題分；puzzl
   ok(!/經驗|稱號|連續日數/.test(home));
   const html = fs.readFileSync(path.join(ROOT, "puzzles.html"), "utf8");
   for (const f of ["js/puzzle-logic.js", "js/puzzles.js", "js/state.js"]) ok(html.includes(f), "puzzles.html 應引用 " + f);
+});
+
+/* ======================= 第 3 階段新增測試 ======================= */
+const CFG = require(path.join(ROOT, "js/config.js"));
+
+test("設定集中（js/config.js）：數字合理；pickMove 用嘅就係 config 嘅同一份", () => {
+  const P = CFG.PICKMOVE;
+  for (let l = 1; l <= 6; l++) ok(P.P_BEST[l] > 0 && P.P_BEST[l] < 1, "P_BEST " + l);
+  for (let l = 2; l <= 6; l++) ok(P.P_BEST[l] > P.P_BEST[l - 1], "P_BEST 應隨級別上升");
+  eq(P.P_BEST, { 1: 0.10, 2: 0.20, 3: 0.30, 4: 0.45, 5: 0.60, 6: 0.75 }, "沿用第 0 階段數值");
+  eq(P.P_TAKE_FREE, { 1: 0.85, 2: 0.90, 3: 0.95 });
+  eq(P.LOWEST[7].skill, 0); eq(P.LOWEST[8].elo, 1320);
+  ok(P.BEST_SEARCH.depth >= 4 && P.BEST_SEARCH.depth <= 20);
+  ok(PM.P_BEST === P.P_BEST && PM.P_TAKE_FREE === P.P_TAKE_FREE && PM.BEST_SEARCH === P.BEST_SEARCH && PM.LOWEST === P.LOWEST, "pickmove 應直接用 config");
+  ok(CFG.THINK_PAUSE.minMs >= 400 && CFG.THINK_PAUSE.maxMs <= 800 && CFG.THINK_PAUSE.minMs < CFG.THINK_PAUSE.maxMs, "出棋前停頓 0.4–0.8 秒");
+  ok(CFG.HINT.depth >= 4);
+  const R = CFG.REVIEW, T = R.THRESHOLDS_CP;
+  ok(R.maxMsPerMove > 0 && R.maxDepth > 0 && R.MATE_CP >= 500);
+  ok(T.inaccuracy > 0 && T.inaccuracy < T.mistake && T.mistake < T.blunder, "疑問手 < 錯著 < 大錯");
+});
+test("設定檔案有註解說明（未有 iPad 實測數據，要按實測再調）", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/config.js"), "utf8");
+  ok(src.includes("iPad 實測") && src.includes("PICKMOVE") && src.includes("THINK_PAUSE") && src.includes("HINT") && src.includes("REVIEW"));
+});
+
+/* ---------- 第 2 階段修正：錯題本與提示 ---------- */
+test("錯題本：用咗提示嘅題目，無論答啱定答錯都入錯題本（唔計連勝）；錯題本練習用提示答啱唔計連勝", () => {
+  eq(PL.countsAsCorrect(true, false), true);
+  eq(PL.countsAsCorrect(true, true), false);
+  eq(PL.countsAsCorrect(false, false), false);
+  eq(PL.countsAsCorrect(false, true), false);
+  // 用提示答啱：入錯題本
+  eq(PL.updateWrongBook([], "aaaaa", 800, PL.countsAsCorrect(true, true)), [{ id: "aaaaa", r: 800, streak: 0 }]);
+  // 不用提示答啱：唔入
+  eq(PL.updateWrongBook([], "aaaaa", 800, PL.countsAsCorrect(true, false)), []);
+  // 錯題本練習中用提示答啱：連勝歸零、仍在本內
+  eq(PL.updateWrongBook([{ id: "aaaaa", r: 800, streak: 1 }], "aaaaa", 800, PL.countsAsCorrect(true, true)), [{ id: "aaaaa", r: 800, streak: 0 }]);
+  // 用提示答啱：仍然唔計謎題分
+  eq(PL.applyResult({ rating: 700, rated: 0, done: [], wrong: [], history: [] }, 800, true, true).delta, 0);
+});
+test("書面語修正：「箭咀」改為「箭頭」、「隻」改為「枚」；App 文字有「箭頭」「這枚棋子」", () => {
+  const files = ["js/puzzles.js", "js/quiz.js", "js/game-mate1.js", "js/game-check.js"].map(f => fs.readFileSync(path.join(ROOT, f), "utf8")).join("\n");
+  ok(files.includes("綠色箭頭是正確的走法") && files.includes("提示 2：箭頭是答案") && files.includes("要走這枚棋子"));
+  ok(!/箭咀/.test(files));
+  const quiz = fs.readFileSync(path.join(ROOT, "data/rules-quiz.js"), "utf8");
+  ok(!/隻/.test(quiz) && quiz.includes("一枚馬"));
+});
+test("主題標籤：「推薦」模式答完先顯示；「按主題練習」及錯題本照舊一開始顯示（原始碼檢查，流程見 tools/shots2.js）", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/puzzles.js"), "utf8");
+  ok(/ctx\.cfg\.mode === "recommended" \? " invisible"/.test(src), "推薦模式標籤初始隱藏（保留位置，避免棋盤移位）");
+  ok((src.match(/tagsEl\.classList\.remove\("invisible"\)/g) || []).length >= 2, "答對同答錯後都要顯示標籤");
 });
 
 /* ---------- 執行 ---------- */

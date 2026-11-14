@@ -90,7 +90,7 @@ function show() {
       const missing = p.checks.filter(u => !found.has(u));
       board.setShapes(missing.map(u => ({ orig: u.slice(0, 2), dest: u.slice(2, 4), brush: "yellow" })));
       board.feedback(false);
-      CO.Feedback.show(fb, { ok: false, title: "時間到", text: "還有 " + missing.length + " 種將軍的走法沒找到，已用黃色箭咀標示。" });
+      CO.Feedback.show(fb, { ok: false, title: "時間到", text: "還有 " + missing.length + " 種將軍的走法沒找到，已用黃色箭頭標示。" });
     }
     nextBtn.classList.remove("hidden");
   }

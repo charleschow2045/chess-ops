@@ -100,6 +100,9 @@
     return list;
   }
 
+  /* 錯題本用：用咗提示嘅題目，無論最後答啱定答錯，都當「未掌握」入錯題本（唔計連勝） */
+  function countsAsCorrect(won, usedHint) { return won && !usedHint; }
+
   function markDone(done, id) {
     var list = done.filter(function (x) { return x !== id; });
     list.push(id);
@@ -117,6 +120,6 @@
     THEME_NAMES: THEME_NAMES, ALL_THEMES: ALL_THEMES, RECOMMENDED: RECOMMENDED, START_RATING: START_RATING, WINDOW: WINDOW,
     expectedScore: expectedScore, kFactor: kFactor, applyResult: applyResult, fromRow: fromRow,
     bandStart: bandStart, bandFile: bandFile, bandsFor: bandsFor, selectPuzzle: selectPuzzle, planThemes: planThemes,
-    updateWrongBook: updateWrongBook, markDone: markDone, pushHistory: pushHistory, mainTheme: mainTheme
+    updateWrongBook: updateWrongBook, countsAsCorrect: countsAsCorrect, markDone: markDone, pushHistory: pushHistory, mainTheme: mainTheme
   };
 });

@@ -5,7 +5,7 @@
  *   const board = createBoard(el, { fen, orientation:"white", interactive:"turn", onMove(move){…} });
  *
  * 功能：點擊／拖拉走棋、最後一步高亮、合法步提示、將軍時王格高亮、升變選擇（4 款，可取消）、翻轉、
- *       座標 13px、拖拉時頁面唔捲動（blockTouchScroll＋touch-action:none）、箭咀同圈（setShapes）。
+ *       座標 13px、拖拉時頁面唔捲動（blockTouchScroll＋touch-action:none）、箭頭同圈（setShapes）。
  *
  * options：
  *   fen            初始局面（預設開局）
