@@ -1,0 +1,786 @@
+{
+ "depth": 14,
+ "maxDrop": 0.1,
+ "minMargin": 0.05,
+ "routes": [
+  {
+   "id": "w-italian",
+   "original": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d3 d6 O-O O-O",
+   "kept": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d3 d6 O-O O-O",
+   "removed": [],
+   "failing": null,
+   "drops": [
+    {
+     "ply": 1,
+     "san": "e4",
+     "drop": 0,
+     "best": "e4"
+    },
+    {
+     "ply": 3,
+     "san": "Nf3",
+     "drop": 0,
+     "best": "Nc3"
+    },
+    {
+     "ply": 5,
+     "san": "Bc4",
+     "drop": 0.006,
+     "best": "d4"
+    },
+    {
+     "ply": 7,
+     "san": "c3",
+     "drop": 0,
+     "best": "d3"
+    },
+    {
+     "ply": 9,
+     "san": "d3",
+     "drop": 0,
+     "best": "d4"
+    },
+    {
+     "ply": 11,
+     "san": "O-O",
+     "drop": 0,
+     "best": "O-O"
+    }
+   ]
+  },
+  {
+   "id": "w-two-knights",
+   "original": "e4 e5 Nf3 Nc6 Bc4 Nf6 d3 Be7 O-O O-O",
+   "kept": "e4 e5 Nf3 Nc6 Bc4 Nf6 d3 Be7 O-O O-O",
+   "removed": [],
+   "failing": null,
+   "drops": [
+    {
+     "ply": 1,
+     "san": "e4",
+     "drop": 0,
+     "best": "e4"
+    },
+    {
+     "ply": 3,
+     "san": "Nf3",
+     "drop": 0,
+     "best": "Nc3"
+    },
+    {
+     "ply": 5,
+     "san": "Bc4",
+     "drop": 0.006,
+     "best": "d4"
+    },
+    {
+     "ply": 7,
+     "san": "d3",
+     "drop": 0,
+     "best": "d3"
+    },
+    {
+     "ply": 9,
+     "san": "O-O",
+     "drop": 0,
+     "best": "Nc3"
+    }
+   ]
+  },
+  {
+   "id": "w-philidor",
+   "original": "e4 e5 Nf3 d6 d4 exd4 Nxd4 Nf6 Nc3 Be7 Be2 O-O O-O",
+   "kept": "e4 e5 Nf3 d6 d4 exd4 Nxd4 Nf6 Nc3 Be7 Be2 O-O O-O",
+   "removed": [],
+   "failing": null,
+   "drops": [
+    {
+     "ply": 1,
+     "san": "e4",
+     "drop": 0,
+     "best": "e4"
+    },
+    {
+     "ply": 3,
+     "san": "Nf3",
+     "drop": 0,
+     "best": "Nc3"
+    },
+    {
+     "ply": 5,
+     "san": "d4",
+     "drop": 0,
+     "best": "d4"
+    },
+    {
+     "ply": 7,
+     "san": "Nxd4",
+     "drop": 0,
+     "best": "Nxd4"
+    },
+    {
+     "ply": 9,
+     "san": "Nc3",
+     "drop": 0,
+     "best": "Nc3"
+    },
+    {
+     "ply": 11,
+     "san": "Be2",
+     "drop": 0.053,
+     "best": "Bf4"
+    },
+    {
+     "ply": 13,
+     "san": "O-O",
+     "drop": 0.004,
+     "best": "Bf4"
+    }
+   ]
+  },
+  {
+   "id": "b-italian",
+   "original": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d3 d6 O-O O-O",
+   "kept": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d3 d6 O-O O-O",
+   "removed": [],
+   "failing": null,
+   "drops": [
+    {
+     "ply": 2,
+     "san": "e5",
+     "drop": 0,
+     "best": "e5"
+    },
+    {
+     "ply": 4,
+     "san": "Nc6",
+     "drop": 0,
+     "best": "Nc6"
+    },
+    {
+     "ply": 6,
+     "san": "Bc5",
+     "drop": 0,
+     "best": "Nf6"
+    },
+    {
+     "ply": 8,
+     "san": "Nf6",
+     "drop": 0,
+     "best": "Nf6"
+    },
+    {
+     "ply": 10,
+     "san": "d6",
+     "drop": 0,
+     "best": "d6"
+    },
+    {
+     "ply": 12,
+     "san": "O-O",
+     "drop": 0,
+     "best": "O-O"
+    }
+   ]
+  },
+  {
+   "id": "b-scholar",
+   "original": "e4 e5 Qh5 Nc6 Bc4 g6 Qf3 Nf6",
+   "kept": "e4 e5 Qh5 Nc6 Bc4 g6 Qf3 Nf6",
+   "removed": [],
+   "failing": null,
+   "drops": [
+    {
+     "ply": 2,
+     "san": "e5",
+     "drop": 0,
+     "best": "e5"
+    },
+    {
+     "ply": 4,
+     "san": "Nc6",
+     "drop": 0,
+     "best": "Nc6"
+    },
+    {
+     "ply": 6,
+     "san": "g6",
+     "drop": 0,
+     "best": "Qe7"
+    },
+    {
+     "ply": 8,
+     "san": "Nf6",
+     "drop": 0,
+     "best": "Nf6"
+    }
+   ]
+  },
+  {
+   "id": "b-bishop",
+   "original": "e4 e5 Bc4 Nf6 d3 Nc6 Nf3 Be7 O-O O-O",
+   "kept": "e4 e5 Bc4 Nf6 d3 Nc6 Nf3 Be7 O-O O-O",
+   "removed": [],
+   "failing": null,
+   "drops": [
+    {
+     "ply": 2,
+     "san": "e5",
+     "drop": 0,
+     "best": "e5"
+    },
+    {
+     "ply": 4,
+     "san": "Nf6",
+     "drop": 0,
+     "best": "Nf6"
+    },
+    {
+     "ply": 6,
+     "san": "Nc6",
+     "drop": 0.031,
+     "best": "c6"
+    },
+    {
+     "ply": 8,
+     "san": "Be7",
+     "drop": 0.015,
+     "best": "Bc5"
+    },
+    {
+     "ply": 10,
+     "san": "O-O",
+     "drop": 0,
+     "best": "O-O"
+    }
+   ]
+  }
+ ],
+ "quizAll": [
+  {
+   "n": 0,
+   "prefix": [
+    "e4",
+    "e5"
+   ],
+   "evals": [
+    {
+     "san": "Nf3",
+     "cp": 27,
+     "wc": 0.05
+    },
+    {
+     "san": "Qh5",
+     "cp": -23,
+     "wc": -0.042
+    },
+    {
+     "san": "a3",
+     "cp": -12,
+     "wc": -0.022
+    }
+   ],
+   "margin": 0.072,
+   "pass": true
+  },
+  {
+   "n": 1,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3"
+   ],
+   "evals": [
+    {
+     "san": "Nc6",
+     "cp": -28,
+     "wc": -0.052
+    },
+    {
+     "san": "a6",
+     "cp": -146,
+     "wc": -0.263
+    },
+    {
+     "san": "h6",
+     "cp": -151,
+     "wc": -0.271
+    }
+   ],
+   "margin": 0.211,
+   "pass": true
+  },
+  {
+   "n": 2,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6"
+   ],
+   "evals": [
+    {
+     "san": "Bc4",
+     "cp": 25,
+     "wc": 0.046
+    },
+    {
+     "san": "h4",
+     "cp": -24,
+     "wc": -0.044
+    },
+    {
+     "san": "Ke2",
+     "cp": -142,
+     "wc": -0.256
+    }
+   ],
+   "margin": 0.09,
+   "pass": true
+  },
+  {
+   "n": 3,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6",
+    "Bc4"
+   ],
+   "evals": [
+    {
+     "san": "Bc5",
+     "cp": -24,
+     "wc": -0.044
+    },
+    {
+     "san": "a6",
+     "cp": -89,
+     "wc": -0.162
+    },
+    {
+     "san": "h6",
+     "cp": -74,
+     "wc": -0.135
+    }
+   ],
+   "margin": 0.091,
+   "pass": true
+  },
+  {
+   "n": 4,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6",
+    "Bc4",
+    "Bc5"
+   ],
+   "evals": [
+    {
+     "san": "c3",
+     "cp": 26,
+     "wc": 0.048
+    },
+    {
+     "san": "Bxf7+",
+     "cp": -353,
+     "wc": -0.572
+    },
+    {
+     "san": "a3",
+     "cp": 7,
+     "wc": 0.013
+    }
+   ],
+   "margin": 0.035,
+   "pass": false
+  },
+  {
+   "n": 5,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6",
+    "Bc4",
+    "Bc5",
+    "c3",
+    "Nf6",
+    "d3",
+    "d6"
+   ],
+   "evals": [
+    {
+     "san": "O-O",
+     "cp": 17,
+     "wc": 0.031
+    },
+    {
+     "san": "h4",
+     "cp": -62,
+     "wc": -0.114
+    },
+    {
+     "san": "Ke2",
+     "cp": -93,
+     "wc": -0.17
+    }
+   ],
+   "margin": 0.145,
+   "pass": true
+  },
+  {
+   "n": 6,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6",
+    "Bc4",
+    "Bc5",
+    "c3"
+   ],
+   "evals": [
+    {
+     "san": "Nf6",
+     "cp": -15,
+     "wc": -0.028
+    },
+    {
+     "san": "h6",
+     "cp": -166,
+     "wc": -0.296
+    },
+    {
+     "san": "a6",
+     "cp": -120,
+     "wc": -0.217
+    }
+   ],
+   "margin": 0.19,
+   "pass": true
+  },
+  {
+   "n": 7,
+   "prefix": [
+    "e4",
+    "e5",
+    "Qh5"
+   ],
+   "evals": [
+    {
+     "san": "Nc6",
+     "cp": 34,
+     "wc": 0.063
+    },
+    {
+     "san": "a6",
+     "cp": -60,
+     "wc": -0.11
+    },
+    {
+     "san": "h6",
+     "cp": -121,
+     "wc": -0.219
+    }
+   ],
+   "margin": 0.173,
+   "pass": true
+  },
+  {
+   "n": 8,
+   "prefix": [
+    "d4",
+    "d5"
+   ],
+   "evals": [
+    {
+     "san": "Nf3",
+     "cp": 28,
+     "wc": 0.052
+    },
+    {
+     "san": "Qd3",
+     "cp": -44,
+     "wc": -0.081
+    },
+    {
+     "san": "a3",
+     "cp": 11,
+     "wc": 0.02
+    }
+   ],
+   "margin": 0.031,
+   "pass": false
+  },
+  {
+   "n": 9,
+   "prefix": [
+    "d4",
+    "Nf6",
+    "c4",
+    "e6",
+    "Nc3"
+   ],
+   "evals": [
+    {
+     "san": "d5",
+     "cp": -17,
+     "wc": -0.031
+    },
+    {
+     "san": "a6",
+     "cp": -99,
+     "wc": -0.18
+    },
+    {
+     "san": "h6",
+     "cp": -92,
+     "wc": -0.168
+    }
+   ],
+   "margin": 0.136,
+   "pass": true
+  },
+  {
+   "n": 10,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6",
+    "Bc4",
+    "Nf6",
+    "d3",
+    "Be7"
+   ],
+   "evals": [
+    {
+     "san": "O-O",
+     "cp": 25,
+     "wc": 0.046
+    },
+    {
+     "san": "a3",
+     "cp": 6,
+     "wc": 0.011
+    },
+    {
+     "san": "h3",
+     "cp": 26,
+     "wc": 0.048
+    }
+   ],
+   "margin": -0.002,
+   "pass": false
+  },
+  {
+   "n": 11,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6",
+    "Bc4",
+    "Bc5",
+    "c3",
+    "Nf6",
+    "d3"
+   ],
+   "evals": [
+    {
+     "san": "d6",
+     "cp": -12,
+     "wc": -0.022
+    },
+    {
+     "san": "Bb6",
+     "cp": -15,
+     "wc": -0.028
+    },
+    {
+     "san": "h6",
+     "cp": -31,
+     "wc": -0.057
+    }
+   ],
+   "margin": 0.006,
+   "pass": false
+  },
+  {
+   "n": 12,
+   "prefix": [
+    "e4",
+    "c5",
+    "Nf3"
+   ],
+   "evals": [
+    {
+     "san": "Nc6",
+     "cp": -46,
+     "wc": -0.084
+    },
+    {
+     "san": "h6",
+     "cp": -72,
+     "wc": -0.132
+    },
+    {
+     "san": "a5",
+     "cp": -175,
+     "wc": -0.311
+    }
+   ],
+   "margin": 0.047,
+   "pass": false
+  },
+  {
+   "n": 13,
+   "prefix": [
+    "e4",
+    "e6",
+    "d4",
+    "d5",
+    "Nc3"
+   ],
+   "evals": [
+    {
+     "san": "Nf6",
+     "cp": -49,
+     "wc": -0.09
+    },
+    {
+     "san": "a6",
+     "cp": -61,
+     "wc": -0.112
+    },
+    {
+     "san": "h6",
+     "cp": -76,
+     "wc": -0.139
+    }
+   ],
+   "margin": 0.022,
+   "pass": false
+  },
+  {
+   "n": 14,
+   "prefix": [
+    "Nf3",
+    "d5",
+    "g3"
+   ],
+   "evals": [
+    {
+     "san": "Nf6",
+     "cp": -18,
+     "wc": -0.033
+    },
+    {
+     "san": "h6",
+     "cp": -41,
+     "wc": -0.075
+    },
+    {
+     "san": "a5",
+     "cp": -44,
+     "wc": -0.081
+    }
+   ],
+   "margin": 0.042,
+   "pass": false
+  },
+  {
+   "n": 15,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "Nc6",
+    "d4",
+    "exd4"
+   ],
+   "evals": [
+    {
+     "san": "Nxd4",
+     "cp": 28,
+     "wc": 0.052
+    },
+    {
+     "san": "Qxd4",
+     "cp": -674,
+     "wc": -0.846
+    },
+    {
+     "san": "h3",
+     "cp": -20,
+     "wc": -0.037
+    }
+   ],
+   "margin": 0.088,
+   "pass": true
+  },
+  {
+   "n": 16,
+   "prefix": [
+    "e4",
+    "e5",
+    "Nf3",
+    "d6",
+    "d4"
+   ],
+   "evals": [
+    {
+     "san": "Nf6",
+     "cp": -55,
+     "wc": -0.101
+    },
+    {
+     "san": "Qd7",
+     "cp": -163,
+     "wc": -0.291
+    },
+    {
+     "san": "h6",
+     "cp": -131,
+     "wc": -0.237
+    }
+   ],
+   "margin": 0.136,
+   "pass": true
+  },
+  {
+   "n": 17,
+   "prefix": [
+    "d4",
+    "d5",
+    "c4",
+    "e6",
+    "Nc3",
+    "Nf6",
+    "Bg5"
+   ],
+   "evals": [
+    {
+     "san": "Be7",
+     "cp": -30,
+     "wc": -0.055
+    },
+    {
+     "san": "h6",
+     "cp": -140,
+     "wc": -0.252
+    },
+    {
+     "san": "a6",
+     "cp": -106,
+     "wc": -0.193
+    }
+   ],
+   "margin": 0.138,
+   "pass": true
+  }
+ ]
+}

@@ -129,11 +129,16 @@ function startGame(init) {
   const undoBtn = el("button", { class: "btn", id: "undo", type: "button", onclick: doUndo });
   const hintBtn = el("button", { class: "btn", id: "hint", type: "button", onclick: doHint });
   const btnRow = el("div", { class: "btn-row", id: "btn-row" });
+  // 三問提醒（設定「對局中顯示三問提醒」，預設開）：只係提醒，唔幫玩家判斷；可以收起
+  let remCollapsed = false;
+  const remText = el("span", { class: "rtxt", text: "先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？" });
+  const remBtn = el("button", { class: "rbtn", id: "rem-toggle", type: "button", text: "收起", onclick() { remCollapsed = !remCollapsed; refresh(); } });
+  const reminder = el("div", { class: "reminder hidden", id: "reminder" }, [remText, remBtn]);
   const resignBtn = el("button", { class: "btn danger", id: "resign", type: "button", text: "認輸", onclick: doResign });
   btnRow.append(undoBtn, hintBtn, resignBtn);
   stage.append(
     el("div", { class: "player-row" }, [el("span", { class: "who", text: "電腦" }), el("span", { class: "lvl-badge", text: "第 " + G.level + " 級" }), oppCaps]),
-    status, wrap,
+    status, reminder, wrap,
     el("div", { class: "player-row" }, [el("span", { class: "who", text: "你（" + sideName(G.color) + "）" }), meCaps]),
     fb, endBox, btnRow, movesBox);
 
@@ -183,6 +188,10 @@ function startGame(init) {
   function refresh() {
     const g = board.game;
     renderCaps(); renderMoves();
+    const showRem = getS().settings.threeReminder && !G.over && !G.thinking && g.turn() === G.color;
+    reminder.classList.toggle("hidden", !showRem);
+    remText.textContent = remCollapsed ? "三問提醒" : "先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？";
+    remBtn.textContent = remCollapsed ? "展開" : "收起";
     status.textContent = G.over ? "對局結束" : G.thinking ? "電腦思考中…" : g.turn() === G.color ? "輪到你（" + sideName(G.color) + "）" + (g.inCheck() ? "：你被將軍！" : "") : "輪到電腦";
     undoBtn.textContent = "悔棋（剩 " + (CFG.PLAY.undoLimit - G.undos) + "）";
     hintBtn.textContent = G.busy ? "計算中…" : "提示（剩 " + (CFG.PLAY.hintLimit - G.hints) + "）";
@@ -341,7 +350,7 @@ function showReviewResult(info, res, back) {
   if (items.length) stage.append(el("h2", { class: "section-title", text: "大錯和錯著（點選任一項可查看局面）" }));
   items.forEach((m, i) => stage.append(el("button", { class: "rev-item " + m.cls, type: "button", "data-i": i, onclick: () => showReviewPosition(info, res, items, i, back) }, [
     el("b", { text: "第 " + m.moveNo + " 步・" + RV.CLASS_NAME[m.cls] }),
-    el("span", { text: "你走了 " + m.san + (m.bestSan ? "，較好的走法是 " + m.bestSan : "") + "。" + lossText(m.loss) + "。" })])));
+    el("span", { text: "你走了 " + m.san + (m.bestSan ? "，較好的走法是 " + m.bestSan : "") + "。" + lossText(m.lossCp) + "。" })])));
   stage.append(el("div", { class: "btn-row" }, [el("button", { class: "btn primary", id: "rv-back", type: "button", text: "返回", onclick: back })]));
 }
 
@@ -353,7 +362,7 @@ function showReviewPosition(info, res, items, i, back) {
   stage.append(
     el("div", { class: "q-text", text: "第 " + m.moveNo + " 步：你走了 " + m.san + "（" + RV.CLASS_NAME[m.cls] + "）" }), wrap,
     el("div", { class: "card", id: "rv-pos-text" }, [
-      el("p", { style: "margin:0 0 6px", text: (m.bestSan ? "較好的走法：" + m.bestSan + "（綠色箭頭）。" : "") + "你走的是紅色箭頭。" + lossText(m.loss) + "。" }),
+      el("p", { style: "margin:0 0 6px", text: (m.bestSan ? "較好的走法：" + m.bestSan + "（綠色箭頭）。" : "") + "你走的是紅色箭頭。" + lossText(m.lossCp) + "。" }),
       reasonLine ? el("p", { style: "margin:0", text: reasonLine }) : ""].filter(Boolean)),
     el("div", { class: "btn-row" }, [
       el("button", { class: "btn", type: "button", text: "‹ 上一個", disabled: i === 0, onclick: () => showReviewPosition(info, res, items, i - 1, back) }),

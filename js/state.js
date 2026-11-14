@@ -39,6 +39,7 @@
   var RECORD_IDS = ["quiz-castling", "quiz-enpassant", "quiz-promotion", "quiz-mate", "quiz-draw", "quiz-check",
     "mate1-1", "mate1-2", "mate1-3", "mate1-4", "check-find", "maze", "pawnwar"];
 
+  var OPENING_ROUTE_IDS = ["w-italian", "w-two-knights", "w-philidor", "b-italian", "b-scholar", "b-bishop"];
   var PUZZLE_THEMES = ["hangingPiece", "mateIn1", "fork", "pin", "mateIn2", "skewer", "discoveredAttack"];
 
   /* 白名單：欄位名 → { def: 預設值（函數，每次新建）, clean: 檢查／清洗函數 } */
@@ -65,14 +66,15 @@
     },
     // 設定
     settings: {
-      def: function () { return { board: "chessground", design: "A", flipped: false, squareNames: false }; },
+      def: function () { return { board: "chessground", design: "A", flipped: false, squareNames: false, threeReminder: true }; },
       clean: function (v) {
         v = isObj(v) ? v : {};
         return {
           board: oneOf(["chessground", "custom"], "chessground")(v.board),
           design: oneOf(["A", "B", "C"], "A")(v.design),
           flipped: v.flipped === true,
-          squareNames: v.squareNames === true
+          squareNames: v.squareNames === true,
+          threeReminder: v.threeReminder !== false
         };
       }
     },
@@ -149,6 +151,35 @@
         return { levels: levels, current: current, recent: recent };
       }
     },
+    /*
+     * 走棋前三問（第 4 階段）：plays 完成輪數；asked 累計作答條數；correct 累計答對條數（正確率 = correct / asked）
+     */
+    three: {
+      def: function () { return { plays: 0, asked: 0, correct: 0 }; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var asked = int(v.asked, 0, 10000000, 0);
+        return { plays: int(v.plays, 0, 10000000, 0), asked: asked, correct: Math.min(asked, int(v.correct, 0, 10000000, 0)) };
+      }
+    },
+    /*
+     * 開局訓練（第 4 階段）：
+     *   routes  各路線：{ streak 連續全對次數（走錯就歸零）, mastered 已掌握（連續 3 次全對）, runs 完成次數 }
+     *   quiz    開局原則小測：{ plays 完成次數, best 最高答對題數（0–10） }
+     */
+    openings: {
+      def: function () { var r = {}; OPENING_ROUTE_IDS.forEach(function (id) { r[id] = { streak: 0, mastered: false, runs: 0 }; }); return { routes: r, quiz: { plays: 0, best: 0 } }; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var routes = {}, rv = isObj(v.routes) ? v.routes : {};
+        OPENING_ROUTE_IDS.forEach(function (id) {
+          var e = isObj(rv[id]) ? rv[id] : {};
+          routes[id] = { streak: int(e.streak, 0, 1000, 0), mastered: e.mastered === true, runs: int(e.runs, 0, 1000000, 0) };
+        });
+        var q = isObj(v.quiz) ? v.quiz : {};
+        return { routes: routes, quiz: { plays: int(q.plays, 0, 1000000, 0), best: int(q.best, 0, 10, 0) } };
+      }
+    },
     // 對電腦下棋：目前選擇嘅級別（1–8）
     playLevel: {
       def: function () { return 3; },
@@ -213,7 +244,7 @@
   }
 
   return {
-    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, PUZZLE_THEMES: PUZZLE_THEMES, recordResult: recordResult,
+    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, PUZZLE_THEMES: PUZZLE_THEMES, OPENING_ROUTE_IDS: OPENING_ROUTE_IDS, recordResult: recordResult,
     defaultState: defaultState, normalizeState: normalizeState,
     loadState: loadState, saveState: saveState, exportBackup: exportBackup, parseBackup: parseBackup
   };

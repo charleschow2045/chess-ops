@@ -1,0 +1,332 @@
+{
+ "oldThresholdsCp": {
+  "blunder": 300,
+  "mistake": 150,
+  "inaccuracy": 80
+ },
+ "newThresholdsWinDrop": {
+  "blunder": 0.3,
+  "mistake": 0.2,
+  "inaccuracy": 0.1
+ },
+ "games": [
+  {
+   "name": "示範局 1（第 3 級 對 第 3 級）",
+   "plies": 35,
+   "result": "白勝（將死）",
+   "playerMoves": 35,
+   "old": {
+    "blunder": 5,
+    "mistake": 5,
+    "inaccuracy": 2
+   },
+   "new": {
+    "blunder": 5,
+    "mistake": 1,
+    "inaccuracy": 4
+   },
+   "differences": [
+    {
+     "ply": 6,
+     "san": "Nh6",
+     "evalBefore": -16,
+     "evalAfter": -84,
+     "lossCp": 68,
+     "drop": 0.124,
+     "old": null,
+     "new": "inaccuracy"
+    },
+    {
+     "ply": 12,
+     "san": "Nxg4",
+     "evalBefore": 631,
+     "evalAfter": 466,
+     "lossCp": 165,
+     "drop": 0.126,
+     "old": "mistake",
+     "new": "inaccuracy"
+    },
+    {
+     "ply": 19,
+     "san": "Nc3",
+     "evalBefore": -719,
+     "evalAfter": -889,
+     "lossCp": 170,
+     "drop": 0.059,
+     "old": "mistake",
+     "new": null
+    },
+    {
+     "ply": 26,
+     "san": "Qb7",
+     "evalBefore": 1000,
+     "evalAfter": 840,
+     "lossCp": 160,
+     "drop": 0.038,
+     "old": "mistake",
+     "new": null
+    },
+    {
+     "ply": 27,
+     "san": "Ba3",
+     "evalBefore": -840,
+     "evalAfter": -1000,
+     "lossCp": 160,
+     "drop": 0.038,
+     "old": "mistake",
+     "new": null
+    }
+   ],
+   "differenceCount": 5,
+   "reasons": {
+    "hang": 4,
+    "mated": 1
+   }
+  },
+  {
+   "name": "示範局 2（第 2 級 對 第 5 級）",
+   "plies": 90,
+   "result": "未完（90 個半步）",
+   "playerMoves": 90,
+   "old": {
+    "blunder": 6,
+    "mistake": 2,
+    "inaccuracy": 5
+   },
+   "new": {
+    "blunder": 4,
+    "mistake": 0,
+    "inaccuracy": 3
+   },
+   "differences": [
+    {
+     "ply": 10,
+     "san": "Ba3",
+     "evalBefore": -599,
+     "evalAfter": -998,
+     "lossCp": 399,
+     "drop": 0.149,
+     "old": "blunder",
+     "new": "inaccuracy"
+    },
+    {
+     "ply": 19,
+     "san": "Qxd5",
+     "evalBefore": -579,
+     "evalAfter": -687,
+     "lossCp": 108,
+     "drop": 0.064,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 24,
+     "san": "Bh3",
+     "evalBefore": -563,
+     "evalAfter": -676,
+     "lossCp": 113,
+     "drop": 0.07,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 31,
+     "san": "Qxb7",
+     "evalBefore": 669,
+     "evalAfter": 521,
+     "lossCp": 148,
+     "drop": 0.099,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 32,
+     "san": "g5",
+     "evalBefore": -521,
+     "evalAfter": -614,
+     "lossCp": 93,
+     "drop": 0.067,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 34,
+     "san": "Rc8",
+     "evalBefore": -549,
+     "evalAfter": -1000,
+     "lossCp": 451,
+     "drop": 0.185,
+     "old": "blunder",
+     "new": "inaccuracy"
+    },
+    {
+     "ply": 45,
+     "san": "Qxf7",
+     "evalBefore": 1000,
+     "evalAfter": 839,
+     "lossCp": 161,
+     "drop": 0.038,
+     "old": "mistake",
+     "new": null
+    },
+    {
+     "ply": 46,
+     "san": "a5",
+     "evalBefore": -839,
+     "evalAfter": -1000,
+     "lossCp": 161,
+     "drop": 0.038,
+     "old": "mistake",
+     "new": null
+    }
+   ],
+   "differenceCount": 8,
+   "reasons": {
+    "hang": 4
+   }
+  },
+  {
+   "name": "示範局 3（第 4 級 對 第 4 級）",
+   "plies": 90,
+   "result": "未完（90 個半步）",
+   "playerMoves": 90,
+   "old": {
+    "blunder": 6,
+    "mistake": 3,
+    "inaccuracy": 10
+   },
+   "new": {
+    "blunder": 5,
+    "mistake": 0,
+    "inaccuracy": 3
+   },
+   "differences": [
+    {
+     "ply": 24,
+     "san": "Qc8",
+     "evalBefore": 729,
+     "evalAfter": 614,
+     "lossCp": 115,
+     "drop": 0.061,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 27,
+     "san": "Nd2",
+     "evalBefore": -593,
+     "evalAfter": -679,
+     "lossCp": 86,
+     "drop": 0.051,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 28,
+     "san": "Kf6",
+     "evalBefore": 679,
+     "evalAfter": 460,
+     "lossCp": 219,
+     "drop": 0.159,
+     "old": "mistake",
+     "new": "inaccuracy"
+    },
+    {
+     "ply": 33,
+     "san": "h4",
+     "evalBefore": -574,
+     "evalAfter": -654,
+     "lossCp": 80,
+     "drop": 0.05,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 35,
+     "san": "Be2",
+     "evalBefore": -616,
+     "evalAfter": -696,
+     "lossCp": 80,
+     "drop": 0.044,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 36,
+     "san": "Qb7",
+     "evalBefore": 696,
+     "evalAfter": 566,
+     "lossCp": 130,
+     "drop": 0.078,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 39,
+     "san": "Ng3",
+     "evalBefore": -571,
+     "evalAfter": -665,
+     "lossCp": 94,
+     "drop": 0.059,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 43,
+     "san": "Ke1",
+     "evalBefore": -601,
+     "evalAfter": -744,
+     "lossCp": 143,
+     "drop": 0.076,
+     "old": "inaccuracy",
+     "new": null
+    },
+    {
+     "ply": 59,
+     "san": "Rac1",
+     "evalBefore": -672,
+     "evalAfter": -837,
+     "lossCp": 165,
+     "drop": 0.068,
+     "old": "mistake",
+     "new": null
+    },
+    {
+     "ply": 60,
+     "san": "Rd6",
+     "evalBefore": 837,
+     "evalAfter": 528,
+     "lossCp": 309,
+     "drop": 0.163,
+     "old": "blunder",
+     "new": "inaccuracy"
+    },
+    {
+     "ply": 61,
+     "san": "Bc2",
+     "evalBefore": -528,
+     "evalAfter": -788,
+     "lossCp": 260,
+     "drop": 0.146,
+     "old": "mistake",
+     "new": "inaccuracy"
+    },
+    {
+     "ply": 65,
+     "san": "Rc2",
+     "evalBefore": -919,
+     "evalAfter": -1000,
+     "lossCp": 81,
+     "drop": 0.017,
+     "old": "inaccuracy",
+     "new": null
+    }
+   ],
+   "differenceCount": 14,
+   "reasons": {
+    "hang": 4,
+    "missedCapture": 1
+   }
+  }
+ ]
+}

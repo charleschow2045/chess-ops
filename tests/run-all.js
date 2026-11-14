@@ -173,7 +173,7 @@ test("normalizeState：刪走白名單以外嘅欄位（包括巢狀欄位）", 
   eq(Object.keys(out).sort(), Object.keys(State.STATE_FIELDS).sort(), "頂層欄位要同白名單完全一樣");
   eq(out.rank, { index: 2, xp: 120 });
   eq(out.streak, { count: 5, lastDay: "2026-11-13" });
-  eq(out.settings, { board: "custom", design: "B", flipped: true, squareNames: false });
+  eq(out.settings, { board: "custom", design: "B", flipped: true, squareNames: false, threeReminder: true });
   eq(out.playLevel, 5);
   ok(!("hacker" in out) && !("unknownTop" in out) && !("evil" in out));
 });
@@ -488,10 +488,10 @@ test("已刪除「自己寫」棋盤；Stockfish 已升級到 19（18 檔案不�
     ok(!/board-custom|CustomBoard|stockfish-18/.test(src), path.relative(ROOT, f) + " 仍有舊引用");
   }
 });
-test("首頁：7 個模組，「規則快測與小遊戲」「戰術謎題」「對電腦下棋」有連結，其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
+test("首頁：7 個模組，其中 5 個有連結（規則快測、走棋前三問、戰術謎題、對電腦下棋、開局），其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
   eq(mods.length, 7);
-  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "戰術謎題 Tactics", "對電腦下棋"]);
+  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "走棋前三問", "戰術謎題 Tactics", "對電腦下棋", "開局 Openings"]);
   eq(new Set(mods.map(m => m.icon)).size, 7, "7 個模組要用 7 個不同圖示");
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8") + fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(!/稱號|連續|今日任務|經驗/.test(html), "首頁不應有稱號卡／任務／連續日數");
@@ -533,7 +533,7 @@ test("座標：設定「顯示格名」預設關閉、屬白名單、非布林�
   eq(State.defaultState().settings.squareNames, false);
   eq(State.normalizeState({ settings: { squareNames: true } }).settings.squareNames, true);
   eq(State.normalizeState({ settings: { squareNames: "yes" } }).settings.squareNames, false);
-  eq(State.normalizeState({ settings: { squareNames: 1, evil: 1 } }).settings, { board: "chessground", design: "A", flipped: false, squareNames: false });
+  eq(State.normalizeState({ settings: { squareNames: 1, evil: 1 } }).settings, { board: "chessground", design: "A", flipped: false, squareNames: false, threeReminder: true });
   const s = State.normalizeState({ settings: { squareNames: true } });
   eq(State.parseBackup(State.exportBackup(s)).settings.squareNames, true);
 });
@@ -684,11 +684,11 @@ test("謎題儲存：done 最多 2,000（保留最近）、history 最多 50、�
   const s = State.normalizeState({ puzzles: { rating: 815, rated: 12, done: ["aaaaa", "bbbbb"], wrong: [{ id: "ccccc", r: 1000, streak: 1 }], history: [{ id: "aaaaa", ok: true, hint: true, rated: false, theme: "pin", delta: 0 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
   eq(State.defaultState().puzzles, { rating: 700, rated: 0, done: [], wrong: [], history: [] });
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("首頁：「戰術謎題」入口已開放並顯示真實謎題分；puzzles.html 引用嘅檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "puzzles.html", "play.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.puzzles.rating"), "首頁要用儲存嘅謎題分");
   ok(!/經驗|稱號|連續日數/.test(home));
@@ -710,7 +710,7 @@ test("設定集中（js/config.js）：數字合理；pickMove 用嘅就係 conf
   ok(PM.P_BEST === P.P_BEST && PM.P_TAKE_FREE === P.P_TAKE_FREE && PM.BEST_SEARCH === P.BEST_SEARCH && PM.LOWEST === P.LOWEST, "pickmove 應直接用 config");
   ok(CFG.THINK_PAUSE.minMs >= 400 && CFG.THINK_PAUSE.maxMs <= 800 && CFG.THINK_PAUSE.minMs < CFG.THINK_PAUSE.maxMs, "出棋前停頓 0.4–0.8 秒");
   ok(CFG.HINT.depth >= 4);
-  const R = CFG.REVIEW, T = R.THRESHOLDS_CP;
+  const R = CFG.REVIEW, T = R.WIN_CHANCE.THRESHOLDS;
   ok(R.maxMsPerMove > 0 && R.maxDepth > 0 && R.MATE_CP >= 500);
   ok(T.inaccuracy > 0 && T.inaccuracy < T.mistake && T.mistake < T.blunder, "疑問手 < 錯著 < 大錯");
 });
@@ -875,55 +875,116 @@ test("PGN：可以用 chess.js 重新載入，步序、結果、級別、日期�
 });
 
 /* ---------- 賽後檢討：分數損失、分類、原因、小結 ---------- */
-test("檢討：引擎分數換算（將死 ±MATE_CP、cp 上限）、終局分數、分數損失計算", () => {
+const TAC = require(path.join(ROOT, "js/tactics.js"));
+test("檢討：引擎分數換算（將死 ±MATE_CP、cp 上限）、終局分數", () => {
   const M = CFG.REVIEW.MATE_CP;
   eq(RV.scoreToCp({ cp: 35, mate: null }), 35); eq(RV.scoreToCp({ cp: 5000, mate: null }), M); eq(RV.scoreToCp({ cp: -5000, mate: null }), -M);
   eq(RV.scoreToCp({ cp: null, mate: 3 }), M); eq(RV.scoreToCp({ cp: null, mate: -2 }), -M); eq(RV.scoreToCp({ cp: null, mate: 0 }), -M);
   eq(RV.terminalScore(playMoves(new Chess(), ["f3", "e5", "g4", "Qh4#"])), -M, "被將死");
   eq(RV.terminalScore(new Chess("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1")), 0, "逼和 = 0");
   eq(RV.terminalScore(new Chess()), null);
-  eq(RV.lossCp(50, -50), 0, "走完後分數同走前一樣 → 0");
-  eq(RV.lossCp(50, 100), 150, "走前 +50，走完後（玩家角度）−100 → 損失 150");
-  eq(RV.lossCp(-30, 10), 0, "分數反而更好 → 0");
-  eq(RV.lossCp(M, M), M + M > 0 ? 2 * M : 0, "上限內相加");
-  eq(RV.lossCp(M, -M), 0);
-  eq(RV.lossCp(0, M), M, "走出將死劣勢：損失 = MATE_CP");
+  eq(RV.lossCp(50, -50), 0); eq(RV.lossCp(50, 100), 150); eq(RV.lossCp(-30, 10), 0); eq(RV.lossCp(0, M), M);
 });
-test("檢討：分類按 config 門檻（疑問手 80–149、錯著 150–299、大錯 >= 300）；邊界值", () => {
-  const T = CFG.REVIEW.THRESHOLDS_CP;
-  eq(T, { inaccuracy: 80, mistake: 150, blunder: 300 });
-  eq(RV.classify(0), null); eq(RV.classify(79), null);
-  eq(RV.classify(80), "inaccuracy"); eq(RV.classify(149), "inaccuracy");
-  eq(RV.classify(150), "mistake"); eq(RV.classify(299), "mistake");
-  eq(RV.classify(300), "blunder"); eq(RV.classify(1000), "blunder"); eq(RV.classify(2000), "blunder");
+test("檢討（勝率）：Lichess 勝率公式 wc(cp) = 2/(1+exp(−0.00368208×cp)) − 1；跌幅同分類（0.1／0.2／0.3）；已輸局面唔會再標大錯", () => {
+  const W = CFG.REVIEW.WIN_CHANCE;
+  eq(W.K, 0.00368208); eq(W.THRESHOLDS, { inaccuracy: 0.1, mistake: 0.2, blunder: 0.3 });
+  ok(CFG.REVIEW.THRESHOLDS_CP === undefined, "舊 THRESHOLDS_CP 要刪走");
+  const wc = cp => 2 / (1 + Math.exp(-0.00368208 * cp)) - 1;
+  for (const cp of [0, 50, 100, 300, -300, 800, -1000, 1000]) ok(Math.abs(RV.winChance(cp) - wc(cp)) < 1e-12, "wc(" + cp + ")");
+  eq(RV.winChance(0), 0);
+  ok(Math.abs(RV.winChance(100) - 0.18207) < 1e-4, "wc(100) ≈ 0.182");
+  ok(RV.winChance(-300) === -RV.winChance(300), "對稱");
+  ok(RV.winChance(100) > RV.winChance(50) && RV.winChance(1000) < 1 && RV.winChance(-1000) > -1, "單調而且喺 −1 至 1 之間");
+  eq(RV.winChance(5000), RV.winChance(CFG.REVIEW.MATE_CP), "超過上限會被夾住");
+  eq(RV.winDrop(0, 0), 0); eq(RV.winDrop(100, 300), 0, "變好唔係跌幅");
+  ok(Math.abs(RV.winDrop(0, -300) - 0.5 + 0) > 0 && RV.winDrop(0, -300) > 0.3, "0 → −300 跌幅 > 0.3");
+  ok(Math.abs(RV.winDrop(300, -300) - 1.0) < 0.01, "+300 → −300：跌幅約 1.0");
+  // 已輸局面：−1000 → −1000 以及 −800 → −1000 都唔係大錯
+  eq(RV.winDrop(-1000, -1000), 0); eq(RV.classify(RV.winDrop(-1000, -1000)), null);
+  eq(RV.classify(RV.winDrop(-800, -1000)), null, "已輸局面再多輸少少唔會標大錯");
+  eq(RV.classify(RV.winDrop(-1000, -1000)), null);
+  // 已經大勝：+1000 → +700 唔係錯
+  eq(RV.classify(RV.winDrop(1000, 700)), null);
+  // 邊界值（跌幅）
+  eq(RV.classify(0), null); eq(RV.classify(0.0999), null); eq(RV.classify(0.1), "inaccuracy"); eq(RV.classify(0.1999), "inaccuracy");
+  eq(RV.classify(0.2), "mistake"); eq(RV.classify(0.2999), "mistake"); eq(RV.classify(0.3), "blunder"); eq(RV.classify(1.5), "blunder");
+  // 實際數例：均勢送兵（0 → −100）約 0.18 → 疑問手；送馬（0 → −300）→ 大錯；將死（0 → −1000）→ 大錯
+  eq(RV.classify(RV.winDrop(0, -100)), "inaccuracy"); eq(RV.classify(RV.winDrop(0, -300)), "blunder"); eq(RV.classify(RV.winDrop(0, -1000)), "blunder");
+  eq(RV.classify(RV.winDrop(0, -150)), "mistake");
   ok(RV.CLASS_NAME.blunder.includes("大錯") && RV.CLASS_NAME.mistake.includes("錯著") && RV.CLASS_NAME.inaccuracy.includes("疑問手"));
 });
-test("檢討：原因只在能確定時才寫（對方可以吃子／對方可以將死），否則 null", () => {
-  // 白后走到 e5，黑馬可以白吃（無保護）
-  const after = "r1bqkbnr/pppp1ppp/2n5/4Q3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3";
-  eq(RV.reasonFor(Chess, after, "c6e5", false, "w"), "hang");
-  eq(RV.reasonFor(Chess, after, "d7d6", false, "w"), null, "對方最佳步唔係吃子 → 唔寫原因");
-  eq(RV.reasonFor(Chess, after, null, false, "w"), null);
-  eq(RV.reasonFor(Chess, after, "c6e5", true, "w"), "mate", "對方有將死 → 將死原因優先");
-  // 以兵換馬以外嘅「公平交換」唔當成沒有注意到：Rxd5 被 exd5 回吃（車換兵）
-  eq(RV.reasonFor(Chess, "4k3/8/8/3p4/4P3/8/8/3RK3 b - - 0 1", "d5e4", false, "w"), "hang", "兵吃兵：e4 兵無保護 → hang");
-  eq(RV.reasonFor(Chess, "4k3/8/8/8/3p4/2P5/8/4K3 b - - 0 1", "d4c3", false, "w"), "hang", "無保護兵被吃");
-  eq(RV.reasonFor(Chess, "4k3/8/8/8/3n4/2P5/1P6/4K3 b - - 0 1", "d4c2", false, "w"), null, "冇棋可吃 → null");
+test("白吃計算：淨得益 = 被吃子價值 −（吃完會被吃返 ? 自己價值 : 0）；吃過路兵；排序；將死步；交換走棋方", () => {
+  const free = fen => TAC.freeCaptures(Chess, new Chess(fen), 1);
+  // 無保護嘅兵：淨得益 1
+  eq(free("4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1").map(c => [c.move.san, c.gain]), [["exd5", 1]]);
+  // 有保護嘅兵（被兵保護）：兵吃兵 1 − 1 = 0 → 唔算
+  eq(free("4k3/8/2p5/3p4/4P3/8/8/4K3 w - - 0 1").length, 0);
+  // 后吃有保護嘅兵：1 − 9 = −8 → 唔算
+  eq(free("4k3/8/2p5/3p4/8/8/8/3QK3 w - - 0 1").length, 0);
+  // 兵吃有保護嘅馬：3 − 1 = 2
+  const pn = free("4k3/8/2p5/3n4/4P3/8/8/4K3 w - - 0 1"); eq(pn.map(c => [c.move.san, c.gain]), [["exd5", 2]]);
+  // 車吃無保護嘅馬：3；吃有保護嘅馬：3 − 5 = −2
+  eq(free("4k3/8/8/3n4/8/8/8/3RK3 w - - 0 1").map(c => c.gain), [3]);
+  eq(free("4k3/8/2p5/3n4/8/8/8/3RK3 w - - 0 1").length, 0, "馬被 c7 兵保護，車換馬唔白吃");
+  // 吃過路兵算一個吃子（吃嘅係兵）
+  const ep = free("4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1"); eq(ep.map(c => [c.move.san, c.gain]), [["exd6", 1]]);
+  // 排序：得益大嘅排前面
+  const two = free("4k3/8/8/3n1p2/4P3/8/8/3RK3 w - - 0 1"); ok(two.length >= 2 && two[0].gain >= two[1].gain, "按得益排序");
+  eq(TAC.captureGain(Chess, new Chess("4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1"), new Chess("4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1").moves({ verbose: true }).find(m => m.san === "e5")), 0, "非吃子 = 0");
+  // 將死步
+  eq(TAC.mateMoves(Chess, new Chess("6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1")).map(m => m.san), ["Ra8#"]);
+  eq(TAC.mateMoves(Chess, new Chess()).length, 0);
+  // 交換走棋方
+  const sw = TAC.swapTurn(Chess, "4k3/8/8/3pP3/8/8/8/4K3 w - d6 0 1");
+  eq(sw, "4k3/8/8/3pP3/8/8/8/4K3 b - - 0 1", "走棋方改為黑，吃過路兵格清走");
+  eq(TAC.swapTurn(Chess, "4k3/8/8/8/8/8/4r3/4K3 w - - 0 1"), null, "走棋方被將軍 → 交換後唔合法 → null");
+  eq(TAC.swapTurn(Chess, "garbage"), null);
+  const swg = new Chess(sw); eq(swg.turn(), "b");
+  ok(TAC.swapTurn(Chess, "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1") !== null);
 });
-test("檢討：小結文字（簡單書面語）；分辨唔到原因只講數目，唔亂作原因", () => {
+test("檢討（原因）：四種原因按次序判斷，只標第一個符合嘅：被將死 > 漏殺 > 送子 > 漏吃；判斷唔到就 null", () => {
+  const rf = (fenBefore, uci, before, after) => RV.reasonFor(Chess, { fenBefore, uci, before, after, playerColor: new Chess(fenBefore).turn() });
+  const hangFen = "r3k3/8/8/8/8/8/4Q3/4K3 w - - 0 1";       // 白后走去 a6 會被車白吃
+  eq(rf(hangFen, "e2a6", { cp: 0, best: "e2e5" }, { cp: 900, best: "a8a6" }), "hang", "送子");
+  // 1. 被將死 優先於 其他
+  eq(rf(hangFen, "e2a6", { cp: 0, mate: 1, best: "e2e5" }, { mate: 2, best: "a8a6" }), "mated", "對手有將死 → 被將死（即使同時送子、漏殺）");
+  // 2. 漏殺（3 步內有將死而玩家冇將死）優先於送子
+  eq(rf(hangFen, "e2a6", { mate: 2, best: "e2e8" }, { cp: 900, best: "a8a6" }), "missedMate");
+  eq(rf(hangFen, "e2a6", { mate: 3, best: "e2e8" }, { cp: 900, best: "a8a6" }), "missedMate", "3 步內都算");
+  eq(rf(hangFen, "e2a6", { mate: 4, best: "e2e8" }, { cp: 900, best: "a8a6" }), "hang", "4 步將死唔算漏殺");
+  eq(rf(hangFen, "e2a6", { mate: -2, best: "e2e8" }, { cp: 900, best: "a8a6" }), "hang", "走之前係被將死（負數）唔係漏殺");
+  const mateFen = "6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1";   // 白方 Ra8# 一步殺
+  eq(rf(mateFen, "g2g3", { mate: 1, best: "a1a8" }, { cp: 50, best: "g8f8" }), "missedMate", "冇走將死嘅步");
+  eq(rf(mateFen, "a1a8", { mate: 1, best: "a1a8" }, { cp: -1000, mate: 0, best: null }), null, "走咗將死嘅步 → 唔係漏殺（亦冇其他原因）");
+  // 3. 送子 優先於 漏吃：后被車攻擊，玩家走王（唔吃車），之後對手可以吃后（王回吃，淨得益 9 − 5 = 4）
+  const bothFen = "4k3/8/8/3n4/8/8/r3Q3/4K3 w - - 0 1";
+  eq(rf(bothFen, "e1d1", { cp: 500, best: "e2a2" }, { cp: 400, best: "a2e2" }), "hang", "送子（同時漏吃 Qxa2）→ 標送子");
+  // 4. 漏吃：最佳步係白吃（淨得益 >= 2），玩家走咗安全嘅閒著
+  const missFen = "4k3/8/8/3n4/8/8/8/3RK3 w - - 0 1";       // Rxd5 白吃馬（3 分）
+  eq(rf(missFen, "e1e2", { cp: 300, best: "d1d5" }, { cp: -300, best: "e8e7" }), "missedCapture");
+  eq(rf("4k3/8/8/3p4/8/8/8/3RK3 w - - 0 1", "e1e2", { cp: 100, best: "d1d5" }, { cp: -100, best: "e8e7" }), null, "最佳吃子淨得益只有 1 → 唔算漏吃");
+  eq(rf(missFen, "d1d5", { cp: 300, best: "d1d5" }, { cp: -300, best: "e8e7" }), null, "玩家走咗最佳吃子 → 冇原因");
+  // 判斷唔到：安全閒著、最佳步唔係吃子
+  eq(rf("4k3/8/8/8/8/8/8/R3K3 w - - 0 1", "e1e2", { cp: 0, best: "a1a7" }, { cp: 0, best: "e8e7" }), null);
+  eq(rf(missFen, "e1e2", { cp: 300, best: null }, { cp: 0, best: null }), null);
+  eq(RV.REASON_TEXT, { mated: "沒有注意到對方可以將死", missedMate: "錯過了將死的機會", hang: "沒有注意到對方可以吃子", missedCapture: "錯過了白吃對方棋子的機會" });
+});
+test("檢討：小結文字（簡單書面語）；分辨唔到原因只講數目，唔亂作原因；四種原因都有書面語文字", () => {
   const mk = (cls, reason) => ({ cls, reason: reason || null });
   eq(RV.summarize([mk("blunder", "hang"), mk("blunder", "hang")]).text, "這局有 2 步大錯，都是沒有注意到對方可以吃子。");
   eq(RV.summarize([mk("blunder", "hang")]).text, "這局有 1 步大錯，是沒有注意到對方可以吃子。");
   eq(RV.summarize([mk("blunder"), mk("blunder")]).text, "這局有 2 步大錯。", "原因不明 → 只講數目");
   eq(RV.summarize([mk("blunder", "hang"), mk("blunder")]).text, "這局有 2 步大錯，其中 1 步是沒有注意到對方可以吃子。");
-  eq(RV.summarize([mk("blunder", "hang"), mk("blunder", "mate")]).text, "這局有 2 步大錯。", "原因不一致 → 只講數目");
-  eq(RV.summarize([mk("blunder", "mate")]).text, "這局有 1 步大錯，是沒有注意到對方可以將死。");
+  eq(RV.summarize([mk("blunder", "hang"), mk("blunder", "mated")]).text, "這局有 2 步大錯。", "原因不一致 → 只講數目");
+  eq(RV.summarize([mk("blunder", "mated")]).text, "這局有 1 步大錯，是沒有注意到對方可以將死。");
+  eq(RV.summarize([mk("blunder", "missedMate"), mk("blunder", "missedMate")]).text, "這局有 2 步大錯，都是錯過了將死的機會。");
+  eq(RV.summarize([mk("mistake", "missedCapture")]).text, "這局有 1 步錯著，是錯過了白吃對方棋子的機會。");
   eq(RV.summarize([mk("blunder"), mk("mistake"), mk("mistake"), mk("inaccuracy")]).text, "這局有 1 步大錯。另有 2 步錯著。還有 1 步疑問手。");
-  eq(RV.summarize([mk("mistake", "hang")]).text, "這局有 1 步錯著，是沒有注意到對方可以吃子。");
   eq(RV.summarize([mk("inaccuracy"), mk("inaccuracy")]).text, "這局沒有大錯和錯著。這局有 2 步疑問手。");
   eq(RV.summarize([mk(null), mk(null)]).text, "這局沒有大錯、錯著或疑問手。");
   eq(RV.summarize([mk("blunder", "hang"), mk("blunder", "hang")]).counts, { blunder: 2, mistake: 0, inaccuracy: 0 });
 });
+
 
 /* 假分析器：2 步貪心（子力 + 對手最佳吃子），輪到走棋方角度；足夠令「送后」變成大錯 */
 function fakeAnalyze(Chess) {
@@ -943,8 +1004,8 @@ function fakeAnalyze(Chess) {
     return { cp: Math.round(bestScore * 100), mate: null, best };
   };
 }
-test("檢討整局（假分析器）：送后被標為大錯並寫明原因；最佳步損失 0；進度回報同取消", async () => {
-  const ucis = ["e2e4", "e7e5", "d1h5", "b8c6", "h5e5", "c6e5"];       // 白方 3.Qxe5?? 送后
+test("檢討整局（假分析器，勝率分類）：送后被標為大錯並寫明原因；最佳步跌幅 0；進度回報同取消", async () => {
+  const ucis = ["e2e4", "e7e5", "d1h5", "b8c6", "h5e5", "c6e5"];       // 白方 3.Qxe5+?? 送后
   const prog = [];
   const res = await RV.reviewGame(Chess, ucis, "w", fakeAnalyze(Chess), { onProgress: (d, t) => prog.push([d, t]) });
   eq(res.cancelled, false);
@@ -952,33 +1013,43 @@ test("檢討整局（假分析器）：送后被標為大錯並寫明原因；�
   eq(prog, [[1, 3], [2, 3], [3, 3]]);
   const last = res.moves[2];
   eq([last.san, last.cls, last.reason, last.moveNo], ["Qxe5+", "blunder", "hang", 3]);
-  ok(last.loss >= 300, "損失 " + last.loss);
+  ok(last.drop >= 0.3 && last.lossCp >= 300, "勝率跌幅 " + last.drop.toFixed(2) + "、損失 " + last.lossCp + " cp");
   ok(last.bestUci && last.bestSan && last.bestUci !== last.uci, "有較好走法：" + last.bestSan);
-  eq(res.moves[0].cls, null);
+  eq(res.moves[0].cls, null); eq(res.moves[0].drop, 0);
   eq(res.summary.text, "這局有 1 步大錯，是沒有注意到對方可以吃子。");
-  // 玩家執黑：只分析黑方步
   const asBlack = await RV.reviewGame(Chess, ["e2e4", "e7e5"], "b", fakeAnalyze(Chess));
   eq(asBlack.moves.length, 1); eq(asBlack.moves[0].san, "e5");
-  // 取消
   let calls = 0;
   const cancelled = await RV.reviewGame(Chess, ucis, "w", async f => { calls++; return fakeAnalyze(Chess)(f); }, { shouldCancel: () => calls >= 2 });
   eq(cancelled.cancelled, true); eq(cancelled.summary, null);
-  // 將死對方嘅一步：損失 0（走完後被將死分數為 −MATE_CP）
   const mate = await RV.reviewGame(Chess, ["f2f3", "e7e5", "g2g4", "d8h4"], "b", fakeAnalyze(Chess));
-  eq(mate.moves[mate.moves.length - 1].san, "Qh4#"); eq(mate.moves[mate.moves.length - 1].loss, 0);
-  // 同一局面唔重複分析（cache）
+  eq(mate.moves[mate.moves.length - 1].san, "Qh4#"); eq(mate.moves[mate.moves.length - 1].drop, 0);
   let n = 0;
   await RV.reviewGame(Chess, ["e2e4", "e7e5", "g1f3", "b8c6"], "w", async f => { n++; return fakeAnalyze(Chess)(f); });
   ok(n <= 4, "分析次數 " + n);
 });
-test("檢討：走出將死劣勢（將死分數）→ 大錯並寫「對方可以將死」", async () => {
-  const analyze = async fen => {
-    if (fen.startsWith("rnbqkbnr/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQKBNR b")) return { cp: null, mate: 1, best: "e7e5" };   // 1.f3 之後，黑方有將死（假設，模擬「走出將死劣勢」）
+test("檢討整局：走出將死劣勢 → 大錯（被將死）；錯過一步殺 → 大錯（漏殺）；已輸局面再走錯唔再標大錯", async () => {
+  const analyzeMated = async fen => {
+    if (fen.startsWith("rnbqkbnr/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQKBNR b")) return { cp: null, mate: 1, best: "e7e5" };   // 1.f3 之後，黑方有將死（假設）
     return { cp: 0, mate: null, best: "e2e4" };
   };
-  const res = await RV.reviewGame(Chess, ["f2f3", "e7e5"], "w", analyze);
-  eq([res.moves[0].cls, res.moves[0].reason, res.moves[0].loss], ["blunder", "mate", 1000]);
-  ok(res.summary.text.includes("可以將死"));
+  const res = await RV.reviewGame(Chess, ["f2f3", "e7e5"], "w", analyzeMated);
+  eq([res.moves[0].cls, res.moves[0].reason, res.moves[0].lossCp], ["blunder", "mated", 1000]);
+  ok(res.summary.text.includes("可以將死") && res.moves[0].drop > 0.9);
+  // 漏殺：黑方喺 1.f3 e5 2.g4 之後有 Qh4# 但走咗 Nc6
+  const analyzeMiss = async fen => {
+    if (fen.startsWith("rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b")) return { cp: null, mate: 1, best: "d8h4" };
+    if (fen.startsWith("r1bqkbnr/pppp1ppp/2n5/4p3/6P1/5P2/PPPPP2P/RNBQKBNR w")) return { cp: 100, mate: null, best: "d2d4" };
+    return { cp: 0, mate: null, best: null };
+  };
+  const miss = await RV.reviewGame(Chess, ["f2f3", "e7e5", "g2g4", "b8c6"], "b", analyzeMiss);
+  const m2 = miss.moves[miss.moves.length - 1];
+  eq([m2.san, m2.cls, m2.reason], ["Nc6", "blunder", "missedMate"]);
+  eq(miss.summary.text, "這局有 1 步大錯，是錯過了將死的機會。");
+  // 已輸局面：之前已經 −1000，之後仍然 −1000 → 唔標
+  const lost = await RV.reviewGame(Chess, ["e2e4", "e7e5"], "w", async f => ({ cp: -1000, mate: null, best: "a2a3" }));
+  eq(lost.moves[0].cls, null); eq(lost.moves[0].drop, 0);
+  eq(lost.summary.text, "這局沒有大錯、錯著或疑問手。");
 });
 
 /* ---------- 儲存：對局狀態 ---------- */
@@ -1003,7 +1074,7 @@ test("儲存（play 欄位）：白名單清洗、最近 20 局、不存分析�
   eq(n.recent[0].blunders, null); eq(n.recent[1].blunders, 2); eq(n.recent[1].reason, "draw", "不明原因會被清洗");
   const s = State.normalizeState({ playLevel: 5, play: { levels: { 5: { w: 3, d: 0, l: 1, streak: 2, lstreak: 0 } }, current: { level: 5, color: "b", moves: ["e2e4"], undos: 1, hints: 2, usedUndo: true, usedHint: true }, recent: [{ date: "2026-11-14", level: 5, color: "b", result: "loss", reason: "resign", pgn: "1. e4 *", blunders: 3, plies: 1 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("進行中對局：保存（localStorage）→ 恢復 → 重播出同一個局面；中途離開後可以繼續", () => {
   const store = {};
@@ -1099,12 +1170,199 @@ test("對電腦下棋：用 App 內對話框（唔用 alert／confirm／prompt�
 });
 test("首頁：「對電腦下棋」已開放，顯示目前級別（真實數字）；play.html 引用檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "puzzles.html", "play.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.playLevel") && home.includes("目前第 "));
   const html = fs.readFileSync(path.join(ROOT, "play.html"), "utf8");
   for (const f of ["js/config.js", "js/pickmove.js", "js/engine.js", "js/engine-manager.js", "js/play-logic.js", "js/review-logic.js", "js/dialog.js", "js/play.js"]) ok(html.includes(f), "play.html 應引用 " + f);
   ok(html.indexOf("js/config.js") < html.indexOf("js/pickmove.js"), "config.js 要喺 pickmove.js 之前");
+});
+
+/* ======================= 第 4 階段（走棋前三問、開局訓練、檢討改良）新增測試 ======================= */
+const TL = require(path.join(ROOT, "js/three-logic.js"));
+const THREE = require(path.join(ROOT, "data/three.js"));
+const OPEN = require(path.join(ROOT, "data/openings.js"));
+const OL = require(path.join(ROOT, "js/openings-logic.js"));
+
+/* ---------- 走棋前三問：答案計算 ---------- */
+test("三問：Q1（假如輪到對方走）要交換走棋方：吃過路兵格清走、走棋方被將軍就不用；Q2 同 Q3 嘅答案計算", () => {
+  // Q1 威脅：白方走棋，黑車可以白吃白馬（假如輪到黑方）
+  const r = TL.analyzeQ12(Chess, "4k3/8/8/3p4/8/8/8/R3K3 w - - 0 1");
+  eq(r.q2.kind, "none", "車 a1 吃唔到任何子");
+  eq(r.q1.kind, "none");
+  // 對方可以白吃我嘅馬：黑方象 b4 攻擊白馬 e1？ 用明確局面：白馬 d4 無保護，黑后 d8 對住
+  const t1 = TL.analyzeQ12(Chess, "3qk3/8/8/8/3N4/8/8/4K3 w - - 0 1");
+  eq([t1.q1.kind, t1.q1.squares], ["squares", ["d4"]], "假如輪到黑方，黑后可以白吃 d4 的馬");
+  ok(t1.q1.text.includes("對方的后可以吃掉你沒有保護的 d4 馬"), t1.q1.text);
+  eq(t1.q2.kind, "none", "白馬吃唔到任何子，亦冇一步將死");
+});
+test("三問：交換走棋方後仍然唔合法嘅局面唔用（走棋方被將軍）；同時有將死同白吃嘅局面（答案有歧義）唔用", () => {
+  eq(TL.analyzeQ12(Chess, "4k3/8/8/8/8/8/4r3/4K3 w - - 0 1"), null, "白王被將軍");
+  eq(TL.analyzeQ12(Chess, "garbage"), null);
+  // 白方有 Ra8#（將死），同時有可以白吃嘅子 → 歧義 → null
+  eq(TL.analyzeQ12(Chess, "6k1/5ppp/8/8/3n4/8/5PPP/R2R2K1 w - - 0 1"), null);
+  // 吃過路兵格：Q1 用嘅交換 FEN 唔含 ep
+  const swapped = TAC.swapTurn(Chess, "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3");
+  ok(swapped && swapped.split(" ")[3] === "-" && swapped.split(" ")[1] === "b");
+});
+test("三問：Q3 候選步——1 個不安全（送子或被將死）、2 個安全；不用被排除嘅步；候選步都係「自然」嘅步", () => {
+  const fen = "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3";
+  let got = 0;
+  for (let seed = 1; seed <= 30 && got < 5; seed++) {
+    const q3 = TL.pickQ3(Chess, fen, mulberry32(seed), ["g8f6"]);
+    if (!q3) continue;
+    got++;
+    eq(q3.options.length, 3); ok(q3.options.some(o => o.uci === q3.answer));
+    ok(TL.checkQ3(Chess, fen, q3), "checkQ3");
+    ok(!q3.options.some(o => o.uci === "g8f6"), "排除嘅步唔會出現");
+    const g = new Chess(fen);
+    q3.options.forEach(o => ok(TL.natural(g.moves({ verbose: true }).find(m => uciOf(m) === o.uci)), o.san + " 係自然嘅步"));
+    ok(q3.text.includes("另外兩步是安全的"));
+  }
+  ok(got >= 3, "應該揀到候選步");
+  // 懲罰細節：走 Qh5?? 之類
+  const g = new Chess("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+  eq(TL.punishment(Chess, g, g.moves({ verbose: true }).find(m => m.san === "e4")), null, "e4 安全");
+  const g2 = new Chess("r3k3/8/8/8/8/8/4Q3/4K3 w - - 0 1");
+  const bad = TL.punishment(Chess, g2, g2.moves({ verbose: true }).find(m => m.san === "Qa6"));
+  eq(bad.kind, "capture"); ok(bad.text.includes("對方的車可以吃掉") && bad.text.includes("Qa6"));
+  const g3 = new Chess("6k1/5ppp/8/8/8/8/5PPP/R5K1 b - - 0 1");
+  const mt = TL.punishment(Chess, g3, g3.moves({ verbose: true }).find(m => m.san === "h6"));
+  eq(mt, null, "h6 後 Ra8+ Kh7 唔係將死 → 安全");
+});
+
+/* ---------- 走棋前三問：題庫（60 題）逐題重新計算 ---------- */
+test("三問題庫：60 題、四個主題各 15 題、分數 400–1100、Lichess id；局面係「對手第一步走完」之後", () => {
+  eq(THREE.length, 60);
+  const themes = {}; THREE.forEach(q => { themes[q.theme] = (themes[q.theme] || 0) + 1; });
+  eq([themes.hangingPiece, themes.fork, themes.pin, themes.mateIn1], [15, 15, 15, 15]); eq(Object.keys(themes).length, 4);
+  eq(new Set(THREE.map(q => q.id)).size, 60);
+  const byId = {}; PUZZLES.forEach(p => { byId[p.id] = p; });
+  for (const q of THREE) {
+    const p = byId[q.id];
+    ok(p, q.id + " 應該係 data/puzzles 內嘅 Lichess 謎題");
+    ok(q.rating === p.rating && q.rating >= 400 && q.rating <= 1100, q.id + " 分數");
+    ok(p.themes.includes(q.theme), q.id + " 主題");
+    const g = new Chess(p.fen); g.move({ from: p.moves[0].slice(0, 2), to: p.moves[0].slice(2, 4), promotion: p.moves[0][4] });
+    eq(q.fen, g.fen(), q.id + " 局面應該係對手第一步走完之後");
+  }
+});
+test("三問題庫：每一題 Q1／Q2／Q3 答案都用程式重新計算並核對（唔合法交換局面、歧義局面已排除）；答案類型有變化", () => {
+  const kinds = { q1: {}, q2: {} };
+  for (const q of THREE) {
+    const r = TL.analyzeQ12(Chess, q.fen);
+    ok(r, q.id + " 局面應該適用");
+    eq([q.q1.kind, q.q1.squares, q.q1.text], [r.q1.kind, r.q1.squares, r.q1.text], q.id + " Q1");
+    eq([q.q2.kind, q.q2.squares, q.q2.text], [r.q2.kind, r.q2.squares, r.q2.text], q.id + " Q2");
+    ok(TL.checkQ3(Chess, q.fen, q.q3), q.id + " Q3：恰好 1 個不安全、2 個安全");
+    ok(q.q3.text.length > 10 && q.q1.text.length > 10 && q.q2.text.length > 10, q.id + " 有解釋");
+    // 獨立核對：Q1／Q2 嘅 squares 係正確一方嘅棋子；mate 類有將死步；Q3 候選步唔含謎題答案
+    const side = q.fen.split(" ")[1];
+    const g = new Chess(q.fen);
+    q.q2.squares.forEach(s => ok(g.get(s) && g.get(s).color !== side, q.id + " Q2 格 " + s + " 應該係對方棋子"));
+    q.q1.squares.forEach(s => ok(g.get(s) && g.get(s).color === side, q.id + " Q1 格 " + s + " 應該係己方棋子"));
+    if (q.q2.kind === "mate") ok(TAC.mateMoves(Chess, g).length >= 1, q.id + " Q2 要有一步將死");
+    const p = PUZZLES.find(x => x.id === q.id);
+    ok(!q.q3.options.some(o => o.uci === p.moves[1]), q.id + " Q3 候選步唔含謎題答案");
+    eq(new Set(q.q3.options.map(o => o.uci)).size, 3);
+    kinds.q1[q.q1.kind] = (kinds.q1[q.q1.kind] || 0) + 1; kinds.q2[q.q2.kind] = (kinds.q2[q.q2.kind] || 0) + 1;
+  }
+  ok(kinds.q1.squares >= 20 && kinds.q1.none >= 10, "Q1 答案類型有變化：" + JSON.stringify(kinds.q1));
+  ok(kinds.q2.squares >= 10 && kinds.q2.mate >= 10 && kinds.q2.none >= 5, "Q2 答案類型有變化：" + JSON.stringify(kinds.q2));
+});
+
+/* ---------- 開局訓練 ---------- */
+test("開局路線：6 條路線，id 同儲存白名單一致；每步都用 chess.js 驗證合法；每步有一句解釋；路線同要求一致", () => {
+  eq(OPEN.ROUTES.map(r => r.id).sort(), State.OPENING_ROUTE_IDS.slice().sort());
+  const spec = {
+    "w-italian": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d3 d6 O-O O-O",
+    "w-two-knights": "e4 e5 Nf3 Nc6 Bc4 Nf6 d3 Be7 O-O O-O",
+    "w-philidor": "e4 e5 Nf3 d6 d4",
+    "b-italian": "e4 e5 Nf3 Nc6 Bc4 Bc5 c3 Nf6 d3 d6 O-O O-O",
+    "b-scholar": "e4 e5 Qh5 Nc6 Bc4 g6 Qf3 Nf6",
+    "b-bishop": "e4 e5 Bc4 Nf6"
+  };
+  for (const r of OPEN.ROUTES) {
+    ok(r.moves.join(" ").startsWith(spec[r.id]), r.id + " 要包含指定嘅走法：" + spec[r.id]);
+    const g = new Chess();
+    r.moves.forEach((s, i) => { try { g.move(s); } catch (e) { throw new Error(r.id + " 第 " + (i + 1) + " 步 " + s + " 不合法"); } });
+    eq(r.notes.length, r.moves.length, r.id + " 解釋數目");
+    r.notes.forEach(n => ok(typeof n === "string" && n.length > 8 && n.endsWith("。"), r.id + " 解釋要係一句完整嘅話：" + n));
+    ok(r.side === "w" || r.side === "b"); ok(r.title && r.desc);
+  }
+  eq(OPEN.ROUTES.filter(r => r.side === "w").length, 3); eq(OPEN.ROUTES.filter(r => r.side === "b").length, 3);
+});
+test("開局路線：學習者一方每一步已用 Stockfish 驗證勝率跌幅 < 0.1（儲存嘅驗證結果）；deph 14", () => {
+  for (const r of OPEN.ROUTES) {
+    eq(r.verify.depth, 14);
+    ok(r.verify.maxDrop < 0.1, r.id + " 最大跌幅 " + r.verify.maxDrop);
+    const learner = r.moves.length ? r.moves.filter((_, i) => (i % 2 === 0) === (r.side === "w")).length : 0;
+    eq(r.verify.moves.length, learner, r.id + " 每個學習者步都有驗證紀錄");
+    r.verify.moves.forEach(m => ok(m.drop < 0.1, r.id + " " + m.san + " 跌幅 " + m.drop));
+  }
+});
+test("開局原則小測：10 題、每題 3 個合法選項；正確答案係 Stockfish 評價最好，而且比次好嘅勝率高至少 0.05（儲存嘅驗證數字，勝率同 cp 一致）", () => {
+  eq(OPEN.QUIZ.length, 10);
+  eq(new Set(OPEN.QUIZ.map(q => q.id)).size, 10);
+  for (const q of OPEN.QUIZ) {
+    const g = new Chess(q.fen);
+    eq(g.turn(), q.turn);
+    eq(q.options.length, 3);
+    const legal = new Set(g.moves({ verbose: true }).map(uciOf));
+    q.options.forEach(o => ok(legal.has(o.uci), q.id + " 選項 " + o.san + " 要合法"));
+    ok(q.options.some(o => o.uci === q.answer), q.id + " 答案要喺選項內");
+    q.options.forEach(o => ok(Math.abs(RV.winChance(o.cp) - o.wc) < 0.002, q.id + " " + o.san + " 勝率同 cp 要一致"));
+    const sorted = q.options.slice().sort((a, b) => b.wc - a.wc);
+    eq(sorted[0].uci, q.answer, q.id + " 正確答案要係 3 個選項之中最好");
+    ok(sorted[0].wc - sorted[1].wc >= 0.05 - 1e-9, q.id + " 比次好至少 0.05：" + (sorted[0].wc - sorted[1].wc).toFixed(3));
+    ok(q.explain && q.explain.length > 15, q.id + " 有解釋");
+    // 局面由開局步序走出
+    const g2 = new Chess(); q.prefix.forEach(s => g2.move(s)); eq(g2.fen(), q.fen);
+  }
+});
+test("開局路線紀錄：連續 3 次全對 = 已掌握；走錯歸零；已掌握之後再走錯仍然已掌握", () => {
+  let r = { streak: 0, mastered: false, runs: 0 };
+  r = OL.applyRun(r, true); eq(r, { streak: 1, mastered: false, runs: 1 });
+  r = OL.applyRun(r, true); eq(r, { streak: 2, mastered: false, runs: 2 });
+  r = OL.applyRun(r, false); eq(r, { streak: 0, mastered: false, runs: 3 }, "走錯：連續歸零");
+  r = OL.applyRun(r, true); r = OL.applyRun(r, true);
+  eq(r.mastered, false); r = OL.applyRun(r, true); eq([r.streak, r.mastered, r.runs], [3, true, 6], "連續 3 次全對 → 已掌握");
+  r = OL.applyRun(r, false); eq([r.streak, r.mastered], [0, true], "已掌握之後走錯：連續歸零但仍然已掌握");
+  eq(OL.NEED, 3);
+});
+
+/* ---------- 三問提醒設定、儲存 ---------- */
+test("設定「對局中顯示三問提醒」：預設開；false 會保留；非布林值當預設（開）；屬白名單；備份往返", () => {
+  eq(State.defaultState().settings.threeReminder, true);
+  eq(State.normalizeState({ settings: { threeReminder: false } }).settings.threeReminder, false);
+  eq(State.normalizeState({ settings: { threeReminder: true } }).settings.threeReminder, true);
+  eq(State.normalizeState({ settings: { squareNames: true } }).settings.threeReminder, true, "冇設定 → 預設開");
+  eq(State.normalizeState({ settings: { threeReminder: "no" } }).settings.threeReminder, true);
+  const s = State.normalizeState({ settings: { threeReminder: false, squareNames: true } });
+  eq(State.parseBackup(State.exportBackup(s)).settings, { board: "chessground", design: "A", flipped: false, squareNames: true, threeReminder: false });
+  const src = fs.readFileSync(path.join(ROOT, "js/play.js"), "utf8");
+  ok(src.includes("先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？") && src.includes("settings.threeReminder") && src.includes("收起"), "對局中提醒文字、設定同「收起」");
+  ok(fs.readFileSync(path.join(ROOT, "settings.html"), "utf8").includes("對局中顯示三問提醒"));
+});
+test("儲存（three、openings 欄位）：白名單清洗、備份往返；首頁顯示真數字", () => {
+  eq(State.defaultState().three, { plays: 0, asked: 0, correct: 0 });
+  eq(State.normalizeState({ three: { plays: 2, asked: 30, correct: 99, x: 1 } }).three, { plays: 2, asked: 30, correct: 30 }, "答對不可以多過作答");
+  const o = State.normalizeState({ openings: { routes: { "w-italian": { streak: 2, mastered: true, runs: 5, x: 1 }, nope: { streak: 1 } }, quiz: { plays: 3, best: 99, y: 1 } } }).openings;
+  eq(Object.keys(o).sort(), ["quiz", "routes"]); eq(Object.keys(o.routes).sort(), State.OPENING_ROUTE_IDS.slice().sort());
+  eq(o.routes["w-italian"], { streak: 2, mastered: true, runs: 5 }); eq(o.quiz, { plays: 3, best: 10 });
+  const s = State.normalizeState({ three: { plays: 4, asked: 60, correct: 51 }, openings: { routes: { "b-scholar": { streak: 1, mastered: false, runs: 2 } }, quiz: { plays: 1, best: 8 } } });
+  eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
+  ok(home.includes("homeState.three.plays") && home.includes("homeState.openings.routes"), "首頁用儲存嘅真數字");
+  const mods = require(path.join(ROOT, "js/modules.js"));
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html"]);
+});
+test("頁面：three.html／openings.html 引用嘅檔案齊全；play.html 有載入 tactics.js", () => {
+  const th = fs.readFileSync(path.join(ROOT, "three.html"), "utf8"), oh = fs.readFileSync(path.join(ROOT, "openings.html"), "utf8");
+  for (const f of ["data/three.js", "js/three.js", "js/state.js"]) ok(th.includes(f), "three.html 應引用 " + f);
+  for (const f of ["data/openings.js", "js/openings.js", "js/openings-logic.js"]) ok(oh.includes(f), "openings.html 應引用 " + f);
+  ok(fs.readFileSync(path.join(ROOT, "play.html"), "utf8").indexOf("js/tactics.js") < fs.readFileSync(path.join(ROOT, "play.html"), "utf8").indexOf("js/review-logic.js"), "tactics.js 要喺 review-logic.js 之前");
 });
 
 /* ---------- 執行 ---------- */

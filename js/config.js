@@ -60,9 +60,10 @@
       maxMsPerMove: 300,
       // 分析深度上限（同時受時間上限限制，先到先停）
       maxDepth: 12,
-      // 走完該步之後，相對最佳步損失嘅分數（centipawn，1 兵 = 100）達到門檻就標記
-      //   疑問手（inaccuracy）< 錯著（mistake）< 大錯（blunder）
-      THRESHOLDS_CP: { inaccuracy: 80, mistake: 150, blunder: 300 },
+      // 分類用 Lichess 勝率：勝率 wc(cp) = 2 / (1 + exp(−K × cp)) − 1（−1 至 1，玩家角度）；
+      // 每步嘅「跌幅」= wc(走之前) − wc(走之後)；跌幅 >= 門檻就標記：疑問手 < 錯著 < 大錯。
+      // 已輸局面（例如 −1000 → −1000）跌幅接近 0，唔會再標大錯。
+      WIN_CHANCE: { K: 0.00368208, THRESHOLDS: { inaccuracy: 0.1, mistake: 0.2, blunder: 0.3 } },
       // 將殺局面換算成分數用嘅數值（避免「將殺」變無限大）
       MATE_CP: 1000
     }

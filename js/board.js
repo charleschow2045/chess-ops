@@ -12,6 +12,7 @@
  *   orientation    "white" | "black"
  *   interactive    "turn"（輪到邊方邊方走，預設）| "white" | "black" | false（唔俾走）
  *   promotion      "ask"（彈出視窗，預設）| "q" | "r" | "b" | "n"（自動升變，唔彈視窗）
+ *   viewOnly       true = 只供觀看（唔綁定操作／觸控事件，頁面自己處理點擊）
  *   onMove(move)   走完一步之後呼叫（move 係 chess.js 嘅 Move 物件）。呼叫者可以用 board.load()／board.undo() 退回。
  *
  * 方法：load(fen,{lastMove}) loadMoves(ucis) play({from,to,promotion}) flip() setOrientation(c) setInteractive(m) undo() lock() unlock()
@@ -124,6 +125,7 @@ export function createBoard(el, opts = {}) {
     fen: game.fen(),
     orientation: opts.orientation || "white",
     turnColor: COLOR[game.turn()],
+    viewOnly: !!opts.viewOnly,                    // 只供觀看（例如走棋前三問要自己處理點擊）：唔綁定任何棋子操作／觸控事件
     movable: { free: false, showDests: true, events: { after: handleMove } }
   });
   sync();
