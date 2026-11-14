@@ -14,7 +14,7 @@
  *   promotion      "ask"（彈出視窗，預設）| "q" | "r" | "b" | "n"（自動升變，唔彈視窗）
  *   onMove(move)   走完一步之後呼叫（move 係 chess.js 嘅 Move 物件）。呼叫者可以用 board.load()／board.undo() 退回。
  *
- * 方法：load(fen,{lastMove}) play({from,to,promotion}) flip() setOrientation(c) setInteractive(m) undo() lock() unlock()
+ * 方法：load(fen,{lastMove}) loadMoves(ucis) play({from,to,promotion}) flip() setOrientation(c) setInteractive(m) undo() lock() unlock()
  *       setShapes(list) arrow(from,to,brush) circle(sq,brush) clearShapes() feedback(ok) destroy()
  *       屬性：game（chess.js 實例）、cg（Chessground API）、el
  *
@@ -95,6 +95,7 @@ export function createBoard(el, opts = {}) {
       lastMove,
       movable: { color: interactive === "turn" ? COLOR[game.turn()] : (interactive || undefined), dests: dests() }
     });
+    cg.setShapes(shapes);                       // cg.set() 會清走箭頭，所以每次同步後重新畫返
   }
 
   async function handleMove(orig, dest) {
@@ -130,6 +131,18 @@ export function createBoard(el, opts = {}) {
       lastMove = o.lastMove;
       shapes = []; cg.setShapes([]);
       sync();
+    },
+    /* 由開局載入一串 uci 步（保留棋譜，俾悔棋同 PGN 用）；有不合法步就回傳 false */
+    loadMoves(ucis) {
+      game.reset();
+      let last;
+      for (const u of ucis) {
+        try { game.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] }); } catch (e) { return false; }
+        last = [u.slice(0, 2), u.slice(2, 4)];
+      }
+      lastMove = last; shapes = []; cg.setShapes([]);
+      sync();
+      return true;
     },
     /* 程式走一步（例如電腦走棋）：會有動畫，並會呼叫 onMove */
     play(m) {

@@ -72,25 +72,41 @@
     }
   };
 
-  Engine.prototype.bestMove = function (fen, search) {
-    var self = this, t0 = performance.now(), info = { depth: 0, nodes: 0, ms: 0 };
+  /*
+   * bestMove(fen, search, timeoutMs)：回傳 uci 字串。search = { depth, movetime, skill, elo }（depth 同 movetime 可以同時用，先到先停）
+   * 完成後 this.lastInfo = { depth, nodes, ms, cp, mate, pv }：cp／mate 係「輪到走棋嗰方」角度嘅分數（只會有其中一個）
+   */
+  Engine.prototype.bestMove = function (fen, search, timeoutMs) {
+    var self = this, t0 = performance.now(), info = { depth: 0, nodes: 0, ms: 0, cp: null, mate: null, pv: [] };
     search = search || { depth: 10 };
     this._applyStrength(search);
     var done = this._waitFor(function (l) {
       var m;
-      if ((m = /^info .*\bdepth (\d+)/.exec(l))) { info.depth = +m[1]; var n = /\bnodes (\d+)/.exec(l); if (n) info.nodes = +n[1]; }
+      if (/^info /.test(l) && !/\b(lowerbound|upperbound)\b/.test(l)) {
+        if ((m = /\bdepth (\d+)/.exec(l))) info.depth = +m[1];
+        if ((m = /\bnodes (\d+)/.exec(l))) info.nodes = +m[1];
+        if ((m = /\bscore (cp|mate) (-?\d+)/.exec(l))) { info.cp = m[1] === "cp" ? +m[2] : null; info.mate = m[1] === "mate" ? +m[2] : null; }
+        if ((m = / pv (.+)$/.exec(l))) info.pv = m[1].split(" ");
+      }
       if ((m = /^bestmove (\S+)/.exec(l))) return m[1];
       return undefined;
-    }, 120000);
+    }, timeoutMs || 120000);
     this._send("ucinewgame");
     this._send("position fen " + fen);
-    this._send("go " + (search.movetime ? "movetime " + search.movetime : "depth " + (search.depth || 10)));
+    var go = "go";
+    if (search.depth) go += " depth " + search.depth;
+    if (search.movetime) go += " movetime " + search.movetime;
+    if (!search.depth && !search.movetime) go += " depth 10";
+    this._send(go);
     return done.then(function (uci) {
       info.ms = Math.round(performance.now() - t0);
       self.lastInfo = info;
       return uci;
     });
   };
+
+  /* 叫引擎即刻停（會回傳 bestmove，令等緊結果嘅 bestMove 完成） */
+  Engine.prototype.stop = function () { if (this.worker) this._send("stop"); };
 
   Engine.prototype.terminate = function () { if (this.worker) this.worker.terminate(); this.worker = null; };
 

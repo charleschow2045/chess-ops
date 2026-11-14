@@ -33,6 +33,24 @@
     /* ---------- 電腦出棋前嘅停頓（毫秒）：令玩家睇得清電腦嘅棋 ---------- */
     THINK_PAUSE: { minMs: 400, maxMs: 800 },
 
+    /* ---------- 引擎穩定（js/engine-manager.js）：載入、搜尋逾時，出錯自動重新載入並重試 ---------- */
+    ENGINE: {
+      initTimeoutMs: 30000,   // 首次載入（下載 + 編譯 wasm）上限；iPad 慢嘅話要加大
+      moveTimeoutMs: 10000,   // 一次搜尋冇回應就當出錯
+      retries: 1,             // 出錯後重新載入並重試嘅次數
+      coolDownMs: 20000       // 全部失敗後，呢段時間內唔再等引擎，直接退回隨機合法步
+    },
+
+    /* ---------- 對電腦下棋規則（js/play-logic.js） ---------- */
+    PLAY: {
+      undoLimit: 3,           // 每局最多悔棋次數（一次退返雙方各一步）
+      hintLimit: 3,           // 每局最多提示次數
+      winsToLevelUp: 3,       // 同一級連贏幾局自動升一級（用過悔棋或提示嘅勝局唔計入）
+      lossesToOfferDrop: 3,   // 同一級連輸幾局就問要唔要降一級（由玩家自己揀）
+      minLevel: 1, maxLevel: 8, defaultLevel: 3,
+      recentGames: 20         // 保存最近幾局（PGN、結果等；唔存分析過程）
+    },
+
     /* ---------- 提示（對局中問「提示」時，Stockfish 全力計算嘅設定） ---------- */
     HINT: { depth: 12 },
 
@@ -44,7 +62,7 @@
       maxDepth: 12,
       // 走完該步之後，相對最佳步損失嘅分數（centipawn，1 兵 = 100）達到門檻就標記
       //   疑問手（inaccuracy）< 錯著（mistake）< 大錯（blunder）
-      THRESHOLDS_CP: { inaccuracy: 60, mistake: 150, blunder: 300 },
+      THRESHOLDS_CP: { inaccuracy: 80, mistake: 150, blunder: 300 },
       // 將殺局面換算成分數用嘅數值（避免「將殺」變無限大）
       MATE_CP: 1000
     }

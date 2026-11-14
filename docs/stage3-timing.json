@@ -1,0 +1,145 @@
+{
+ "cores": 8,
+ "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
+ "config": {
+  "PICKMOVE": {
+   "P_BEST": {
+    "1": 0.1,
+    "2": 0.2,
+    "3": 0.3,
+    "4": 0.45,
+    "5": 0.6,
+    "6": 0.75
+   },
+   "P_TAKE_FREE": {
+    "1": 0.85,
+    "2": 0.9,
+    "3": 0.95
+   },
+   "BEST_SEARCH": {
+    "depth": 10
+   },
+   "LOWEST": {
+    "7": {
+     "skill": 0,
+     "depth": 2
+    },
+    "8": {
+     "elo": 1320,
+     "movetime": 150
+    }
+   }
+  },
+  "HINT": {
+   "depth": 12
+  },
+  "REVIEW": {
+   "maxMsPerMove": 300,
+   "maxDepth": 12,
+   "THRESHOLDS_CP": {
+    "inaccuracy": 80,
+    "mistake": 150,
+    "blunder": 300
+   },
+   "MATE_CP": 1000
+  },
+  "THINK_PAUSE": {
+   "minMs": 400,
+   "maxMs": 800
+  }
+ },
+ "loadMs": 130,
+ "levels": {
+  "1": {
+   "min": 2,
+   "avg": 6,
+   "max": 14,
+   "n": 24,
+   "sources": {
+    "random": 24
+   }
+  },
+  "2": {
+   "min": 2,
+   "avg": 13,
+   "max": 69,
+   "n": 24,
+   "sources": {
+    "engine-best": 5,
+    "random": 19
+   }
+  },
+  "3": {
+   "min": 2,
+   "avg": 10,
+   "max": 43,
+   "n": 24,
+   "sources": {
+    "engine-best": 6,
+    "random": 18
+   }
+  },
+  "4": {
+   "min": 1,
+   "avg": 15,
+   "max": 44,
+   "n": 24,
+   "sources": {
+    "random": 11,
+    "engine-best": 13
+   }
+  },
+  "5": {
+   "min": 1,
+   "avg": 17,
+   "max": 35,
+   "n": 24,
+   "sources": {
+    "engine-best": 19,
+    "random": 5
+   }
+  },
+  "6": {
+   "min": 1,
+   "avg": 17,
+   "max": 32,
+   "n": 24,
+   "sources": {
+    "engine-best": 20,
+    "random": 4
+   }
+  },
+  "7": {
+   "min": 5,
+   "avg": 8,
+   "max": 22,
+   "n": 24,
+   "sources": {
+    "engine-lowest": 24
+   }
+  },
+  "8": {
+   "min": 154,
+   "avg": 156,
+   "max": 161,
+   "n": 24,
+   "sources": {
+    "engine-lowest": 24
+   }
+  }
+ },
+ "hint": {
+  "min": 17,
+  "avg": 28,
+  "max": 36,
+  "n": 12
+ },
+ "review": {
+  "plies": 80,
+  "totalMs": 1508,
+  "playerMoves": 40,
+  "analyses": 80,
+  "avgMsPerAnalysis": 19,
+  "summary": "這局有 4 步大錯。另有 5 步錯著，其中 4 步是沒有注意到對方可以吃子。還有 8 步疑問手。"
+ }
+}
