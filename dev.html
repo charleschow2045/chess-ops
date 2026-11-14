@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>開發者</title>
+<link rel="stylesheet" href="css/theme.css">
+<style>.dev-list { display: grid; gap: 10px; } .dev-list a { display: block; padding: 14px 16px; min-height: 56px; border-radius: 14px; background: var(--surface); color: var(--text); text-decoration: none; font-weight: 700; } .dev-list small { display: block; color: var(--muted); font-weight: 500; font-size: 14px; }</style>
+</head>
+<body>
+<main class="page">
+  <div class="topbar"><a class="btn-back" href="./">‹ 返回</a><h1>開發者</h1></div>
+  <p class="muted">測試頁和設計預覽，供開發和試機使用。</p>
+  <nav class="dev-list">
+    <a href="design-preview/">設計預覽（A／B／C）<small>三個風格方向</small></a>
+    <a href="test-stockfish.html">Stockfish 引擎測試<small>載入時間、每步運算時間、pickMove 各級別（請在 iPad 試）</small></a>
+    <a href="test-board-chessground.html">棋盤測試（Chessground）<small>第 0 階段測試頁</small></a>
+    <a href="test-chesscom-api.html">chess.com 介面測試<small>CORS 與 PGN 可否直接取得</small></a>
+    <a href="docs/stage1-report.md">第 1 階段報告</a>
+  </nav>
+</main>
+</body>
+</html>

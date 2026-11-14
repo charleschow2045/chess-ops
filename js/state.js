@@ -28,6 +28,17 @@
   function oneOf(list, dflt) { return function (v) { return list.indexOf(v) >= 0 ? v : dflt; }; }
   function dateStr(v) { return typeof v === "string" && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : ""; }
 
+  /*
+   * 成績記錄：每個項目 { best, plays }（最佳成績、完成次數）。項目 id 必須喺 RECORD_IDS 入面，其他一律刪走。
+   *   quiz-*   規則快測各組：best = 最高答對題數（0–5）
+   *   mate1-N  一步將死第 N 級（10 題一輪）：best = 最高答對題數（0–10）
+   *   check-find 找出將軍（5 個局面一輪）：best = 最多完整找齊嘅局面數（0–5）
+   *   maze     騎士迷宮：best = 已通關嘅最高關數（0–15）
+   *   pawnwar  兵仗：best = 打贏過嘅最高電腦級別（0–4；兩人對戰唔計）
+   */
+  var RECORD_IDS = ["quiz-castling", "quiz-enpassant", "quiz-promotion", "quiz-mate", "quiz-draw", "quiz-check",
+    "mate1-1", "mate1-2", "mate1-3", "mate1-4", "check-find", "maze", "pawnwar"];
+
   /* 白名單：欄位名 → { def: 預設值（函數，每次新建）, clean: 檢查／清洗函數 } */
   var STATE_FIELDS = {
     version: {
@@ -60,6 +71,18 @@
           design: oneOf(["A", "B", "C"], "A")(v.design),
           flipped: v.flipped === true
         };
+      }
+    },
+    records: {
+      def: function () { var r = {}; RECORD_IDS.forEach(function (id) { r[id] = { best: 0, plays: 0 }; }); return r; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var r = {};
+        RECORD_IDS.forEach(function (id) {
+          var e = isObj(v[id]) ? v[id] : {};
+          r[id] = { best: int(e.best, 0, 100000, 0), plays: int(e.plays, 0, 1000000, 0) };
+        });
+        return r;
       }
     },
     // 對電腦下棋：目前選擇嘅級別（1–8）
@@ -104,6 +127,15 @@
     return clean;
   }
 
+  /* 記錄一次完成嘅成績：plays + 1，best 取較高者。回傳已儲存嘅新狀態。 */
+  function recordResult(state, id, score) {
+    if (RECORD_IDS.indexOf(id) < 0) throw new Error("未登記的成績項目：" + id);
+    var s = normalizeState(state);
+    s.records[id].plays += 1;
+    s.records[id].best = Math.max(s.records[id].best, int(score, 0, 100000, 0));
+    return saveState(s);
+  }
+
   /* 備份：輸出 JSON 字串；還原：解析後再 normalizeState */
   function exportBackup(state) {
     return JSON.stringify({ app: "chessops", exportedAt: new Date().toISOString(), state: normalizeState(state) }, null, 2);
@@ -115,7 +147,7 @@
   }
 
   return {
-    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS,
+    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, recordResult: recordResult,
     defaultState: defaultState, normalizeState: normalizeState,
     loadState: loadState, saveState: saveState, exportBackup: exportBackup, parseBackup: parseBackup
   };

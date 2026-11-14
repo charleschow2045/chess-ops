@@ -3,12 +3,12 @@
 俾小五學生用 iPad 直向玩嘅國際象棋學習 App，目標係提升 chess.com 水平（主要問題：送子、睇漏）。
 
 - 網址：https://charleschow2045.github.io/chess-ops/
-- 狀態：**第 0 階段（準備同設計預覽）**。正式模組仍未開始。
-- 報告：[docs/stage0-report.md](docs/stage0-report.md)　第三方授權：[docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)
+- 狀態：**第 1 階段（棋盤、規則快測、小遊戲）**。其餘模組仍未開始。
+- 報告：[第 0 階段](docs/stage0-report.md)、[第 1 階段](docs/stage1-report.md)、[題目清單](docs/stage1-content.md)　第三方授權：[docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)
 
 ## 授權
 
-本 repo 帶有 GPL 授權嘅第三方檔案（Stockfish.js：GPL-3.0；Chessground：GPL-3.0-or-later），所以**整個 repo 以 GPL-3.0 公開**（全文見 [LICENSE](LICENSE)）。其他第三方檔案（chess.js：BSD-2-Clause）同 GPL 相容。詳情見 [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)。
+本 repo 帶有 GPL 授權嘅第三方檔案（Stockfish.js 19：GPL-3.0；Chessground：GPL-3.0-or-later），所以**整個 repo 以 GPL-3.0 公開**（全文見 [LICENSE](LICENSE)）。其他第三方檔案（chess.js：BSD-2-Clause）同 GPL 相容。詳情見 [docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)。
 
 ## 技術規定
 
@@ -20,15 +20,18 @@
 ## 結構
 
 ```
-index.html          首頁（暫時「建設中」＋測試頁連結）
-css/ js/            自己寫嘅樣式同程式（state.js、pickmove.js、engine.js、board-custom.js…）
-vendor/             第三方檔案（chess.js、Chessground、Stockfish.js）
-data/               資料（暫時空）
-tools/serve.js      本機測試伺服器：node tools/serve.js 8123
-tests/run-all.js    純邏輯測試：node tests/run-all.js
+index.html          首頁（7 個模組入口，只有「規則快測與小遊戲」開放）
+rules.html quiz.html game-*.html   規則快測與 4 個小遊戲
+dev.html            開發者頁：測試頁同設計預覽連結
+css/                theme.css（設計 A token）、board.css、test.css
+js/                 board.js（正式棋盤）、state.js、pickmove.js、engine.js、quiz*.js、game-*.js、knight-maze.js、pawnwar.js…
+data/               rules-quiz.js（手寫）、mate1.js／check-find.js／knight-maze.js（tools/gen-games.js 產生）
+vendor/             第三方檔案（chess.js、Chessground、Stockfish.js 19 lite）
+tools/              serve.js（本機伺服器）、gen-games.js、gen-content.js、shots.js（Playwright 截圖／流程測試）
+tests/run-all.js    純邏輯測試
 design-preview/     三個設計風格預覽
-docs/               報告同授權說明
-test-*.html         階段 0 測試頁
+docs/               報告、題目清單、截圖、授權說明
+test-*.html         開發用測試頁
 ```
 
 ## 本機運行

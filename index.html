@@ -3,32 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>國際象棋 Ops</title>
-<link rel="stylesheet" href="css/test.css">
-<style>
-  .hero { text-align: center; padding: 28px 8px 8px; }
-  .hero h1 { font-size: 32px; margin: 0 0 6px; }
-  .build { display: inline-block; padding: 6px 18px; border-radius: 999px; background: var(--accent); color: var(--accent-fg); font-weight: 800; font-size: 16px; margin: 8px 0 4px; }
-  .links { display: grid; gap: 12px; margin-top: 20px; }
-  .links a { display: block; min-height: 72px; padding: 14px 18px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); color: var(--fg); text-decoration: none; font-size: 18px; font-weight: 700; }
-  .links a small { display: block; font-size: 14px; font-weight: 500; color: var(--muted); margin-top: 2px; }
-</style>
+<link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
-<div class="page">
-  <div class="hero">
-    <h1>國際象棋 Ops</h1>
-    <div class="build">建設中 · 第 0 階段</div>
-    <p class="muted">學習 App 準備中。以下係測試頁同設計預覽，請用 iPad 直向試用。</p>
-  </div>
-  <nav class="links">
-    <a href="design-preview/">設計預覽（A／B／C 三個風格）<small>主頁、謎題、對電腦下棋三個畫面</small></a>
-    <a href="test-board-chessground.html">棋盤測試 A：Chessground<small>點擊、拖拉、升變、翻轉、箭咀</small></a>
-    <a href="test-board-custom.html">棋盤測試 B：自己寫<small>同一套功能，純 CSS grid + JavaScript</small></a>
-    <a href="test-stockfish.html">Stockfish 引擎測試<small>載入時間、每步運算時間、pickMove 各級別</small></a>
-    <a href="test-chesscom-api.html">chess.com 介面測試<small>CORS 同 PGN 棋譜可否直接攞到</small></a>
-  </nav>
-  <p class="muted" style="margin-top:24px">原始碼以 GPL-3.0 公開；第三方元件授權見 docs/THIRD_PARTY.md。</p>
-</div>
+<main class="page">
+  <div class="brand" id="brand"></div>
+  <h2 class="section-title">練習項目</h2>
+  <div class="modules" id="modules"></div>
+  <p class="foot"><a href="dev.html">開發者</a></p>
+</main>
+<script src="js/icons.js"></script>
+<script src="js/util.js"></script>
+<script src="js/modules.js"></script>
+<script src="js/home.js"></script>
 </body>
 </html>

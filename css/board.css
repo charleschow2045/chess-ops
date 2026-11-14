@@ -1,0 +1,57 @@
+/* 正式棋盤元件樣式（配合 vendor/chessground 嘅 base／brown／cburnett CSS，後載入以覆蓋） */
+.board-wrap { position: relative; width: 100%; max-width: 760px; margin: 8px auto; aspect-ratio: 1 / 1; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; border-radius: 10px; }
+.board-wrap .cg-wrap { width: 100%; height: 100%; border-radius: 10px; overflow: hidden; }
+
+/* 棋盤顏色：用主題 token 重畫棋盤格（覆蓋 brown 嘅圖片） */
+cg-board {
+  background-color: var(--sq-light) !important;
+  background-image: conic-gradient(var(--sq-dark) 25%, var(--sq-light) 0 50%, var(--sq-dark) 0 75%, var(--sq-light) 0) !important;
+  background-size: 25% 25% !important;
+}
+/* 座標字：規定最細 13px（Chessground 預設 9px） */
+.cg-wrap coords { font-size: 13px !important; font-weight: 700; opacity: .9; }
+
+/* 答啱／答錯回饋（顏色＋短動畫＋文字，冇聲音） */
+.board-wrap::after { content: ""; position: absolute; inset: 0; border-radius: 10px; pointer-events: none; opacity: 0; }
+.board-wrap.fb-ok::after { animation: fb-flash-ok .7s ease-out; }
+.board-wrap.fb-bad::after { animation: fb-flash-bad .7s ease-out; }
+.board-wrap.fb-bad { animation: fb-shake .45s ease-in-out; }
+@keyframes fb-flash-ok { 0% { opacity: .95; box-shadow: inset 0 0 0 8px var(--ok), inset 0 0 60px var(--ok); } 100% { opacity: 0; box-shadow: inset 0 0 0 8px var(--ok), inset 0 0 60px var(--ok); } }
+@keyframes fb-flash-bad { 0% { opacity: .95; box-shadow: inset 0 0 0 8px var(--bad), inset 0 0 60px var(--bad); } 100% { opacity: 0; box-shadow: inset 0 0 0 8px var(--bad), inset 0 0 60px var(--bad); } }
+@keyframes fb-shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-9px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(6px); } }
+
+.feedback { display: flex; align-items: flex-start; gap: 12px; margin: 12px 0; padding: 14px 16px; border-radius: var(--radius-sm); border-left: 8px solid var(--line); background: var(--surface); font-size: 17px; line-height: 1.5; animation: fb-pop .25s ease-out; }
+.feedback .fb-mark { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 22px; font-weight: 900; color: #fff; }
+.feedback b { display: block; font-size: 19px; }
+.feedback.ok { border-left-color: var(--ok); } .feedback.ok .fb-mark { background: var(--ok); color: var(--accent-fg); } .feedback.ok b { color: var(--ok); }
+.feedback.bad { border-left-color: var(--bad); } .feedback.bad .fb-mark { background: var(--bad); } .feedback.bad b { color: var(--bad); }
+@keyframes fb-pop { 0% { transform: scale(.96); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .board-wrap.fb-ok::after, .board-wrap.fb-bad::after, .board-wrap.fb-bad, .feedback { animation: none; } }
+
+/* 升變選擇 */
+.promo-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .62); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.promo-box { background: var(--surface); border-radius: var(--radius); padding: 18px; text-align: center; box-shadow: 0 10px 40px rgba(0, 0, 0, .5); }
+.promo-box h3 { margin: 0 0 12px; font-size: 19px; }
+.promo-list { display: flex; gap: 12px; }
+.promo-list button { width: 92px; height: 92px; padding: 0; border: 2px solid var(--line); border-radius: 14px; background: var(--sq-light); }
+.promo-list piece { position: static !important; display: block; width: 100% !important; height: 100% !important; background-size: cover; }
+.promo-cancel { margin-top: 12px; }
+
+/* 棋步記錄、狀態列、計時 */
+.status-line { min-height: 28px; font-size: 18px; font-weight: 700; margin: 8px 2px; }
+.moves { background: var(--surface); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 16px; min-height: 48px; word-break: break-word; }
+.meta-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 6px 2px; font-size: 16px; font-weight: 700; }
+.timer { font-size: 22px; font-variant-numeric: tabular-nums; }
+.timer.low { color: var(--bad); }
+.opt-list { display: grid; gap: 10px; margin: 12px 0; }
+.opt { min-height: 60px; padding: 10px 16px; text-align: left; border-radius: 14px; border: 2px solid var(--line); background: var(--surface2); color: var(--text); font-size: 18px; font-weight: 700; cursor: pointer; }
+.opt:active { filter: brightness(1.15); }
+.opt.right { background: var(--ok); color: var(--accent-fg); border-color: var(--ok); }
+.opt.wrong { background: var(--bad); color: #fff; border-color: var(--bad); }
+.opt[disabled] { pointer-events: none; }
+.opt-list.two { grid-template-columns: 1fr 1fr; }
+.q-text { font-size: 20px; font-weight: 800; line-height: 1.45; margin: 12px 2px; }
+.q-prog { font-size: 15px; color: var(--muted); font-weight: 700; }
+.found-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; margin: 8px 0; }
+.score-box { text-align: center; padding: 24px 16px; }
+.score-box .big { font-size: 56px; font-weight: 900; color: var(--gold); line-height: 1.1; }
