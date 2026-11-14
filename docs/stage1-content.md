@@ -270,59 +270,79 @@
 
 **check-5**（選擇題）
 
-- 局面 FEN：`4k3/8/8/4r3/1b6/8/8/4K3 w - - 0 1`
-- 問題：白王同時被 e5 的車和 b4 的象將軍（雙將）。可以怎樣應對？
+- 局面 FEN：`4r1k1/8/8/8/8/3n4/8/4K3 w - - 0 1`
+- 問題：白王同時被 e8 的車和 d3 的馬將軍（雙將）。可以怎樣應對？
 - 選項：只能走王 ✅　／　擋住其中一個將軍就可以　／　吃掉其中一個將軍的棋子就可以
 - 標準答案：**只能走王**（chess.js 計算結果：`only`，與題庫一致）
 - 驗證方法：`{"kind":"onlyKing"}`
-- 解釋：雙將時，擋住或吃掉一個攻擊者都無法解除另一個將軍，所以只能走王。
+- 解釋：雙將時，擋住或吃掉一個攻擊者都無法解除另一個將軍，所以只能走王。這裡白王可以走到 d1、d2 或 f1。
 
-## 二、一步將死（40 題）
+## 二、一步將死（Lichess 真實 mateIn1，60 題）
 
-白方走棋；接受所有能將死的走法（已列出全部）。
+題目來自 Lichess 謎題資料庫（CC0）。FEN 是對手走之前的局面；App 先自動走「對手先走」那一步，然後輪到玩家將死。接受所有能將死的走法（下表列出全部）。
 
-| 編號 | 級 | 將死棋子 | FEN | 全部將死的走法 |
-|---|---|---|---|---|
-| m1-01 | 1 | Q | `5k2/4rP1Q/6b1/8/8/8/8/2K5 w - - 0 1` | Qg8# |
-| m1-02 | 1 | Q | `8/8/N7/8/k7/8/KQ6/8 w - - 0 1` | Qb4# |
-| m1-03 | 1 | Q | `7k/5Q1p/5pp1/6P1/8/8/3K4/8 w - - 0 1` | Qf8# |
-| m1-04 | 1 | Q | `8/8/8/8/P1Q5/8/8/2B1k1K1 w - - 0 1` | Qf1# |
-| m1-05 | 1 | Q | `8/8/3P4/1K6/2p5/k7/8/BQ6 w - - 0 1` | Qb2# |
-| m1-06 | 1 | Q | `3K3k/5Q1p/2B5/3P4/8/8/8/8 w - - 0 1` | Qf8# |
-| m1-07 | 1 | Q | `4k3/2Q3b1/8/8/2K5/BP6/8/8 w - - 0 1` | Qe7# |
-| m1-08 | 1 | Q | `kb6/p7/p2B4/5K2/8/4Q3/8/8 w - - 0 1` | Qe4#、Qf3# |
-| m1-09 | 1 | Q | `4k3/2B2pr1/2pQ4/5P1K/8/8/8/8 w - - 0 1` | Qd8# |
-| m1-10 | 1 | Q | `8/BP6/8/8/8/Qb1K4/p7/k1r5 w - - 0 1` | Qxc1# |
-| m1-11 | 2 | Q | `k7/ppp5/BQr5/8/8/6PK/8/8 w - - 0 1` | Qxb7# |
-| m1-12 | 2 | Q | `1bBk4/2pp4/4p2K/7P/8/8/3Q4/8 w - - 0 1` | Qxd7# |
-| m1-13 | 2 | Q | `8/8/8/4P3/8/2BQp1b1/3p2K1/2b1k3 w - - 0 1` | Qf1# |
-| m1-14 | 2 | Q | `5B1k/5npp/6Qp/6P1/8/8/5K2/8 w - - 0 1` | Qxg7# |
-| m1-15 | 2 | Q | `2K5/8/4Q3/r7/B3P3/k1p5/pn6/8 w - - 0 1` | Qb3# |
-| m1-16 | 2 | R | `8/8/8/8/4R3/R3K3/8/4k3 w - - 0 1` | Ra1# |
-| m1-17 | 2 | R | `7k/7p/5RR1/8/8/4K3/8/8 w - - 0 1` | Rf8# |
-| m1-18 | 2 | R | `7k/3R4/8/1K6/R7/8/8/8 w - - 0 1` | Ra8# |
-| m1-19 | 2 | R | `7k/8/6R1/8/R7/8/1K6/8 w - - 0 1` | Rh4# |
-| m1-20 | 2 | R | `8/7N/8/8/8/2K1R3/7P/2k5 w - - 0 1` | Re1# |
-| m1-21 | 3 | R | `8/8/8/8/4K3/1R6/B7/k1N5 w - - 0 1` | Rb1# |
-| m1-22 | 3 | R | `knR5/p7/8/6K1/8/1R6/8/8 w - - 0 1` | Rbxb8#、Rcxb8# |
-| m1-23 | 3 | R | `8/4K3/8/R7/8/2r5/pR6/kn6 w - - 0 1` | Raxa2#、Rbxa2# |
-| m1-24 | 3 | R | `7k/3K1pRp/5Npp/8/8/8/8/5B2 w - - 0 1` | Rg8#、Rxh7# |
-| m1-25 | 3 | B | `k7/B7/1K4B1/8/8/8/8/8 w - - 0 1` | Be4# |
-| m1-26 | 3 | B | `8/8/4B3/8/8/6B1/8/5K1k w - - 0 1` | Bd5# |
-| m1-27 | 3 | N | `1R6/k7/p2K4/Nr6/8/8/8/8 w - - 0 1` | Nc6# |
-| m1-28 | 3 | N | `5N1k/5Q2/7p/5K2/8/8/8/8 w - - 0 1` | Qh7#、Ng6# |
-| m1-29 | 3 | B | `4B3/8/8/7K/8/6Q1/8/7k w - - 0 1` | Bc6# |
-| m1-30 | 3 | B | `3k4/3B1nB1/1pKpb3/8/8/8/8/8 w - - 0 1` | Bf6# |
-| m1-31 | 4 | B | `8/8/8/8/8/1Kp5/n7/kB3Q2 w - - 0 1` | Bxa2# |
-| m1-32 | 4 | N | `8/8/8/8/8/1K5N/4R3/5k1N w - - 0 1` | Ng3# |
-| m1-33 | 4 | N | `8/8/1K6/8/8/1p3r2/2p5/2nkNQ2 w - - 0 1` | Nxf3# |
-| m1-34 | 4 | N | `8/8/8/8/bNb3K1/kn6/2p5/1Q6 w - - 0 1` | Nxc2# |
-| m1-35 | 4 | N | `8/8/8/8/8/5QnK/3p2p1/2N1k3 w - - 0 1` | Nd3# |
-| m1-36 | 4 | N | `krN5/npQ5/p7/8/8/8/8/K7 w - - 0 1` | Nb6# |
-| m1-37 | 4 | B | `3k4/8/4Q3/2K5/1B6/4P3/8/8 w - - 0 1` | Ba5# |
-| m1-38 | 4 | B | `1K6/1R6/k1N5/p2B4/8/8/8/8 w - - 0 1` | Bc4# |
-| m1-39 | 4 | N | `8/8/8/6K1/8/5pbB/5pRp/5N1k w - - 0 1` | Nxg3# |
-| m1-40 | 4 | N | `8/K7/8/8/8/5RNr/4p1p1/5Nkr w - - 0 1` | Nxe2# |
+| 編號 | 級 | 謎題分 | Lichess 連結 | 對手先走 | 全部將死的走法 | FEN（對手走之前） |
+|---|---|---|---|---|---|---|
+| fQQzO | 1 | 432 | [fQQzO](https://lichess.org/training/fQQzO) | Bxh6 | Qxh6# | `r2q1r1k/pb2n1b1/1p1pB2B/2p5/4P2P/2N5/PPPQ1PP1/2KR3R b - - 0 18` |
+| hkUOl | 1 | 432 | [hkUOl](https://lichess.org/training/hkUOl) | Qxa6 | Rf1# | `5rk1/1Q5p/p5p1/8/PPP5/4n3/7P/6K1 w - - 0 37` |
+| 6o5lS | 1 | 444 | [6o5lS](https://lichess.org/training/6o5lS) | h5 | Ra1# | `8/8/r4p2/5R2/7P/4k3/8/4K3 w - - 0 61` |
+| j6MJE | 1 | 466 | [j6MJE](https://lichess.org/training/j6MJE) | h6 | Qh7# | `r2qrbk1/pbpp1ppp/1pn1p3/3nP3/3PQB2/2PB1N2/PP1N1PPP/R3K2R b KQ - 2 11` |
+| 5oB98 | 1 | 472 | [5oB98](https://lichess.org/training/5oB98) | c4 | Qxh7# | `3r1rk1/p1q1bppp/1p6/2pbP3/5p2/1NPQ1P2/PPB3PP/R3R1K1 b - - 2 21` |
+| lEraY | 1 | 482 | [lEraY](https://lichess.org/training/lEraY) | Rxg8 | Qxg8# | `1rbr2Rk/pq2bp1B/1p1p1p2/2pPP2P/P1N3Q1/2P2N2/1P3P2/2K3R1 b - - 8 27` |
+| zZ4bD | 1 | 541 | [zZ4bD](https://lichess.org/training/zZ4bD) | Bxe5 | Qxh7# | `1r1q1rk1/p4ppp/2pbp3/3pN3/2pP4/2P1PPP1/PPQ3P1/R3K2R b KQ - 0 17` |
+| 8iDwM | 1 | 559 | [8iDwM](https://lichess.org/training/8iDwM) | Ra2 | Qd8# | `6k1/q4ppp/8/P7/8/3Q1P2/1rr3PP/4B1RK b - - 5 33` |
+| kQwbI | 1 | 568 | [kQwbI](https://lichess.org/training/kQwbI) | Bxd4 | Qxg2# | `r4rk1/1b3pbp/pp4p1/2pq4/3n4/P2PB2P/1P1NBPP1/1R1Q1RK1 w - - 2 16` |
+| EGXZl | 1 | 570 | [EGXZl](https://lichess.org/training/EGXZl) | f5 | Qxg7# | `r2q1rk1/4bpp1/2b1p2p/p3B3/P1pPpPQ1/2P1P2R/2B3PP/R5K1 b - - 1 22` |
+| a8rn0 | 1 | 575 | [a8rn0](https://lichess.org/training/a8rn0) | Na5 | Qh7# | `r1bq1rk1/5pp1/p1n2b1p/1pp1p1N1/2PpQ3/1B1P4/PP3PPP/R1B2RK1 b - - 1 16` |
+| waKlr | 1 | 576 | [waKlr](https://lichess.org/training/waKlr) | hxg6 | Qxg6# | `rn1qkb1r/pb1p3p/1p1Pp1N1/3np2Q/8/8/PP3PPP/RNB1KB1R b KQkq - 0 11` |
+| aTcRY | 1 | 639 | [aTcRY](https://lichess.org/training/aTcRY) | Rxd8 | Rf7# | `3Q4/2R5/8/4p1p1/5k2/3r1P2/5K2/8 b - - 0 40` |
+| wcocX | 1 | 648 | [wcocX](https://lichess.org/training/wcocX) | Bxd5 | Rc1# | `2r2k2/R3pp2/8/3b4/1pBPn3/1P6/5r1P/4K2R w K - 0 25` |
+| i545h | 1 | 674 | [i545h](https://lichess.org/training/i545h) | Nxc5 | Nxc2# | `2kr2nr/ppp4p/4b3/2q5/3n4/P2N4/1PP1PPPP/RN2KB1R w KQ - 0 14` |
+| l3L2y | 2 | 682 | [l3L2y](https://lichess.org/training/l3L2y) | Rb8 | Re8# | `r1b2k2/ppN2pbp/2n3p1/2p5/8/7P/PPP2PP1/R3R1K1 b - - 2 18` |
+| aAYXZ | 2 | 687 | [aAYXZ](https://lichess.org/training/aAYXZ) | Kh2 | Rh5# | `8/pR2R1pp/1pp3k1/5r2/5P2/P1P3P1/Bb4P1/3r3K w - - 1 29` |
+| Depzm | 2 | 694 | [Depzm](https://lichess.org/training/Depzm) | Kg4 | Rg1# | `8/8/5k2/6p1/5n1p/5PK1/7P/R2B3r w - - 0 51` |
+| DNkgl | 2 | 707 | [DNkgl](https://lichess.org/training/DNkgl) | Qf4 | Qxg2# | `r1b2rk1/1pp2pbp/p3p1p1/3pB1q1/3PP2n/P1NN1Q2/1PP2PPP/R3R1K1 w - - 1 15` |
+| 6VWOG | 2 | 718 | [6VWOG](https://lichess.org/training/6VWOG) | Rxb1 | Bxc3# | `r5k1/pp3ppp/2n2b2/8/8/P1P1Pq1P/5P1B/1b1RKQR1 w - - 0 24` |
+| pSxlE | 2 | 732 | [pSxlE](https://lichess.org/training/pSxlE) | dxc6 | Qxf2# | `r3kb1r/pp2ppp1/1qp2n2/1B1P2Bp/6n1/2N2N2/PPP2PP1/R2QK2R w KQkq - 0 12` |
+| K3nqS | 2 | 736 | [K3nqS](https://lichess.org/training/K3nqS) | Nxg3 | Qxh6# | `r5rk/p7/1p2pp1p/n4npQ/P1Pq4/6B1/3N1PPP/R2R2K1 b - - 3 24` |
+| vqTMW | 2 | 771 | [vqTMW](https://lichess.org/training/vqTMW) | O-O-O | Qxb2# | `r1b1k2r/pp2Bpb1/1n1P2pp/2p1q3/2P5/8/PP1NQ1PP/R3KB1R w KQkq - 0 15` |
+| 8hVcI | 2 | 789 | [8hVcI](https://lichess.org/training/8hVcI) | g3 | Qxf2# | `2r3k1/4Rpbp/3p2p1/1N1P4/5q2/1R1Q3P/5PPK/2r5 w - - 3 28` |
+| l8NGi | 2 | 807 | [l8NGi](https://lichess.org/training/l8NGi) | Bxe7 | Qxg2# | `r1b1k1r1/ppp1npqp/8/2b3B1/2pp4/5N2/PPP2PPP/RN1QR1K1 w q - 0 12` |
+| 5jZtI | 2 | 835 | [5jZtI](https://lichess.org/training/5jZtI) | Qxe3 | Qb2# | `r3k2r/pp3pp1/4p3/3pPPP1/6Bp/qPpPn2P/P1P2Q2/1K4RR w kq - 0 24` |
+| UJRGE | 2 | 837 | [UJRGE](https://lichess.org/training/UJRGE) | gxf3 | Qxh2# | `N4rk1/1p3ppp/p1nb3q/8/3P4/3BPb2/PP3PPP/R2Q1RK1 w - - 0 14` |
+| R4UAb | 2 | 848 | [R4UAb](https://lichess.org/training/R4UAb) | b2 | Rb8# | `4k3/1R6/4K3/3P3p/5P2/1p6/8/1r6 b - - 5 51` |
+| Uo3nA | 2 | 867 | [Uo3nA](https://lichess.org/training/Uo3nA) | Kc1 | Qa3# | `2k4r/ppp1qppp/1r6/7b/4Q3/4PP1P/PKPB1PB1/3R3R w - - 1 17` |
+| z0xVV | 2 | 894 | [z0xVV](https://lichess.org/training/z0xVV) | Qxe8 | Qg7# | `rnb1N1kr/ppp4p/4qPpQ/2b5/2p5/2P5/P2B1nPP/RN3K1R b - - 1 19` |
+| eSgaa | 3 | 904 | [eSgaa](https://lichess.org/training/eSgaa) | dxe5 | Qf7# | `r2q1bkr/pppb2pp/3p4/2n1R1N1/3p4/5Q2/PPP2PPP/RNB3K1 b - - 0 12` |
+| pPugs | 3 | 912 | [pPugs](https://lichess.org/training/pPugs) | Qxf7 | Bxf7# | `3rkb1r/1R3Qpb/pn3q1p/2p4P/2B1P3/2P3N1/P4PP1/2B2RK1 b k - 0 19` |
+| A5FZU | 3 | 940 | [A5FZU](https://lichess.org/training/A5FZU) | a3 | Be7# | `1r6/5pp1/5k1p/1p1p3P/pBnP2P1/2PK1P2/4R3/8 b - - 22 50` |
+| lwRdC | 3 | 946 | [lwRdC](https://lichess.org/training/lwRdC) | Kf8 | Qh8# | `6k1/4rp2/p1r1pQp1/3pP3/8/2P2R2/5PPK/1q6 b - - 1 33` |
+| 9XlXO | 3 | 987 | [9XlXO](https://lichess.org/training/9XlXO) | Kg7 | Qh6# | `r2qbr2/4p2k/3pBp2/3p2P1/pP1BP3/7Q/P4P2/4K3 b - - 1 29` |
+| qUi0T | 3 | 992 | [qUi0T](https://lichess.org/training/qUi0T) | Bxe1 | Qf1# | `r5k1/ppp2ppp/8/8/8/2Pq1B2/PP1B1bPP/RN1Qr2K w - - 2 17` |
+| wWkTn | 3 | 1012 | [wWkTn](https://lichess.org/training/wWkTn) | Ke6 | Re7# | `8/1p1R1kp1/p2p3p/3Np1r1/1P1nP2K/7P/8/8 b - - 3 37` |
+| j0xBu | 3 | 1013 | [j0xBu](https://lichess.org/training/j0xBu) | Rg8 | Rd8# | `2k2b1r/1rp2Npp/4pn2/1p6/5B2/2N5/PPP3PP/2KR4 b - - 0 15` |
+| 49D2N | 3 | 1015 | [49D2N](https://lichess.org/training/49D2N) | Kd3 | Rd2# | `8/pp5R/1kp2p2/3p4/2n1QN2/2P1P3/PPK2r2/8 w - - 0 37` |
+| K9FDW | 3 | 1029 | [K9FDW](https://lichess.org/training/K9FDW) | Rd5 | Qxc2# | `2q2nQ1/1r1pk2p/p2R1pp1/1p2p3/3nP2N/P5P1/1PP2P1P/2KR4 w - - 2 25` |
+| 5iTQQ | 3 | 1032 | [5iTQQ](https://lichess.org/training/5iTQQ) | Kd3 | Rd2# | `5k2/3Q4/1B4p1/pP2PpP1/Pb2r3/2K5/r6P/8 w - - 1 45` |
+| l8EUN | 3 | 1041 | [l8EUN](https://lichess.org/training/l8EUN) | Kf2 | Qg3# | `5r1k/5pb1/5Np1/2P1P1qp/4Q3/P2pB2P/1P2n1P1/5RK1 w - - 8 42` |
+| zZw3D | 3 | 1105 | [zZw3D](https://lichess.org/training/zZw3D) | Nd7 | Qe7# | `r3k2r/5pp1/5n2/p2qp1Q1/3p3p/B7/PPP2PPP/R3R1K1 b kq - 1 18` |
+| Zyf6z | 3 | 1110 | [Zyf6z](https://lichess.org/training/Zyf6z) | gxh6 | Qxh7# | `r3nrk1/pRQ3pp/7N/3p4/3q4/3B3P/5PPK/8 b - - 2 31` |
+| dmSjb | 3 | 1113 | [dmSjb](https://lichess.org/training/dmSjb) | Bxf6 | Qxg2# | `r4rk1/pb3ppp/1p2pn2/2b3N1/8/1P1B2qP/PBP2PP1/R2Q1RK1 w - - 2 16` |
+| FEisj | 4 | 1131 | [FEisj](https://lichess.org/training/FEisj) | f3 | Rh1# | `8/8/1p1r2p1/7p/5p1k/P2r4/1PK3R1/5R2 b - - 1 42` |
+| 8pzv8 | 4 | 1156 | [8pzv8](https://lichess.org/training/8pzv8) | Ra7 | Bg4# | `8/6p1/5p2/Rp2pK1k/pP2P2P/4P3/4b3/8 w - - 3 38` |
+| wBYsq | 4 | 1161 | [wBYsq](https://lichess.org/training/wBYsq) | Bd7 | Nf6# | `r1bqkb1r/pp2np1p/6p1/3Np3/Q1B1P3/8/PP3PPP/R1B1K2R b KQkq - 2 11` |
+| TAPaU | 4 | 1224 | [TAPaU](https://lichess.org/training/TAPaU) | Kxf8 | Qd8# | `5Rk1/2Q2pp1/7p/p7/8/1P1p3P/q5PK/8 b - - 0 30` |
+| n5qt5 | 4 | 1230 | [n5qt5](https://lichess.org/training/n5qt5) | exd8=Q | Qxg2# | `3rr2k/p3P1pp/1p4q1/1Q6/4b3/1B6/PP3PPP/R5K1 w - - 0 24` |
+| X8XHQ | 4 | 1245 | [X8XHQ](https://lichess.org/training/X8XHQ) | Kxe6 | Qd5# | `5r1r/p3p1q1/2PkP3/4b3/1p6/P3PQPp/7K/3R1R2 b - - 2 34` |
+| CLmMD | 4 | 1254 | [CLmMD](https://lichess.org/training/CLmMD) | d8=Q | Re6# | `5n2/3PK1k1/r6p/4N1p1/8/6P1/4R2P/8 w - - 9 56` |
+| MQzAW | 4 | 1278 | [MQzAW](https://lichess.org/training/MQzAW) | Kxa2 | Ra8# | `5rk1/4bpp1/3p3p/1p1Pp3/1q2Q1PP/3B4/r1P2P2/K2R3R w - - 0 25` |
+| nHGXA | 4 | 1291 | [nHGXA](https://lichess.org/training/nHGXA) | Nxg5 | Qd6# | `r4b1r/ppN1kppp/2n1b3/3QP1B1/4n3/P4N2/1PP2qPP/R2K1B1R b - - 5 13` |
+| ZbmNs | 4 | 1348 | [ZbmNs](https://lichess.org/training/ZbmNs) | Re8 | Qh8# | `r1bq1rk1/pp1n2p1/4p1P1/3p3Q/5p2/2P5/PP3PP1/R3K2R b KQ - 0 17` |
+| dtDSk | 4 | 1369 | [dtDSk](https://lichess.org/training/dtDSk) | Kh2 | Rh1# | `8/p7/5rpk/4R2p/4Q2P/P3PqP1/3R1P2/2r3K1 w - - 1 45` |
+| qzrwW | 4 | 1373 | [qzrwW](https://lichess.org/training/qzrwW) | Rae1 | Qxh2# | `4r1k1/ppQ2pp1/8/4P3/5Pb1/2P3Pp/PP1rq2P/R4RKB w - - 1 25` |
+| hHv24 | 4 | 1376 | [hHv24](https://lichess.org/training/hHv24) | Kg8 | Qe6# | `r2qnb1r/1pp2kpp/p1np4/3NPQ2/3P4/8/PPP2PPP/R1B2RK1 b - - 6 13` |
+| 1wMwl | 4 | 1387 | [1wMwl](https://lichess.org/training/1wMwl) | Qe4 | Qh5# | `R7/5Qpk/1p6/2pP1pp1/2P4q/2P3P1/5K1P/4r3 b - - 0 34` |
+| QVYCU | 4 | 1397 | [QVYCU](https://lichess.org/training/QVYCU) | Kh5 | Qg5# | `3Q4/8/p3r1k1/5p2/2q1r2P/6B1/P5PK/8 b - - 3 42` |
 
 ## 三、找出將軍（20 題）
 

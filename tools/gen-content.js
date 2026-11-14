@@ -45,9 +45,15 @@ for (const g of QUIZ.GROUPS) {
   }
 }
 
-L.push("## 二、一步將死（40 題）", "", "白方走棋；接受所有能將死的走法（已列出全部）。", "",
-  "| 編號 | 級 | 將死棋子 | FEN | 全部將死的走法 |", "|---|---|---|---|---|");
-for (const p of MATE1) L.push(`| ${p.id} | ${p.level} | ${p.piece.toUpperCase()} | \`${p.fen}\` | ${esc(sansOf(p.fen, p.mates))} |`);
+L.push("## 二、一步將死（Lichess 真實 mateIn1，60 題）", "",
+  "題目來自 Lichess 謎題資料庫（CC0）。FEN 是對手走之前的局面；App 先自動走「對手先走」那一步，然後輪到玩家將死。接受所有能將死的走法（下表列出全部）。", "",
+  "| 編號 | 級 | 謎題分 | Lichess 連結 | 對手先走 | 全部將死的走法 | FEN（對手走之前） |", "|---|---|---|---|---|---|---|");
+for (const p of MATE1) {
+  const mv = p.moves.split(" "), g = new Chess(p.fen);
+  const opp = g.move({ from: mv[0].slice(0, 2), to: mv[0].slice(2, 4), promotion: mv[0][4] }).san;
+  const mates = g.moves({ verbose: true }).filter(m => { const c = new Chess(g.fen()); c.move({ from: m.from, to: m.to, promotion: m.promotion }); return c.isCheckmate(); }).map(m => m.san);
+  L.push(`| ${p.id} | ${p.level} | ${p.rating} | [${p.id}](https://lichess.org/training/${p.id}) | ${opp} | ${mates.join("、")} | \`${p.fen}\` |`);
+}
 L.push("");
 
 L.push("## 三、找出將軍（20 題）", "", "列出該局面全部能將軍的走法（走棋一方見「走棋」欄）。", "",

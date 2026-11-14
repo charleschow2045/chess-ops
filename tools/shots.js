@@ -75,7 +75,9 @@ async function fresh(ctx, url) {
   console.log("一步將死");
   page = await fresh(ctx, "game-mate1.html?level=1");
   const m1 = await page.evaluate(() => window.ChessOps.Mate1.filter(p => p.level === 1)[0]);
-  await move(page, m1.mates[0].slice(0, 2), m1.mates[0].slice(2, 4));
+  await page.waitForTimeout(900);                                  // 對手先自動走第 1 步
+  const mu = m1.moves.split(" ")[1];
+  await move(page, mu.slice(0, 2), mu.slice(2, 4));
   ok(await page.locator(".feedback.ok").count() === 1, "第 1 題用正確的將死步，顯示答對");
   await shot(page, "05-mate1-solved");
   await page.close();
@@ -149,15 +151,17 @@ async function fresh(ctx, url) {
   await shot(page, "13-rules-hub");
   await page.close();
 
-  console.log("一步將死：第 1 級 10 題全部答對");
+  console.log("一步將死：第 1 級 15 題全部答對");
   page = await fresh(ctx, "game-mate1.html?level=1");
   const m1all = await page.evaluate(() => window.ChessOps.Mate1.filter(p => p.level === 1));
   for (const p of m1all) {
-    await move(page, p.mates[0].slice(0, 2), p.mates[0].slice(2, 4));
+    await page.waitForTimeout(900);
+    const mv = p.moves.split(" ")[1];
+    await move(page, mv.slice(0, 2), mv.slice(2, 4));
     await page.waitForTimeout(250);
     await page.locator("button.primary").click(); await page.waitForTimeout(250);
   }
-  ok((await page.locator(".score-box .big").textContent()).trim() === "10 / 10", "一步將死第 1 級 10 / 10");
+  ok((await page.locator(".score-box .big").textContent()).trim() === "15 / 15", "一步將死第 1 級 15 / 15");
   await page.close();
 
   console.log("騎士迷宮：第 1、8、15 關按最短路徑過關");

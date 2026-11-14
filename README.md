@@ -3,8 +3,8 @@
 俾小五學生用 iPad 直向玩嘅國際象棋學習 App，目標係提升 chess.com 水平（主要問題：送子、睇漏）。
 
 - 網址：https://charleschow2045.github.io/chess-ops/
-- 狀態：**第 1 階段（棋盤、規則快測、小遊戲）**。其餘模組仍未開始。
-- 報告：[第 0 階段](docs/stage0-report.md)、[第 1 階段](docs/stage1-report.md)、[題目清單](docs/stage1-content.md)　第三方授權：[docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)
+- 狀態：**第 2 階段（戰術謎題）**。第 3 階段起（走棋前三問、對電腦下棋、開局、殘局、我的對局）未開始。
+- 報告：[第 0 階段](docs/stage0-report.md)、[第 1 階段](docs/stage1-report.md)、[題目清單](docs/stage1-content.md)、[第 2 階段](docs/stage2-report.md)、[謎題抽查](docs/stage2-content.md)　第三方授權：[docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)
 
 ## 授權
 
@@ -20,14 +20,15 @@
 ## 結構
 
 ```
-index.html          首頁（7 個模組入口，只有「規則快測與小遊戲」開放）
+index.html          首頁（7 個模組入口；「規則快測與小遊戲」「戰術謎題」已開放）
+puzzles.html settings.html   戰術謎題、設定（顯示格名）
 rules.html quiz.html game-*.html   規則快測與 4 個小遊戲
 dev.html            開發者頁：測試頁同設計預覽連結
 css/                theme.css（設計 A token）、board.css、test.css
 js/                 board.js（正式棋盤）、state.js、pickmove.js、engine.js、quiz*.js、game-*.js、knight-maze.js、pawnwar.js…
-data/               rules-quiz.js（手寫）、mate1.js／check-find.js／knight-maze.js（tools/gen-games.js 產生）
+data/               rules-quiz.js（手寫）、puzzles/（Lichess 謎題子集）、mate1.js（Lichess mateIn1）、check-find.js／knight-maze.js（tools/gen-games.js 產生）
 vendor/             第三方檔案（chess.js、Chessground、Stockfish.js 19 lite）
-tools/              serve.js（本機伺服器）、gen-games.js、gen-content.js、shots.js（Playwright 截圖／流程測試）
+tools/              serve.js、build-puzzles.js（由 Lichess 資料庫篩謎題）、gen-games.js、gen-content.js、gen-stage2-content.js、shots.js／shots2.js（Playwright 流程測試同截圖）
 tests/run-all.js    純邏輯測試
 design-preview/     三個設計風格預覽
 docs/               報告、題目清單、截圖、授權說明

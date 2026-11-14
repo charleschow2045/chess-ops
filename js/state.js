@@ -31,13 +31,15 @@
   /*
    * 成績記錄：每個項目 { best, plays }（最佳成績、完成次數）。項目 id 必須喺 RECORD_IDS 入面，其他一律刪走。
    *   quiz-*   規則快測各組：best = 最高答對題數（0–5）
-   *   mate1-N  一步將死第 N 級（10 題一輪）：best = 最高答對題數（0–10）
+   *   mate1-N  一步將死第 N 級（15 題一輪）：best = 最高答對題數（0–15）
    *   check-find 找出將軍（5 個局面一輪）：best = 最多完整找齊嘅局面數（0–5）
    *   maze     騎士迷宮：best = 已通關嘅最高關數（0–15）
    *   pawnwar  兵仗：best = 打贏過嘅最高電腦級別（0–4；兩人對戰唔計）
    */
   var RECORD_IDS = ["quiz-castling", "quiz-enpassant", "quiz-promotion", "quiz-mate", "quiz-draw", "quiz-check",
     "mate1-1", "mate1-2", "mate1-3", "mate1-4", "check-find", "maze", "pawnwar"];
+
+  var PUZZLE_THEMES = ["hangingPiece", "mateIn1", "fork", "pin", "mateIn2", "skewer", "discoveredAttack"];
 
   /* 白名單：欄位名 → { def: 預設值（函數，每次新建）, clean: 檢查／清洗函數 } */
   var STATE_FIELDS = {
@@ -63,13 +65,14 @@
     },
     // 設定
     settings: {
-      def: function () { return { board: "chessground", design: "A", flipped: false }; },
+      def: function () { return { board: "chessground", design: "A", flipped: false, squareNames: false }; },
       clean: function (v) {
         v = isObj(v) ? v : {};
         return {
           board: oneOf(["chessground", "custom"], "chessground")(v.board),
           design: oneOf(["A", "B", "C"], "A")(v.design),
-          flipped: v.flipped === true
+          flipped: v.flipped === true,
+          squareNames: v.squareNames === true
         };
       }
     },
@@ -83,6 +86,30 @@
           r[id] = { best: int(e.best, 0, 100000, 0), plays: int(e.plays, 0, 1000000, 0) };
         });
         return r;
+      }
+    },
+    /*
+     * 戰術謎題（第 2 階段）：
+     *   rating   謎題分（起始 700）；rated 已計分嘅題數（用嚟決定 K 值）
+     *   done     做過嘅題目 id（最多保留最近 2000 個）
+     *   wrong    錯題本：{ id, r（題目分，用嚟搵檔案）, streak（連續答啱次數，到 2 就移出） }
+     *   history  最近 50 題紀錄：{ id, ok, hint, rated, theme, delta }
+     */
+    puzzles: {
+      def: function () { return { rating: 700, rated: 0, done: [], wrong: [], history: [] }; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var seen = {};
+        function pid(x) { return typeof x === "string" && /^[A-Za-z0-9]{5}$/.test(x); }
+        var done = (Array.isArray(v.done) ? v.done : []).filter(function (x) { if (!pid(x) || seen[x]) return false; seen[x] = 1; return true; }).slice(-2000);
+        var seenW = {};
+        var wrong = (Array.isArray(v.wrong) ? v.wrong : []).filter(function (w) { if (!isObj(w) || !pid(w.id) || seenW[w.id]) return false; seenW[w.id] = 1; return true; })
+          .slice(-500).map(function (w) { return { id: w.id, r: int(w.r, 0, 4000, 0), streak: int(w.streak, 0, 1, 0) }; });
+        var history = (Array.isArray(v.history) ? v.history : []).filter(function (h) { return isObj(h) && pid(h.id); }).slice(-50).map(function (h) {
+          return { id: h.id, ok: h.ok === true, hint: h.hint === true, rated: h.rated === true,
+            theme: PUZZLE_THEMES.indexOf(h.theme) >= 0 ? h.theme : "", delta: int(h.delta, -200, 200, 0) };
+        });
+        return { rating: int(v.rating, 100, 3000, 700), rated: int(v.rated, 0, 1000000, 0), done: done, wrong: wrong, history: history };
       }
     },
     // 對電腦下棋：目前選擇嘅級別（1–8）
@@ -147,7 +174,7 @@
   }
 
   return {
-    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, recordResult: recordResult,
+    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, PUZZLE_THEMES: PUZZLE_THEMES, recordResult: recordResult,
     defaultState: defaultState, normalizeState: normalizeState,
     loadState: loadState, saveState: saveState, exportBackup: exportBackup, parseBackup: parseBackup
   };

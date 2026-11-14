@@ -1,6 +1,5 @@
 /*
- * 小遊戲題目產生器（固定種子，結果可重現）。用法：node tools/gen-games.js
- * 輸出：data/mate1.js（一步將死）、data/check-find.js（找出將軍）、data/knight-maze.js（騎士迷宮）
+ * 小遊戲題目產生器（固定種子，結果可重現）。用法：node tools/gen-games.js（一步將死題庫已改為 Lichess 真實謎題，由 tools/build-puzzles.js 產生）
  * 每個局面都用 chess.js／BFS 驗證；tests/run-all.js 會再逐題重新驗證一次。
  */
 "use strict";
@@ -28,73 +27,6 @@ function fenFromPlacement(pieces) {
     rows.push(line);
   }
   return rows.join("/") + " w - - 0 1";
-}
-
-/* ---------- 一步將死 ---------- */
-function genMate1() {
-  const rng = mulberry32(20261113);
-  const R = n => Math.floor(rng() * n);
-  const pick = a => a[R(a.length)];
-  const SETS = [["Q"], ["Q", "P"], ["R"], ["R", "P"], ["R", "R"], ["Q", "N"], ["R", "N"], ["N", "Q"], ["N", "R", "P"], ["B", "Q"], ["B", "R"], ["B", "N"], ["B", "B"], ["N", "N", "R"], ["B", "N", "R"], ["Q", "B", "P"]];
-  const quota = { q: 9, r: 9, n: 9, b: 7, mix: 6 };
-  const got = { q: [], r: [], n: [], b: [], mix: [] };
-  const seen = new Set();
-  const t0 = Date.now();
-  let attempts = 0;
-  const done = () => Object.keys(quota).every(k => got[k].length >= quota[k]);
-  while (!done() && Date.now() - t0 < 240000) {
-    attempts++;
-    const wset = pick(SETS);
-    // 黑王喺邊緣
-    const edge = R(4), t = R(8);
-    const bk = edge === 0 ? { f: t, r: 7 } : edge === 1 ? { f: 7, r: t } : edge === 2 ? { f: 0, r: t } : { f: t, r: 0 };
-    const used = new Set([bk.f * 8 + bk.r]);
-    const place = (c, near) => {
-      for (let i = 0; i < 40; i++) {
-        let f, r;
-        if (near) { f = bk.f + R(5) - 2; r = bk.r + R(5) - 2; } else { f = R(8); r = R(8); }
-        if (f < 0 || f > 7 || r < 0 || r > 7 || used.has(f * 8 + r)) continue;
-        if ((c === "P" || c === "p") && (r === 0 || r === 7)) continue;
-        used.add(f * 8 + r); return { f, r, c };
-      }
-      return null;
-    };
-    const pieces = [{ f: bk.f, r: bk.r, c: "k" }];
-    let ok = true;
-    const wk = place("K", false); if (!wk) continue;
-    if (Math.abs(wk.f - bk.f) <= 1 && Math.abs(wk.r - bk.r) <= 1) continue;
-    pieces.push(wk);
-    wset.forEach(c => { const p = place(c, c !== "P" ? R(2) === 0 : false); if (p) pieces.push(p); else ok = false; });
-    const nBlack = R(5);
-    const bpool = ["p", "p", "p", "n", "b", "r"];
-    for (let i = 0; i < nBlack; i++) { const p = place(pick(bpool), true); if (p) pieces.push(p); }
-    if (!ok) continue;
-    let g;
-    try { g = new Chess(fenFromPlacement(pieces)); } catch (e) { continue; }
-    const bkSq = name(bk.f, bk.r);
-    if (g.isAttacked(bkSq, "w") || g.inCheck()) continue;
-    const moves = g.moves({ verbose: true });
-    if (moves.length < 10) continue;
-    const mates = moves.filter(m => { const c = new Chess(g.fen()); c.move({ from: m.from, to: m.to, promotion: m.promotion }); return c.isCheckmate(); });
-    if (mates.length < 1 || mates.length > 2) continue;
-    const fen = g.fen();
-    if (seen.has(fen)) continue;
-    const piece = mates[0].piece;
-    // 唔要靠兵吃子／升變嘅怪題；只接受 Q/R/N/B 將死
-    if (!"qrnb".includes(piece)) continue;
-    if (mates.some(m => m.promotion || m.piece === "p")) continue;
-    const nWhite = pieces.filter(p => p.c === p.c.toUpperCase()).length - 1;
-    const slot = got[piece].length < quota[piece] ? piece : (nWhite >= 3 && got.mix.length < quota.mix ? "mix" : null);
-    if (!slot) continue;
-    seen.add(fen);
-    got[slot].push({ fen, mates: mates.map(uci).sort(), piece, white: nWhite, black: pieces.length - 1 - nWhite, moves: moves.length });
-  }
-  const all = [].concat(got.q, got.r, got.n, got.b, got.mix);
-  const weight = { q: 1, r: 2, n: 4, b: 4 };
-  all.sort((a, b) => (weight[a.piece] * 10 + a.white * 3 + a.black + a.moves / 6) - (weight[b.piece] * 10 + b.white * 3 + b.black + b.moves / 6));
-  all.forEach((p, i) => { p.id = "m1-" + String(i + 1).padStart(2, "0"); p.level = Math.floor(i / 10) + 1; delete p.moves; });
-  console.log("mate1:", all.length, "題；嘗試", attempts, "次；", Object.fromEntries(Object.entries(got).map(([k, v]) => [k, v.length])));
-  return all;
 }
 
 /* ---------- 找出將軍 ---------- */
@@ -173,6 +105,6 @@ function genMaze() {
 }
 
 const which = process.argv[2];
-if (!which || which === "mate1") fs.writeFileSync(path.join(ROOT, "data/mate1.js"), wrap("Mate1", genMate1(), "一步將死題庫：白方走棋，一步將死。mates = 全部能將死嘅步（uci）。level 1–4，由淺入深。"));
+if (which === "mate1") { console.log("一步將死題庫改由 tools/build-puzzles.js 產生"); process.exit(0); }
 if (!which || which === "check") fs.writeFileSync(path.join(ROOT, "data/check-find.js"), wrap("CheckFind", genCheckFind(), "找出將軍題庫：checks = 全部可以將軍嘅步（uci）。"));
 if (!which || which === "maze") fs.writeFileSync(path.join(ROOT, "data/knight-maze.js"), wrap("MazeLevels", genMaze(), "騎士迷宮關卡：par = 食晒所有星嘅最少步數（BFS 計出）。"));

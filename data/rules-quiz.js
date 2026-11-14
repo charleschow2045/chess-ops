@@ -191,11 +191,11 @@
       verify: { kind: "impossible" }, answer: "block",
       explain: "馬是跳著走的，中間沒有格子可以擋，所以無法擋住。這個局面可以走王，也可以用 f1 的象吃掉 d3 的馬。" },
     { id: "check-5", group: "check", type: "choice",
-      fen: "4k3/8/8/4r3/1b6/8/8/4K3 w - - 0 1",
-      prompt: "白王同時被 e5 的車和 b4 的象將軍（雙將）。可以怎樣應對？",
+      fen: "4r1k1/8/8/8/8/3n4/8/4K3 w - - 0 1",
+      prompt: "白王同時被 e8 的車和 d3 的馬將軍（雙將）。可以怎樣應對？",
       options: [{ key: "only", text: "只能走王" }, { key: "block", text: "擋住其中一個將軍就可以" }, { key: "capture", text: "吃掉其中一個將軍的棋子就可以" }],
       verify: { kind: "onlyKing" }, answer: "only",
-      explain: "雙將時，擋住或吃掉一個攻擊者都無法解除另一個將軍，所以只能走王。" }
+      explain: "雙將時，擋住或吃掉一個攻擊者都無法解除另一個將軍，所以只能走王。這裡白王可以走到 d1、d2 或 f1。" }
   ];
 
   return { GROUPS: GROUPS, QUESTIONS: QUESTIONS };
