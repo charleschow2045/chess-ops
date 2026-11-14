@@ -173,7 +173,7 @@ test("normalizeState：刪走白名單以外嘅欄位（包括巢狀欄位）", 
   eq(Object.keys(out).sort(), Object.keys(State.STATE_FIELDS).sort(), "頂層欄位要同白名單完全一樣");
   eq(out.rank, { index: 2, xp: 120 });
   eq(out.streak, { count: 5, lastDay: "2026-11-13" });
-  eq(out.settings, { board: "custom", design: "B", flipped: true });
+  eq(out.settings, { board: "custom", design: "B", flipped: true, squareNames: false });
   eq(out.playLevel, 5);
   ok(!("hacker" in out) && !("unknownTop" in out) && !("evil" in out));
 });
@@ -289,25 +289,24 @@ test("規則快測：三次重複、50 步、子力不足、將死、逼和分�
   ok(QV.positionOf(byId("mate-2"), Chess).isStalemate());
 });
 
-/* ---------- 一步將死 ---------- */
-test("一步將死：40 題，4 級各 10 題，每題局面有效、白方走棋、至少一步將死，所有將死步都記錄齊全", () => {
-  eq(MATE1.length, 40);
-  for (let lv = 1; lv <= 4; lv++) eq(MATE1.filter(p => p.level === lv).length, 10, "第 " + lv + " 級");
-  eq(new Set(MATE1.map(p => p.fen)).size, 40, "局面重複");
+/* ---------- 一步將死（Lichess 真實 mateIn1 謎題） ---------- */
+test("一步將死：60 題 Lichess 謎題，4 級各 15 題，分數由低至高；每題 FEN 合法、2 步、最後一步是將死", () => {
+  eq(MATE1.length, 60);
+  for (let lv = 1; lv <= 4; lv++) eq(MATE1.filter(p => p.level === lv).length, 15, "第 " + lv + " 級");
+  eq(new Set(MATE1.map(p => p.id)).size, 60, "id 重複");
+  for (let i = 1; i < MATE1.length; i++) ok(MATE1[i].rating >= MATE1[i - 1].rating, "分數應由低至高");
+  for (let lv = 1; lv < 4; lv++) ok(Math.max(...MATE1.filter(p => p.level === lv).map(p => p.rating)) <= Math.min(...MATE1.filter(p => p.level === lv + 1).map(p => p.rating)), "各級分數不重疊");
   for (const p of MATE1) {
+    ok(/^[A-Za-z0-9]{5}$/.test(p.id), p.id);
+    ok(p.rating >= 400 && p.rating <= 1400, p.id + " 分數範圍");
+    const mv = p.moves.split(" ");
+    eq(mv.length, 2, p.id + " mateIn1 應有 2 步（對手 1 步 + 玩家將死 1 步）");
     const g = new Chess(p.fen);
-    eq(g.turn(), "w", p.id + " 應為白方走棋");
-    ok(!g.inCheck(), p.id + " 白方不應被將軍");
-    const mates = g.moves({ verbose: true }).filter(m => { const c = new Chess(p.fen); c.move({ from: m.from, to: m.to, promotion: m.promotion }); return c.isCheckmate(); }).map(uciOf).sort();
-    ok(mates.length >= 1, p.id + " 沒有一步將死");
-    eq(mates, p.mates, p.id + " 記錄的將死步與 chess.js 計算不同");
+    g.move({ from: mv[0].slice(0, 2), to: mv[0].slice(2, 4), promotion: mv[0][4] });
+    const mates = g.moves({ verbose: true }).filter(m => { const c = new Chess(g.fen()); c.move({ from: m.from, to: m.to, promotion: m.promotion }); return c.isCheckmate(); }).map(uciOf);
+    ok(mates.includes(mv[1]), p.id + " 答案步 " + mv[1] + " 不是將死");
+    ok(mates.length >= 1);
   }
-});
-test("一步將死：后、車、馬、象各有題目，難度由淺入深（第 1 級全部是后將死）", () => {
-  const cnt = {}; MATE1.forEach(p => { cnt[p.piece] = (cnt[p.piece] || 0) + 1; });
-  for (const k of ["q", "r", "n", "b"]) ok(cnt[k] >= 6, "將死棋子 " + k + " 題數不足：" + cnt[k]);
-  ok(MATE1.filter(p => p.level === 1).every(p => p.piece === "q"), "第 1 級應全部由后將死");
-  ok(MATE1.filter(p => p.level === 4).some(p => p.piece === "n" || p.piece === "b"), "第 4 級應有馬或象");
 });
 
 /* ---------- 找出將軍 ---------- */
@@ -487,13 +486,212 @@ test("已刪除「自己寫」棋盤；Stockfish 已升級到 19（18 檔案不�
     ok(!/board-custom|CustomBoard|stockfish-18/.test(src), path.relative(ROOT, f) + " 仍有舊引用");
   }
 });
-test("首頁：7 個模組，只有「規則快測與小遊戲」有連結，其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
+test("首頁：7 個模組，只有「規則快測與小遊戲」和「戰術謎題」有連結，其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
   eq(mods.length, 7);
-  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲"]);
+  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "戰術謎題 Tactics"]);
   eq(new Set(mods.map(m => m.icon)).size, 7, "7 個模組要用 7 個不同圖示");
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8") + fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(!/稱號|連續|今日任務|經驗/.test(html), "首頁不應有稱號卡／任務／連續日數");
+});
+
+/* ======================= 第 2 階段新增測試 ======================= */
+const PL = require(path.join(ROOT, "js/puzzle-logic.js"));
+const PUZ_DIR = path.join(ROOT, "data/puzzles");
+const PUZ_INDEX = JSON.parse(fs.readFileSync(path.join(PUZ_DIR, "index.json"), "utf8"));
+const PUZ_FILES = fs.readdirSync(PUZ_DIR).filter(f => /^r\d{4}\.json$/.test(f)).sort();
+const PUZZLES = [].concat(...PUZ_FILES.map(f => JSON.parse(fs.readFileSync(path.join(PUZ_DIR, f), "utf8")).map(PL.fromRow)));
+const THEMES7 = ["hangingPiece", "mateIn1", "fork", "pin", "mateIn2", "skewer", "discoveredAttack"];
+
+/* ---------- A. 修正第 1 階段 ---------- */
+test("check-5 新局面：白王同時被 2 隻棋子（車和馬）將軍，所有合法步都是王的步，答案「只能走王」", () => {
+  const q = QUIZ.QUESTIONS.find(x => x.id === "check-5");
+  eq(q.fen, "4r1k1/8/8/8/8/3n4/8/4K3 w - - 0 1");
+  ok(q.prompt.includes("e8 的車") && q.prompt.includes("d3 的馬") && q.prompt.includes("雙將"));
+  eq(q.answer, "only");
+  ok(q.explain.includes("d1、d2 或 f1"));
+  const g = new Chess(q.fen);
+  ok(g.inCheck());
+  // 逐隻黑棋單獨測試：只有車和馬各自會將軍（共 2 隻）
+  const checkers = [];
+  g.board().flat().filter(p => p && p.color === "b" && p.type !== "k").forEach(p => {
+    const solo = new Chess("6k1/8/8/8/8/8/8/4K3 w - - 0 1");
+    solo.put({ type: p.type, color: "b" }, p.square);
+    if (solo.inCheck()) checkers.push(p.type + p.square);
+  });
+  eq(checkers.sort(), ["ne3".replace("e3", "d3"), "re8"].sort(), "將軍的棋子");
+  const moves = g.moves({ verbose: true });
+  ok(moves.length > 0 && moves.every(m => m.piece === "k"), "所有合法步都應是王的步");
+  eq(moves.map(m => m.to).sort(), ["d1", "d2", "f1"]);
+  eq(QV.computeAnswer(q, Chess), "only");
+});
+
+/* ---------- 座標設定 ---------- */
+test("座標：設定「顯示格名」預設關閉、屬白名單、非布林值會被清洗、備份往返一致", () => {
+  eq(State.defaultState().settings.squareNames, false);
+  eq(State.normalizeState({ settings: { squareNames: true } }).settings.squareNames, true);
+  eq(State.normalizeState({ settings: { squareNames: "yes" } }).settings.squareNames, false);
+  eq(State.normalizeState({ settings: { squareNames: 1, evil: 1 } }).settings, { board: "chessground", design: "A", flipped: false, squareNames: false });
+  const s = State.normalizeState({ settings: { squareNames: true } });
+  eq(State.parseBackup(State.exportBackup(s)).settings.squareNames, true);
+});
+test("座標：棋盤邊座標（小寫 a–h、1–8，14px）；格名只在設定開啟時顯示且為小寫", () => {
+  const js = fs.readFileSync(path.join(ROOT, "js/board.js"), "utf8");
+  const css = fs.readFileSync(path.join(ROOT, "css/board.css"), "utf8");
+  ok(js.includes("coordinates: showNames") && js.includes("coordinatesOnSquares: showNames"), "每格格名應由設定控制");
+  ok(js.includes('"abcdefgh"') && /\[8, 7, 6, 5, 4, 3, 2, 1\]/.test(js), "邊座標內容：a–h 同 1–8");
+  ok(!/coordinates:\s*true/.test(js), "不應預設每格顯示格名");
+  const m = css.match(/\.bf-ranks span, \.bf-files span \{[^}]*font-size:\s*(\d+)px/);
+  ok(m && Number(m[1]) >= 13, "邊座標字體不細過 13px");
+  ok(/coords\.squares \{ text-transform: lowercase !important/.test(css), "每格格名要用小寫");
+  ok(fs.readFileSync(path.join(ROOT, "settings.html"), "utf8").includes("顯示格名"));
+  ok(fs.readFileSync(path.join(ROOT, "index.html"), "utf8").includes("settings.html"), "首頁底部要有設定連結");
+});
+
+/* ---------- 謎題資料 ---------- */
+test("謎題資料：檔案合共 < 1.5 MB；index.json 與檔案一致；總數約 2,500；按 100 分一段", () => {
+  let bytes = 0, count = 0;
+  for (const f of PUZ_FILES) bytes += fs.statSync(path.join(PUZ_DIR, f)).size;
+  bytes += fs.statSync(path.join(PUZ_DIR, "index.json")).size + fs.statSync(path.join(ROOT, "data/mate1.js")).size;
+  ok(bytes < 1.5 * 1048576, "資料檔案太大：" + bytes);
+  eq(PUZ_FILES.length, 10);
+  PUZ_INDEX.bands.forEach(b => {
+    const rows = JSON.parse(fs.readFileSync(path.join(PUZ_DIR, b.file), "utf8"));
+    eq(rows.length, b.count, b.file + " 題數");
+    rows.forEach(r => { const p = PL.fromRow(r); ok(p.rating >= b.min && p.rating <= b.max + 1, p.id + " 不在 " + b.file + " 分數段"); });
+    count += b.count;
+  });
+  eq(count, PUZ_INDEX.total); eq(PUZZLES.length, PUZ_INDEX.total);
+  ok(PUZ_INDEX.total >= 2300 && PUZ_INDEX.total <= 2700, "總數應約 2,500：" + PUZ_INDEX.total);
+  eq(new Set(PUZZLES.map(p => p.id)).size, PUZZLES.length, "id 重複");
+});
+test("謎題資料：7 個主題各約 300–400 題（主要主題），只含指定的 7 個主題；篩選條件已記錄", () => {
+  const primary = {};
+  THEMES7.forEach(t => { primary[t] = 0; });
+  PUZZLES.forEach(p => { p.themes.forEach(t => ok(THEMES7.includes(t), p.id + " 含未允許主題 " + t)); });
+  const PRIORITY = ["skewer", "discoveredAttack", "pin", "fork", "hangingPiece", "mateIn2", "mateIn1"];
+  PUZZLES.forEach(p => { primary[PRIORITY.find(t => p.themes.includes(t))]++; });
+  for (const t of THEMES7) ok(primary[t] >= 300 && primary[t] <= 400, `主題 ${t} 題數 ${primary[t]} 不在 300–400`);
+  eq(PUZ_INDEX.filter, { minRating: 400, maxRating: 1400, maxDeviation: 90, minPopularity: 85, minPlays: 300 });
+  for (const t of THEMES7) ok(PUZZLES.filter(p => p.themes.includes(t)).length >= 300, t + " 含該主題的題數不足 300");
+});
+test("謎題資料：每一題 FEN 合法、moves 每一步都合法；mateIn1／mateIn2 的最後一步確實是將死（2,450 題）", () => {
+  let checkedMates = 0;
+  for (const p of PUZZLES) {
+    let g;
+    try { g = new Chess(p.fen); } catch (e) { throw new Error(p.id + " FEN 不合法：" + e.message); }
+    ok(p.moves.length >= 2, p.id + " moves 太短");
+    let last = null;
+    p.moves.forEach((u, i) => {
+      try { last = g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] }); }
+      catch (e) { throw new Error(p.id + " 第 " + (i + 1) + " 步 " + u + " 不合法"); }
+    });
+    if (p.themes.includes("mateIn1") || p.themes.includes("mateIn2")) {
+      ok(g.isCheckmate(), p.id + " 是 mateIn 題，最後一步應為將死");
+      checkedMates++;
+    }
+    if (p.themes.includes("mateIn1")) eq(p.moves.length, 2, p.id + " mateIn1 應只有 2 步");
+    if (p.themes.includes("mateIn2")) eq(p.moves.length, 4, p.id + " mateIn2 應有 4 步");
+    ok(p.moves.length % 2 === 0, p.id + " moves 應為雙數（對手先走、玩家最後走）");
+  }
+  ok(checkedMates > 800, "應檢查超過 800 題將死題：" + checkedMates);
+});
+
+/* ---------- 謎題邏輯 ---------- */
+test("謎題分：Elo 預期值同升降（頭 30 題 K=40、之後 K=24；贏 +、輸 −；提示不計分）", () => {
+  ok(Math.abs(PL.expectedScore(700, 700) - 0.5) < 1e-12);
+  ok(Math.abs(PL.expectedScore(1100, 700) - 1 / (1 + Math.pow(10, -1))) < 1e-12, "高 400 分預期約 0.909");
+  eq(PL.kFactor(0), 40); eq(PL.kFactor(29), 40); eq(PL.kFactor(30), 24); eq(PL.kFactor(500), 24);
+  const base = { rating: 700, rated: 0, done: [], wrong: [], history: [] };
+  eq(PL.applyResult(base, 700, true, false).delta, 20);
+  eq(PL.applyResult(base, 700, false, false).delta, -20);
+  eq(PL.applyResult(base, 1100, true, false).delta, Math.round(40 * (1 - 1 / (1 + Math.pow(10, 1)))));   // 打贏高分題，加得多
+  ok(PL.applyResult(base, 1100, true, false).delta > PL.applyResult(base, 300, true, false).delta, "贏高分題比贏低分題加得多");
+  eq(PL.applyResult(Object.assign({}, base, { rated: 30 }), 700, true, false).delta, 12);
+  eq(PL.applyResult(Object.assign({}, base, { rated: 30 }), 700, false, false).delta, -12);
+  const h = PL.applyResult(base, 900, true, true);
+  eq(h.delta, 0); eq(h.puzzles.rating, 700); eq(h.puzzles.rated, 0, "用提示不計入已計分題數"); eq(h.rated, false);
+  const w = PL.applyResult(base, 900, false, false);
+  eq(w.puzzles.rated, 1); ok(w.puzzles.rating < 700);
+  eq(PL.applyResult({ rating: 100, rated: 0, done: [], wrong: [], history: [] }, 1400, false, false).puzzles.rating >= 100, true, "分數有下限");
+  eq(base.rating, 700, "不可改動傳入物件");
+});
+test("選題：只揀分數 ±150 內、未做過、符合主題；搵唔到會擴闊；最後先容許重複", () => {
+  const mk = (id, rating, themes) => ({ id, fen: "x", moves: ["a1a2", "a2a3"], rating, themes });
+  const pool = [mk("aaaaa", 700, ["fork"]), mk("bbbbb", 840, ["fork"]), mk("ccccc", 860, ["fork"]), mk("ddddd", 700, ["pin"]), mk("eeeee", 1000, ["fork"])];
+  const rng = mulberry32(5);
+  for (let i = 0; i < 50; i++) {
+    const p = PL.selectPuzzle(pool, { rating: 700, themes: ["fork"], done: ["aaaaa"], exclude: [], rng });
+    ok(p && Math.abs(p.rating - 700) <= 150 && p.id !== "aaaaa" && p.themes.includes("fork"), "揀到範圍外／做過／錯主題：" + (p && p.id));
+  }
+  eq(PL.selectPuzzle(pool, { rating: 700, themes: ["fork"], done: ["aaaaa", "bbbbb"], exclude: [], rng, maxWindow: 150 }), null, "範圍內冇題時，限制 150 就應該揀唔到");
+  eq(PL.selectPuzzle(pool, { rating: 700, themes: ["fork"], done: ["aaaaa", "bbbbb"], exclude: [], rng }).id, "ccccc", "擴闊範圍後揀最近嘅可用題（860 在 ±160）");
+  eq(PL.selectPuzzle(pool, { rating: 700, themes: ["fork"], done: ["aaaaa", "bbbbb", "ccccc", "eeeee"], exclude: [], rng }), null, "全部做過就揀唔到");
+  ok(PL.selectPuzzle(pool, { rating: 700, themes: ["fork"], done: ["aaaaa", "bbbbb", "ccccc", "eeeee"], exclude: [], rng, allowDone: true }), "容許重複時應揀到");
+  eq(PL.selectPuzzle(pool, { rating: 700, themes: ["pin"], done: [], exclude: ["ddddd"], rng }), null, "本輪已揀過嘅唔會再揀");
+  eq(PL.selectPuzzle(pool, { rating: 700, themes: ["skewer"], done: [], exclude: [], rng }), null, "冇該主題");
+});
+test("選題：用真實資料，分數 700 揀題都在 ±150 內；每個主題都揀到題；一輪 5 題主題安排正確", () => {
+  const rng = mulberry32(11);
+  for (const t of THEMES7) {
+    for (let i = 0; i < 20; i++) {
+      const p = PL.selectPuzzle(PUZZLES, { rating: 700, themes: [t], done: [], exclude: [], rng, maxWindow: 150 });
+      ok(p, t + " 在 700±150 應有題目");
+      ok(Math.abs(p.rating - 700) <= 150 && p.themes.includes(t));
+    }
+  }
+  const plan = PL.planThemes("recommended", null, 5, mulberry32(3));
+  eq(plan.length, 5);
+  eq(new Set(plan.slice(0, 4)).size, 4, "頭 4 題應涵蓋推薦嘅 4 個主題");
+  plan.forEach(t => ok(PL.RECOMMENDED.includes(t)));
+  eq(PL.planThemes("theme", "pin", 5), ["pin", "pin", "pin", "pin", "pin"]);
+  eq(PL.RECOMMENDED, ["hangingPiece", "mateIn1", "fork", "pin"]);
+  eq(PL.bandsFor(700, 150), [500, 600, 700, 800]);
+  eq(PL.bandFile(400), "r0400.json"); eq(PL.bandStart(1399), 1300); eq(PL.bandStart(200), 400);
+  for (const t of THEMES7) ok(PL.THEME_NAMES[t], "缺少主題名稱 " + t);
+  ok(PL.THEME_NAMES.fork.includes("捉雙") && PL.THEME_NAMES.fork.includes("Fork"), "主題名稱中英對照");
+});
+test("錯題本：答錯加入；連續答對 2 次移出；中間答錯會重新計算；不在本內答對不會加入", () => {
+  let w = [];
+  w = PL.updateWrongBook(w, "aaaaa", 800, false);
+  eq(w, [{ id: "aaaaa", r: 800, streak: 0 }]);
+  w = PL.updateWrongBook(w, "aaaaa", 800, true); eq(w[0].streak, 1);
+  w = PL.updateWrongBook(w, "aaaaa", 800, false); eq(w[0].streak, 0, "中間答錯，連勝歸零");
+  w = PL.updateWrongBook(w, "aaaaa", 800, true);
+  w = PL.updateWrongBook(w, "aaaaa", 800, true);
+  eq(w, [], "連續答對 2 次就移出");
+  eq(PL.updateWrongBook([], "bbbbb", 900, true), [], "不在錯題本內答對，不會加入");
+  const orig = [{ id: "ccccc", r: 700, streak: 0 }];
+  PL.updateWrongBook(orig, "ccccc", 700, true); eq(orig[0].streak, 0, "不可改動傳入陣列");
+  eq(PL.updateWrongBook([{ id: "ccccc", r: 700, streak: 0 }], "ddddd", 600, false).length, 2);
+});
+test("謎題儲存：done 最多 2,000（保留最近）、history 最多 50、錯題本去重；備份往返一致", () => {
+  let done = [];
+  for (let i = 0; i < 2105; i++) done = PL.markDone(done, "i" + String(i).padStart(4, "0"));
+  eq(done.length, 2000); eq(done[done.length - 1], "i2104"); ok(!done.includes("i0000"));
+  eq(PL.markDone(["aaaaa", "bbbbb"], "aaaaa"), ["bbbbb", "aaaaa"], "重複 id 移到最後");
+  let hist = [];
+  for (let i = 0; i < 60; i++) hist = PL.pushHistory(hist, { id: "h" + String(i).padStart(4, "0"), ok: true, hint: false, rated: true, theme: "fork", delta: 5 });
+  eq(hist.length, 50); eq(hist[0].id, "h0010");
+  const dirty = { puzzles: { rating: 99999, rated: -4, done: done.concat(["bad", "bad2"]), wrong: [{ id: "aaaaa", r: 800, streak: 9, extra: 1 }, { id: "aaaaa", r: 1, streak: 0 }, { id: "xx", r: 1 }], history: hist.concat([{ id: "zzzzz", ok: true, theme: "notATheme", delta: 5000, extra: 1 }]), junk: 1 } };
+  const n = State.normalizeState(dirty).puzzles;
+  eq(Object.keys(n).sort(), ["done", "history", "rated", "rating", "wrong"]);
+  eq(n.rating, 3000); eq(n.rated, 0); eq(n.done.length, 2000); eq(n.history.length, 50);
+  eq(n.wrong, [{ id: "aaaaa", r: 800, streak: 1 }]);
+  eq(n.history[49].theme, ""); eq(n.history[49].delta, 200);
+  const s = State.normalizeState({ puzzles: { rating: 815, rated: 12, done: ["aaaaa", "bbbbb"], wrong: [{ id: "ccccc", r: 1000, streak: 1 }], history: [{ id: "aaaaa", ok: true, hint: true, rated: false, theme: "pin", delta: 0 }] } });
+  eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
+  eq(State.defaultState().puzzles, { rating: 700, rated: 0, done: [], wrong: [], history: [] });
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["playLevel", "puzzles", "rank", "records", "settings", "streak", "version"]);
+});
+test("首頁：「戰術謎題」入口已開放並顯示真實謎題分；puzzles.html 引用嘅檔案齊全", () => {
+  const mods = require(path.join(ROOT, "js/modules.js"));
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "puzzles.html"]);
+  const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
+  ok(home.includes("State.loadState().puzzles.rating"), "首頁要用儲存嘅謎題分");
+  ok(!/經驗|稱號|連續日數/.test(home));
+  const html = fs.readFileSync(path.join(ROOT, "puzzles.html"), "utf8");
+  for (const f of ["js/puzzle-logic.js", "js/puzzles.js", "js/state.js"]) ok(html.includes(f), "puzzles.html 應引用 " + f);
 });
 
 /* ---------- 執行 ---------- */

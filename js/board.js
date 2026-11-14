@@ -28,11 +28,11 @@ import "./feedback.js";
 const CO = window.ChessOps;
 const COLOR = { w: "white", b: "black" };
 
-/* 共用基本設定（座標、阻止捲動、高亮） */
-function baseConfig() {
+/* 共用基本設定（阻止捲動、高亮；showNames = 設定「顯示格名」，開咗先喺每格印 e4 這類名稱） */
+function baseConfig(showNames) {
   return {
-    coordinates: true,
-    coordinatesOnSquares: true,
+    coordinates: showNames,
+    coordinatesOnSquares: showNames,
     blockTouchScroll: true,
     disableContextMenu: true,
     highlight: { lastMove: true, check: true },
@@ -43,11 +43,30 @@ function baseConfig() {
   };
 }
 
+function squareNamesSetting() {
+  try { return !!(CO.State && CO.State.loadState().settings.squareNames); } catch (e) { return false; }
+}
+
+/* 棋盤邊座標：左邊 1–8、下面 a–h（小寫，14px）；翻轉時要更新 */
+function edgeLabels(ranksEl, filesEl, orientation) {
+  const white = orientation !== "black";
+  const r = white ? [8, 7, 6, 5, 4, 3, 2, 1] : [1, 2, 3, 4, 5, 6, 7, 8];
+  const f = white ? "abcdefgh" : "hgfedcba";
+  ranksEl.textContent = ""; filesEl.textContent = "";
+  r.forEach(n => { const s = document.createElement("span"); s.textContent = String(n); ranksEl.appendChild(s); });
+  f.split("").forEach(c => { const s = document.createElement("span"); s.textContent = c; filesEl.appendChild(s); });
+}
+
 export function createRawBoard(el, extra = {}) {
   el.classList.add("board-wrap");
-  const holder = document.createElement("div");
-  el.appendChild(holder);
-  return Chessground(holder, Object.assign(baseConfig(), extra));
+  const ranks = document.createElement("div"); ranks.className = "bf-ranks";
+  const holder = document.createElement("div"); holder.className = "bf-board";
+  const files = document.createElement("div"); files.className = "bf-files";
+  el.append(ranks, holder, files);
+  edgeLabels(ranks, files, extra.orientation);
+  const cg = Chessground(holder, Object.assign(baseConfig(squareNamesSetting()), extra));
+  cg.setEdgeLabels = (orientation) => edgeLabels(ranks, files, orientation);
+  return cg;
 }
 
 export function createBoard(el, opts = {}) {
@@ -128,8 +147,8 @@ export function createBoard(el, opts = {}) {
       sync();
       return m;
     },
-    flip() { cg.toggleOrientation(); },
-    setOrientation(c) { cg.set({ orientation: c }); },
+    flip() { cg.toggleOrientation(); cg.setEdgeLabels(cg.state.orientation); },
+    setOrientation(c) { cg.set({ orientation: c }); cg.setEdgeLabels(c); },
     setInteractive(mode) { interactive = mode; sync(); },
     lock() { locked = true; sync(); },
     unlock() { locked = false; sync(); },

@@ -1,0 +1,179 @@
+{
+ "source": "https://database.lichess.org/lichess_db_puzzle.csv.zst (CC0)",
+ "generated": "2026-11-14",
+ "filter": {
+  "minRating": 400,
+  "maxRating": 1400,
+  "maxDeviation": 90,
+  "minPopularity": 85,
+  "minPlays": 300
+ },
+ "themes": [
+  "hangingPiece",
+  "mateIn1",
+  "fork",
+  "pin",
+  "mateIn2",
+  "skewer",
+  "discoveredAttack"
+ ],
+ "bands": [
+  {
+   "file": "r0400.json",
+   "min": 400,
+   "max": 499,
+   "count": 132,
+   "bytes": 13426
+  },
+  {
+   "file": "r0500.json",
+   "min": 500,
+   "max": 599,
+   "count": 241,
+   "bytes": 24629
+  },
+  {
+   "file": "r0600.json",
+   "min": 600,
+   "max": 699,
+   "count": 260,
+   "bytes": 26203
+  },
+  {
+   "file": "r0700.json",
+   "min": 700,
+   "max": 799,
+   "count": 260,
+   "bytes": 26637
+  },
+  {
+   "file": "r0800.json",
+   "min": 800,
+   "max": 899,
+   "count": 260,
+   "bytes": 26933
+  },
+  {
+   "file": "r0900.json",
+   "min": 900,
+   "max": 999,
+   "count": 260,
+   "bytes": 27101
+  },
+  {
+   "file": "r1000.json",
+   "min": 1000,
+   "max": 1099,
+   "count": 260,
+   "bytes": 27360
+  },
+  {
+   "file": "r1100.json",
+   "min": 1100,
+   "max": 1199,
+   "count": 260,
+   "bytes": 27814
+  },
+  {
+   "file": "r1200.json",
+   "min": 1200,
+   "max": 1299,
+   "count": 260,
+   "bytes": 28085
+  },
+  {
+   "file": "r1300.json",
+   "min": 1300,
+   "max": 1399,
+   "count": 257,
+   "bytes": 27845
+  }
+ ],
+ "total": 2450,
+ "counts": {
+  "hangingPiece": [
+   37,
+   37,
+   37,
+   36,
+   36,
+   36,
+   35,
+   36,
+   39,
+   38
+  ],
+  "mateIn1": [
+   70,
+   70,
+   75,
+   69,
+   56,
+   56,
+   46,
+   42,
+   40,
+   38
+  ],
+  "fork": [
+   25,
+   37,
+   37,
+   40,
+   42,
+   41,
+   43,
+   40,
+   39,
+   41
+  ],
+  "pin": [
+   2,
+   21,
+   41,
+   41,
+   41,
+   42,
+   42,
+   42,
+   43,
+   40
+  ],
+  "mateIn2": [
+   52,
+   55,
+   56,
+   59,
+   50,
+   56,
+   49,
+   45,
+   48,
+   44
+  ],
+  "skewer": [
+   0,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   39,
+   38
+  ],
+  "discoveredAttack": [
+   0,
+   39,
+   39,
+   39,
+   39,
+   40,
+   40,
+   39,
+   40,
+   39
+  ]
+ }
+}
