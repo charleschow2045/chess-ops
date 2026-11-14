@@ -61,3 +61,38 @@ cg-board {
 .found-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; margin: 8px 0; }
 .score-box { text-align: center; padding: 24px 16px; }
 .score-box .big { font-size: 56px; font-weight: 900; color: var(--gold); line-height: 1.1; }
+
+/* App 內對話框 */
+.dlg-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .66); display: flex; align-items: center; justify-content: center; z-index: 120; padding: 16px; }
+.dlg-box { background: var(--surface); border-radius: var(--radius); padding: 22px 22px 18px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0, 0, 0, .5); }
+.dlg-box h3 { margin: 0 0 8px; font-size: 22px; }
+.dlg-box p { margin: 0 0 14px; font-size: 17px; color: var(--text); }
+.dlg-big { font-size: 56px; line-height: 1.1; color: var(--gold); font-weight: 900; margin-bottom: 4px; }
+.dlg-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.dlg-btns .btn { flex: 1 1 160px; }
+
+/* 對電腦下棋 */
+.player-row { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 2px 4px; font-size: 16px; font-weight: 700; }
+.player-row .who { flex: none; }
+.cap-row { display: flex; align-items: center; flex-wrap: wrap; min-height: 26px; flex: 1; }
+.cap-row piece { position: static !important; display: inline-block; width: 22px !important; height: 22px !important; margin-right: -6px; background-size: cover; }
+.cap-diff { font-size: 15px; font-weight: 800; color: var(--gold); margin-left: 12px; }
+.lvl-badge { font-size: 14px; font-weight: 800; padding: 2px 10px; border-radius: 999px; background: var(--surface2); border: 1px solid var(--line); }
+.movelist-box { background: var(--surface); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 16px; line-height: 1.8; max-height: 130px; overflow-y: auto; min-height: 48px; }
+.movelist-box .mv { display: inline-block; padding: 0 6px; border-radius: 6px; margin-right: 2px; }
+.movelist-box .mv.cur { background: var(--accent); color: var(--accent-fg); font-weight: 800; }
+.movelist-box .no { color: var(--muted); margin-left: 8px; }
+.prog { height: 18px; border-radius: 999px; background: rgba(127, 127, 127, .28); overflow: hidden; margin: 10px 0 6px; }
+.prog > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--gold)); width: 0; transition: width .2s; }
+.prog.indet > i { width: 40%; animation: indet 1.2s ease-in-out infinite; }
+@keyframes indet { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+.seg { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 6px 0 14px; }
+.seg.three { grid-template-columns: repeat(3, 1fr); }
+.seg button { min-height: 56px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface2); color: var(--text); font-size: 18px; font-weight: 800; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.rev-item { display: block; width: 100%; text-align: left; padding: 12px 14px; margin: 8px 0; min-height: 64px; border-radius: 14px; background: var(--surface); border: 2px solid var(--line); color: var(--text); font-size: 16px; cursor: pointer; }
+.rev-item b { display: block; font-size: 17px; }
+.rev-item.blunder b { color: var(--bad); } .rev-item.mistake b { color: var(--gold); }
+.recent-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; margin: 8px 0; border-radius: 14px; background: var(--surface); font-size: 15px; }
+.recent-row .info { flex: 1 1 200px; font-weight: 700; }
+.recent-row .btn { min-height: 48px; padding: 0 14px; font-size: 15px; }

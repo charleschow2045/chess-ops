@@ -103,7 +103,7 @@
       '<div class="prompt"><span class="turn-dot"></span>白方走棋：找出最好的一步</div>' +
       '<div class="actions"><button class="btn" type="button" id="pz-hint">' + ICONS.bulb.replace('class="ic"', 'class="ic" style="width:24px;height:24px"') + ' 提示 Hint</button>' +
       '<button class="btn" type="button">看答案</button><button class="btn primary" type="button">下一題</button></div>' +
-      '<div class="hint-text hidden" id="pz-hint-text">提示：留意黑王和黑車，有沒有一隻棋子可以同時攻擊兩者？（捉雙 Fork）</div>' +
+      '<div class="hint-text hidden" id="pz-hint-text">提示：留意黑王和黑車，有沒有一枚棋子可以同時攻擊兩者？（捉雙 Fork）</div>' +
       '<div class="dots"><span>最近 6 題：</span><i class="ok"></i><i class="ok"></i><i class="bad"></i><i class="ok"></i><i class="ok"></i><i></i></div>';
   }
 

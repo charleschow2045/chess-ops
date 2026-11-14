@@ -438,7 +438,7 @@ function stripComments(src, kind) {
   src = src.replace(/\/\*[\s\S]*?\*\//g, "");
   return src.split(/\r?\n/).map(line => line.replace(/(^|[^:"'\\])\/\/.*$/, "$1")).join("\n");
 }
-const CANTONESE = /[嘅咗唔佢喺俾啲嘢冇哋嚟嗰咁乜咩啱睇揀攞嘥畀係諗仲晒呢哩囉喇喎撳搵揸]|點樣|點解|邊個|而家/;
+const CANTONESE = /[嘅咗唔佢喺俾啲嘢冇哋嚟嗰咁乜咩啱睇揀攞嘥畀係諗仲晒呢哩囉喇喎撳搵揸咀隻]|點樣|點解|邊個|而家/;
 test("App 顯示文字一律用書面語：首頁、規則快測、小遊戲、設計預覽、題庫、js 內沒有廣東話用字", () => {
   const files = walk(ROOT, [".html", ".js", ".css"]).filter(f => {
     const rel = path.relative(ROOT, f).replace(/\\/g, "/");
@@ -456,6 +456,8 @@ test("App 顯示文字一律用書面語：首頁、規則快測、小遊戲、�
 test("廣東話掃描本身有效：會抓到「找出最好嘅一步」，不會誤判書面語「找出最好的一步」", () => {
   ok(CANTONESE.test("找出最好嘅一步"));
   ok(!CANTONESE.test("找出最好的一步"));
+  for (const w of ["箭咀", "一隻馬", "冇", "係", "揀", "晒", "啱", "嚟", "咁", "睇", "撳", "畀", "嘢"]) ok(CANTONESE.test(w), "應抓到 " + w);
+  for (const w of ["箭頭", "一枚馬", "這枚棋子", "只有", "是", "選擇", "完", "正確"]) ok(!CANTONESE.test(w), "不應誤判 " + w);
   eq(stripComments("var a = 1; // 嘅註解\n/* 唔 */ var b = 'http://x';", "js").includes("嘅"), false);
   ok(stripComments("var b = 'http://x';", "js").includes("http://x"));
 });
@@ -486,10 +488,10 @@ test("已刪除「自己寫」棋盤；Stockfish 已升級到 19（18 檔案不�
     ok(!/board-custom|CustomBoard|stockfish-18/.test(src), path.relative(ROOT, f) + " 仍有舊引用");
   }
 });
-test("首頁：7 個模組，只有「規則快測與小遊戲」和「戰術謎題」有連結，其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
+test("首頁：7 個模組，「規則快測與小遊戲」「戰術謎題」「對電腦下棋」有連結，其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
   eq(mods.length, 7);
-  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "戰術謎題 Tactics"]);
+  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "戰術謎題 Tactics", "對電腦下棋"]);
   eq(new Set(mods.map(m => m.icon)).size, 7, "7 個模組要用 7 個不同圖示");
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8") + fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(!/稱號|連續|今日任務|經驗/.test(html), "首頁不應有稱號卡／任務／連續日數");
@@ -682,16 +684,427 @@ test("謎題儲存：done 最多 2,000（保留最近）、history 最多 50、�
   const s = State.normalizeState({ puzzles: { rating: 815, rated: 12, done: ["aaaaa", "bbbbb"], wrong: [{ id: "ccccc", r: 1000, streak: 1 }], history: [{ id: "aaaaa", ok: true, hint: true, rated: false, theme: "pin", delta: 0 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
   eq(State.defaultState().puzzles, { rating: 700, rated: 0, done: [], wrong: [], history: [] });
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["playLevel", "puzzles", "rank", "records", "settings", "streak", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "version"]);
 });
 test("首頁：「戰術謎題」入口已開放並顯示真實謎題分；puzzles.html 引用嘅檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "puzzles.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "puzzles.html", "play.html"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
-  ok(home.includes("State.loadState().puzzles.rating"), "首頁要用儲存嘅謎題分");
+  ok(home.includes("homeState.puzzles.rating"), "首頁要用儲存嘅謎題分");
   ok(!/經驗|稱號|連續日數/.test(home));
   const html = fs.readFileSync(path.join(ROOT, "puzzles.html"), "utf8");
   for (const f of ["js/puzzle-logic.js", "js/puzzles.js", "js/state.js"]) ok(html.includes(f), "puzzles.html 應引用 " + f);
+});
+
+/* ======================= 第 3 階段新增測試 ======================= */
+const CFG = require(path.join(ROOT, "js/config.js"));
+
+test("設定集中（js/config.js）：數字合理；pickMove 用嘅就係 config 嘅同一份", () => {
+  const P = CFG.PICKMOVE;
+  for (let l = 1; l <= 6; l++) ok(P.P_BEST[l] > 0 && P.P_BEST[l] < 1, "P_BEST " + l);
+  for (let l = 2; l <= 6; l++) ok(P.P_BEST[l] > P.P_BEST[l - 1], "P_BEST 應隨級別上升");
+  eq(P.P_BEST, { 1: 0.10, 2: 0.20, 3: 0.30, 4: 0.45, 5: 0.60, 6: 0.75 }, "沿用第 0 階段數值");
+  eq(P.P_TAKE_FREE, { 1: 0.85, 2: 0.90, 3: 0.95 });
+  eq(P.LOWEST[7].skill, 0); eq(P.LOWEST[8].elo, 1320);
+  ok(P.BEST_SEARCH.depth >= 4 && P.BEST_SEARCH.depth <= 20);
+  ok(PM.P_BEST === P.P_BEST && PM.P_TAKE_FREE === P.P_TAKE_FREE && PM.BEST_SEARCH === P.BEST_SEARCH && PM.LOWEST === P.LOWEST, "pickmove 應直接用 config");
+  ok(CFG.THINK_PAUSE.minMs >= 400 && CFG.THINK_PAUSE.maxMs <= 800 && CFG.THINK_PAUSE.minMs < CFG.THINK_PAUSE.maxMs, "出棋前停頓 0.4–0.8 秒");
+  ok(CFG.HINT.depth >= 4);
+  const R = CFG.REVIEW, T = R.THRESHOLDS_CP;
+  ok(R.maxMsPerMove > 0 && R.maxDepth > 0 && R.MATE_CP >= 500);
+  ok(T.inaccuracy > 0 && T.inaccuracy < T.mistake && T.mistake < T.blunder, "疑問手 < 錯著 < 大錯");
+});
+test("設定檔案有註解說明（未有 iPad 實測數據，要按實測再調）", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/config.js"), "utf8");
+  ok(src.includes("iPad 實測") && src.includes("PICKMOVE") && src.includes("THINK_PAUSE") && src.includes("HINT") && src.includes("REVIEW"));
+});
+
+/* ---------- 第 2 階段修正：錯題本與提示 ---------- */
+test("錯題本：用咗提示嘅題目，無論答啱定答錯都入錯題本（唔計連勝）；錯題本練習用提示答啱唔計連勝", () => {
+  eq(PL.countsAsCorrect(true, false), true);
+  eq(PL.countsAsCorrect(true, true), false);
+  eq(PL.countsAsCorrect(false, false), false);
+  eq(PL.countsAsCorrect(false, true), false);
+  // 用提示答啱：入錯題本
+  eq(PL.updateWrongBook([], "aaaaa", 800, PL.countsAsCorrect(true, true)), [{ id: "aaaaa", r: 800, streak: 0 }]);
+  // 不用提示答啱：唔入
+  eq(PL.updateWrongBook([], "aaaaa", 800, PL.countsAsCorrect(true, false)), []);
+  // 錯題本練習中用提示答啱：連勝歸零、仍在本內
+  eq(PL.updateWrongBook([{ id: "aaaaa", r: 800, streak: 1 }], "aaaaa", 800, PL.countsAsCorrect(true, true)), [{ id: "aaaaa", r: 800, streak: 0 }]);
+  // 用提示答啱：仍然唔計謎題分
+  eq(PL.applyResult({ rating: 700, rated: 0, done: [], wrong: [], history: [] }, 800, true, true).delta, 0);
+});
+test("書面語修正：「箭咀」改為「箭頭」、「隻」改為「枚」；App 文字有「箭頭」「這枚棋子」", () => {
+  const files = ["js/puzzles.js", "js/quiz.js", "js/game-mate1.js", "js/game-check.js"].map(f => fs.readFileSync(path.join(ROOT, f), "utf8")).join("\n");
+  ok(files.includes("綠色箭頭是正確的走法") && files.includes("提示 2：箭頭是答案") && files.includes("要走這枚棋子"));
+  ok(!/箭咀/.test(files));
+  const quiz = fs.readFileSync(path.join(ROOT, "data/rules-quiz.js"), "utf8");
+  ok(!/隻/.test(quiz) && quiz.includes("一枚馬"));
+});
+test("主題標籤：「推薦」模式答完先顯示；「按主題練習」及錯題本照舊一開始顯示（原始碼檢查，流程見 tools/shots2.js）", () => {
+  const src = fs.readFileSync(path.join(ROOT, "js/puzzles.js"), "utf8");
+  ok(/ctx\.cfg\.mode === "recommended" \? " invisible"/.test(src), "推薦模式標籤初始隱藏（保留位置，避免棋盤移位）");
+  ok((src.match(/tagsEl\.classList\.remove\("invisible"\)/g) || []).length >= 2, "答對同答錯後都要顯示標籤");
+});
+
+/* ======================= 第 3 階段（對電腦下棋、賽後檢討）新增測試 ======================= */
+const PLG = require(path.join(ROOT, "js/play-logic.js"));
+const RV = require(path.join(ROOT, "js/review-logic.js"));
+const vm = require("vm");
+const playMoves = (g, sans) => { sans.forEach(s => g.move(s)); return g; };
+
+/* ---------- 結束原因 ---------- */
+test("對局結束原因：將死、逼和、三次重複、50 步、子力不足都正確判斷並有原因文字", () => {
+  const mate = playMoves(new Chess(), ["f3", "e5", "g4", "Qh4#"]);
+  eq(PLG.endState(mate), { over: true, result: "b", reason: "checkmate", text: "將死 Checkmate" });
+  const stale = new Chess("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1");
+  const st = PLG.endState(stale);
+  eq([st.over, st.result, st.reason], [true, "draw", "stalemate"]); ok(st.text.includes("逼和"));
+  const trip = playMoves(new Chess(), ["Nf3", "Nf6", "Ng1", "Ng8", "Nf3", "Nf6", "Ng1", "Ng8"]);
+  const tr = PLG.endState(trip);
+  eq([tr.over, tr.result, tr.reason], [true, "draw", "threefold"]); ok(tr.text.includes("三次重複"));
+  const fifty = PLG.endState(new Chess("4k3/8/8/8/8/8/R7/4K3 w - - 100 80"));
+  eq([fifty.over, fifty.result, fifty.reason], [true, "draw", "fifty"]); ok(fifty.text.includes("50 步"));
+  const insuf = PLG.endState(new Chess("8/8/4k3/8/8/4K3/8/6N1 w - - 0 1"));
+  eq([insuf.over, insuf.result, insuf.reason], [true, "draw", "insufficient"]); ok(insuf.text.includes("子力不足"));
+  eq(PLG.endState(new Chess()).over, false);
+  const white = playMoves(new Chess(), ["e4", "e5", "Qh5", "Nc6", "Bc4", "Nf6", "Qxf7#"]);
+  eq(PLG.endState(white).result, "w", "白方將死 → 白勝");
+  ok(PLG.REASON_TEXT.resign.includes("認輸"));
+  eq(PLG.outcomeFor("w", "w"), "win"); eq(PLG.outcomeFor("w", "b"), "loss"); eq(PLG.outcomeFor("draw", "b"), "draw");
+});
+
+/* ---------- 被吃棋子同子力差 ---------- */
+test("被吃的棋子同子力差：e4 d5 exd5 → 白吃一兵，+1；互換后之後差為 0；排序由大到小", () => {
+  const g = playMoves(new Chess(), ["e4", "d5", "exd5"]);
+  eq(PLG.materialInfo(g), { capturedByWhite: ["p"], capturedByBlack: [], diff: 1 });
+  const h = playMoves(new Chess(), ["e4", "d5", "exd5", "Qxd5", "Nc3", "Qxg2"]);
+  const mi = PLG.materialInfo(h);
+  eq(mi.capturedByWhite, ["p"], "白吃咗黑兵一隻");
+  eq(mi.capturedByBlack, ["p", "p"], "黑方吃咗 d5、g2 兩隻白兵");
+  eq(mi.diff, -1);
+  const big = PLG.materialInfo(playMoves(new Chess("4k3/8/8/8/8/8/8/R3K1q1 w - - 0 1"), ["Rxg1"].slice(0, 0)));
+  eq(big.diff, 5 - 9);
+  eq(PLG.materialInfo(new Chess()).diff, 0);
+});
+
+/* ---------- 悔棋、提示次數 ---------- */
+test("悔棋：每局最多 3 次，一次退返雙方各一步；輪到電腦或玩家未走過就唔可以悔", () => {
+  const g = new Chess();
+  eq(PLG.undoPlies(g, "w"), 0, "未走棋");
+  g.move("e4"); eq(PLG.undoPlies(g, "w"), 0, "輪到電腦");
+  g.move("e5"); eq(PLG.undoPlies(g, "w"), 2, "玩家（白）走過一步，輪到玩家 → 退 2 個半步");
+  eq(PLG.canUndo(g, "w", 0), true); eq(PLG.canUndo(g, "w", 2), true); eq(PLG.canUndo(g, "w", 3), false, "已用 3 次");
+  // 玩家執黑：電腦先走
+  const b = new Chess();
+  b.move("e4"); eq(PLG.undoPlies(b, "b"), 0, "黑方未走過");
+  b.move("e5"); b.move("Nf3"); eq(PLG.undoPlies(b, "b"), 2);
+  b.undo(); b.undo(); eq(b.history().length, 1, "退 2 個半步後剩電腦首步");
+  eq(PLG.undoPlies(b, "b"), 0, "退到只剩電腦首步，唔可以再退");
+  eq(CFG.PLAY.undoLimit, 3);
+});
+test("提示：每局最多 3 次，只喺輪到玩家時可用；對局完結後唔可用", () => {
+  const g = new Chess();
+  eq(PLG.canHint(g, "w", 0), true); eq(PLG.canHint(g, "w", 2), true); eq(PLG.canHint(g, "w", 3), false);
+  eq(PLG.canHint(g, "b", 0), false, "輪到白方，黑方玩家唔可以要提示");
+  eq(PLG.canHint(playMoves(new Chess(), ["f3", "e5", "g4", "Qh4#"]), "w", 0), false, "已完結");
+  eq(CFG.PLAY.hintLimit, 3);
+});
+
+/* ---------- 升級、降級 ---------- */
+test("升級：同一級連贏 3 局自動升一級；用過悔棋／提示嘅勝局照計勝負，但唔計入連贏（亦唔中斷）", () => {
+  let lv = PLG.emptyLevels();
+  let r = PLG.applyResult(lv, 3, "win", true); lv = r.levels; eq([r.levelUp, lv[3].streak, lv[3].w], [false, 1, 1]);
+  r = PLG.applyResult(lv, 3, "win", false); lv = r.levels;
+  eq([r.levelUp, lv[3].streak, lv[3].w], [false, 1, 2], "用過悔棋／提示嘅勝局：勝場 +1，連贏不變");
+  r = PLG.applyResult(lv, 3, "win", true); lv = r.levels; eq([r.levelUp, lv[3].streak], [false, 2]);
+  r = PLG.applyResult(lv, 3, "win", true); lv = r.levels;
+  eq([r.levelUp, r.newLevel, lv[3].streak, lv[3].w], [true, 4, 0, 4], "第 3 個乾淨勝局 → 升到第 4 級，連贏歸零");
+  // 和棋同敗局會中斷連贏
+  lv = PLG.emptyLevels();
+  lv = PLG.applyResult(lv, 2, "win", true).levels; lv = PLG.applyResult(lv, 2, "win", true).levels;
+  lv = PLG.applyResult(lv, 2, "draw", true).levels; eq(lv[2].streak, 0, "和棋中斷連贏");
+  lv = PLG.applyResult(lv, 2, "win", true).levels; lv = PLG.applyResult(lv, 2, "win", true).levels;
+  r = PLG.applyResult(lv, 2, "loss", true); eq([r.levels[2].streak, r.levelUp], [0, false], "敗局中斷連贏");
+  // 最高級唔再升
+  let top = PLG.emptyLevels();
+  for (let i = 0; i < 3; i++) { r = PLG.applyResult(top, 8, "win", true); top = r.levels; }
+  eq([r.levelUp, r.newLevel], [false, 8]);
+  // 其他級別唔受影響；輸入唔被改動
+  const before = PLG.emptyLevels(); const snap = JSON.stringify(before);
+  PLG.applyResult(before, 5, "win", true); eq(JSON.stringify(before), snap, "不可改動傳入物件");
+  eq(CFG.PLAY.winsToLevelUp, 3);
+});
+test("降級提示：同一級連輸 3 局先問「要不要降一級」（第 1 級唔問）；勝／和會中斷連輸；揀保持就歸零", () => {
+  let lv = PLG.emptyLevels(), r;
+  r = PLG.applyResult(lv, 4, "loss", true); lv = r.levels; eq([r.offerDrop, lv[4].lstreak, lv[4].l], [false, 1, 1]);
+  r = PLG.applyResult(lv, 4, "loss", true); lv = r.levels; eq(r.offerDrop, false);
+  r = PLG.applyResult(lv, 4, "loss", true); lv = r.levels; eq([r.offerDrop, r.newLevel], [true, 4], "提示唔會自動降級，newLevel 仍然係 4");
+  lv = PLG.declineDrop(lv, 4); eq(lv[4].lstreak, 0, "揀保持：連輸歸零");
+  r = PLG.applyResult(lv, 4, "loss", true); eq(r.offerDrop, false, "要再連輸 3 局先再問");
+  // 勝／和中斷連輸
+  lv = PLG.emptyLevels();
+  lv = PLG.applyResult(lv, 6, "loss", true).levels; lv = PLG.applyResult(lv, 6, "loss", true).levels;
+  r = PLG.applyResult(lv, 6, "draw", true); eq(r.levels[6].lstreak, 0);
+  r = PLG.applyResult(lv, 6, "win", false); eq(r.levels[6].lstreak, 0, "用過悔棋嘅勝局仍然中斷連輸");
+  // 第 1 級唔問
+  lv = PLG.emptyLevels();
+  for (let i = 0; i < 4; i++) { r = PLG.applyResult(lv, 1, "loss", true); lv = r.levels; eq(r.offerDrop, false); }
+  eq(CFG.PLAY.lossesToOfferDrop, 3);
+});
+
+/* ---------- PGN ---------- */
+test("PGN：可以用 chess.js 重新載入，步序、結果、級別、日期一致（勝／負／和、認輸、升變）", () => {
+  const ucis = ["e2e4", "e7e5", "d1h5", "b8c6", "f1c4", "g8f6", "h5f7"];
+  const pgn = PLG.buildPgn(Chess, ucis, { playerColor: "w", level: 4, result: "w", date: "2026-11-14", reason: "checkmate" });
+  const g = new Chess(); g.loadPgn(pgn);
+  eq(g.history({ verbose: true }).map(uciOf), ucis);
+  eq(g.header().Result, "1-0"); eq(g.header().Date, "2026.11.14"); ok(g.header().Black.includes("Level 4")); eq(g.header().White, "Player");
+  ok(g.isCheckmate());
+  const draw = PLG.buildPgn(Chess, ["e2e4", "e7e5"], { playerColor: "b", level: 2, result: "draw", date: "2026-11-14" });
+  const d = new Chess(); d.loadPgn(draw); eq(d.header().Result, "1/2-1/2"); eq(d.header().Black, "Player");
+  const res = PLG.buildPgn(Chess, ["e2e4"], { playerColor: "w", level: 1, result: "b", date: "2026-11-14", reason: "resign" });
+  const r = new Chess(); r.loadPgn(res); eq(r.header().Result, "0-1"); eq(r.header().Termination, "resign");
+  const promo = ["a2a4", "b7b5", "a4b5", "a7a6", "b5a6", "c8b7", "a6b7", "b8c6", "b7a8q"];
+  const pp = PLG.buildPgn(Chess, promo, { playerColor: "w", level: 1, result: null, date: "2026-11-14" });
+  const p2 = new Chess(); p2.loadPgn(pp); eq(p2.history({ verbose: true }).map(uciOf), promo); eq(p2.header().Result, "*");
+  let threw = false; try { PLG.buildPgn(Chess, ["e2e5"], { playerColor: "w", level: 1, result: null, date: "2026-11-14" }); } catch (e) { threw = true; }
+  ok(threw, "不合法步序列要拋錯");
+  eq(PLG.replay(Chess, ["e2e4", "e7e5"]).fen(), new Chess("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq e6 0 2").fen());
+  eq(PLG.replay(Chess, ["e2e5"]), null);
+});
+
+/* ---------- 賽後檢討：分數損失、分類、原因、小結 ---------- */
+test("檢討：引擎分數換算（將死 ±MATE_CP、cp 上限）、終局分數、分數損失計算", () => {
+  const M = CFG.REVIEW.MATE_CP;
+  eq(RV.scoreToCp({ cp: 35, mate: null }), 35); eq(RV.scoreToCp({ cp: 5000, mate: null }), M); eq(RV.scoreToCp({ cp: -5000, mate: null }), -M);
+  eq(RV.scoreToCp({ cp: null, mate: 3 }), M); eq(RV.scoreToCp({ cp: null, mate: -2 }), -M); eq(RV.scoreToCp({ cp: null, mate: 0 }), -M);
+  eq(RV.terminalScore(playMoves(new Chess(), ["f3", "e5", "g4", "Qh4#"])), -M, "被將死");
+  eq(RV.terminalScore(new Chess("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1")), 0, "逼和 = 0");
+  eq(RV.terminalScore(new Chess()), null);
+  eq(RV.lossCp(50, -50), 0, "走完後分數同走前一樣 → 0");
+  eq(RV.lossCp(50, 100), 150, "走前 +50，走完後（玩家角度）−100 → 損失 150");
+  eq(RV.lossCp(-30, 10), 0, "分數反而更好 → 0");
+  eq(RV.lossCp(M, M), M + M > 0 ? 2 * M : 0, "上限內相加");
+  eq(RV.lossCp(M, -M), 0);
+  eq(RV.lossCp(0, M), M, "走出將死劣勢：損失 = MATE_CP");
+});
+test("檢討：分類按 config 門檻（疑問手 80–149、錯著 150–299、大錯 >= 300）；邊界值", () => {
+  const T = CFG.REVIEW.THRESHOLDS_CP;
+  eq(T, { inaccuracy: 80, mistake: 150, blunder: 300 });
+  eq(RV.classify(0), null); eq(RV.classify(79), null);
+  eq(RV.classify(80), "inaccuracy"); eq(RV.classify(149), "inaccuracy");
+  eq(RV.classify(150), "mistake"); eq(RV.classify(299), "mistake");
+  eq(RV.classify(300), "blunder"); eq(RV.classify(1000), "blunder"); eq(RV.classify(2000), "blunder");
+  ok(RV.CLASS_NAME.blunder.includes("大錯") && RV.CLASS_NAME.mistake.includes("錯著") && RV.CLASS_NAME.inaccuracy.includes("疑問手"));
+});
+test("檢討：原因只在能確定時才寫（對方可以吃子／對方可以將死），否則 null", () => {
+  // 白后走到 e5，黑馬可以白吃（無保護）
+  const after = "r1bqkbnr/pppp1ppp/2n5/4Q3/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 0 3";
+  eq(RV.reasonFor(Chess, after, "c6e5", false, "w"), "hang");
+  eq(RV.reasonFor(Chess, after, "d7d6", false, "w"), null, "對方最佳步唔係吃子 → 唔寫原因");
+  eq(RV.reasonFor(Chess, after, null, false, "w"), null);
+  eq(RV.reasonFor(Chess, after, "c6e5", true, "w"), "mate", "對方有將死 → 將死原因優先");
+  // 以兵換馬以外嘅「公平交換」唔當成沒有注意到：Rxd5 被 exd5 回吃（車換兵）
+  eq(RV.reasonFor(Chess, "4k3/8/8/3p4/4P3/8/8/3RK3 b - - 0 1", "d5e4", false, "w"), "hang", "兵吃兵：e4 兵無保護 → hang");
+  eq(RV.reasonFor(Chess, "4k3/8/8/8/3p4/2P5/8/4K3 b - - 0 1", "d4c3", false, "w"), "hang", "無保護兵被吃");
+  eq(RV.reasonFor(Chess, "4k3/8/8/8/3n4/2P5/1P6/4K3 b - - 0 1", "d4c2", false, "w"), null, "冇棋可吃 → null");
+});
+test("檢討：小結文字（簡單書面語）；分辨唔到原因只講數目，唔亂作原因", () => {
+  const mk = (cls, reason) => ({ cls, reason: reason || null });
+  eq(RV.summarize([mk("blunder", "hang"), mk("blunder", "hang")]).text, "這局有 2 步大錯，都是沒有注意到對方可以吃子。");
+  eq(RV.summarize([mk("blunder", "hang")]).text, "這局有 1 步大錯，是沒有注意到對方可以吃子。");
+  eq(RV.summarize([mk("blunder"), mk("blunder")]).text, "這局有 2 步大錯。", "原因不明 → 只講數目");
+  eq(RV.summarize([mk("blunder", "hang"), mk("blunder")]).text, "這局有 2 步大錯，其中 1 步是沒有注意到對方可以吃子。");
+  eq(RV.summarize([mk("blunder", "hang"), mk("blunder", "mate")]).text, "這局有 2 步大錯。", "原因不一致 → 只講數目");
+  eq(RV.summarize([mk("blunder", "mate")]).text, "這局有 1 步大錯，是沒有注意到對方可以將死。");
+  eq(RV.summarize([mk("blunder"), mk("mistake"), mk("mistake"), mk("inaccuracy")]).text, "這局有 1 步大錯。另有 2 步錯著。還有 1 步疑問手。");
+  eq(RV.summarize([mk("mistake", "hang")]).text, "這局有 1 步錯著，是沒有注意到對方可以吃子。");
+  eq(RV.summarize([mk("inaccuracy"), mk("inaccuracy")]).text, "這局沒有大錯和錯著。這局有 2 步疑問手。");
+  eq(RV.summarize([mk(null), mk(null)]).text, "這局沒有大錯、錯著或疑問手。");
+  eq(RV.summarize([mk("blunder", "hang"), mk("blunder", "hang")]).counts, { blunder: 2, mistake: 0, inaccuracy: 0 });
+});
+
+/* 假分析器：2 步貪心（子力 + 對手最佳吃子），輪到走棋方角度；足夠令「送后」變成大錯 */
+function fakeAnalyze(Chess) {
+  const V = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+  const mat = g => { let s = 0; g.board().forEach(r => r.forEach(p => { if (p) s += (p.color === "w" ? 1 : -1) * V[p.type]; })); return s; };
+  return async fen => {
+    const g = new Chess(fen), side = g.turn() === "w" ? 1 : -1;
+    let best = null, bestScore = -1e9;
+    for (const m of g.moves({ verbose: true })) {
+      const c = new Chess(fen); c.move({ from: m.from, to: m.to, promotion: m.promotion });
+      let oppGain = 0;
+      for (const o of c.moves({ verbose: true })) if (o.captured) oppGain = Math.max(oppGain, V[o.captured]);
+      const score = side * mat(c) - oppGain;
+      if (c.isCheckmate()) { best = m.from + m.to + (m.promotion || ""); bestScore = 100; break; }
+      if (score > bestScore) { bestScore = score; best = m.from + m.to + (m.promotion || ""); }
+    }
+    return { cp: Math.round(bestScore * 100), mate: null, best };
+  };
+}
+test("檢討整局（假分析器）：送后被標為大錯並寫明原因；最佳步損失 0；進度回報同取消", async () => {
+  const ucis = ["e2e4", "e7e5", "d1h5", "b8c6", "h5e5", "c6e5"];       // 白方 3.Qxe5?? 送后
+  const prog = [];
+  const res = await RV.reviewGame(Chess, ucis, "w", fakeAnalyze(Chess), { onProgress: (d, t) => prog.push([d, t]) });
+  eq(res.cancelled, false);
+  eq(res.moves.length, 3, "只分析玩家（白方）自己嘅步");
+  eq(prog, [[1, 3], [2, 3], [3, 3]]);
+  const last = res.moves[2];
+  eq([last.san, last.cls, last.reason, last.moveNo], ["Qxe5+", "blunder", "hang", 3]);
+  ok(last.loss >= 300, "損失 " + last.loss);
+  ok(last.bestUci && last.bestSan && last.bestUci !== last.uci, "有較好走法：" + last.bestSan);
+  eq(res.moves[0].cls, null);
+  eq(res.summary.text, "這局有 1 步大錯，是沒有注意到對方可以吃子。");
+  // 玩家執黑：只分析黑方步
+  const asBlack = await RV.reviewGame(Chess, ["e2e4", "e7e5"], "b", fakeAnalyze(Chess));
+  eq(asBlack.moves.length, 1); eq(asBlack.moves[0].san, "e5");
+  // 取消
+  let calls = 0;
+  const cancelled = await RV.reviewGame(Chess, ucis, "w", async f => { calls++; return fakeAnalyze(Chess)(f); }, { shouldCancel: () => calls >= 2 });
+  eq(cancelled.cancelled, true); eq(cancelled.summary, null);
+  // 將死對方嘅一步：損失 0（走完後被將死分數為 −MATE_CP）
+  const mate = await RV.reviewGame(Chess, ["f2f3", "e7e5", "g2g4", "d8h4"], "b", fakeAnalyze(Chess));
+  eq(mate.moves[mate.moves.length - 1].san, "Qh4#"); eq(mate.moves[mate.moves.length - 1].loss, 0);
+  // 同一局面唔重複分析（cache）
+  let n = 0;
+  await RV.reviewGame(Chess, ["e2e4", "e7e5", "g1f3", "b8c6"], "w", async f => { n++; return fakeAnalyze(Chess)(f); });
+  ok(n <= 4, "分析次數 " + n);
+});
+test("檢討：走出將死劣勢（將死分數）→ 大錯並寫「對方可以將死」", async () => {
+  const analyze = async fen => {
+    if (fen.startsWith("rnbqkbnr/pppppppp/8/8/8/5P2/PPPPP1PP/RNBQKBNR b")) return { cp: null, mate: 1, best: "e7e5" };   // 1.f3 之後，黑方有將死（假設，模擬「走出將死劣勢」）
+    return { cp: 0, mate: null, best: "e2e4" };
+  };
+  const res = await RV.reviewGame(Chess, ["f2f3", "e7e5"], "w", analyze);
+  eq([res.moves[0].cls, res.moves[0].reason, res.moves[0].loss], ["blunder", "mate", 1000]);
+  ok(res.summary.text.includes("可以將死"));
+});
+
+/* ---------- 儲存：對局狀態 ---------- */
+test("儲存（play 欄位）：白名單清洗、最近 20 局、不存分析過程、進行中對局保存／恢復、備份往返", () => {
+  eq(State.defaultState().play.current, null); eq(State.defaultState().play.recent, []);
+  eq(Object.keys(State.defaultState().play.levels).length, 8);
+  const dirty = {
+    play: {
+      levels: { 3: { w: 2, d: 1, l: 4, streak: 1, lstreak: 2, extra: 9 }, 9: { w: 1 } },
+      current: { level: 99, color: "x", moves: ["e2e4", "ZZ", "e7e5", "a1a9"], undos: 9, hints: -1, usedUndo: 1, usedHint: true, analysis: [1, 2, 3] },
+      recent: Array.from({ length: 25 }, (_, i) => ({ date: "2026-11-14", level: 3, color: "w", result: "win", reason: "weird", pgn: "1. e4 e5", blunders: i === 0 ? null : 2, plies: 2, analysis: { moves: [1] } })),
+      junk: 1
+    }
+  };
+  const n = State.normalizeState(dirty).play;
+  eq(Object.keys(n).sort(), ["current", "levels", "recent"]);
+  eq(n.levels[3], { w: 2, d: 1, l: 4, streak: 1, lstreak: 2 });
+  eq(Object.keys(n.levels).length, 8, "只有 1–8 級");
+  eq(n.current, { level: 8, color: "w", moves: ["e2e4", "e7e5"], undos: 3, hints: 0, usedUndo: false, usedHint: true });
+  eq(n.recent.length, 20);
+  eq(Object.keys(n.recent[0]).sort(), ["blunders", "color", "date", "level", "pgn", "plies", "reason", "result"], "recent 只有指定欄位（冇分析過程）");
+  eq(n.recent[0].blunders, null); eq(n.recent[1].blunders, 2); eq(n.recent[1].reason, "draw", "不明原因會被清洗");
+  const s = State.normalizeState({ playLevel: 5, play: { levels: { 5: { w: 3, d: 0, l: 1, streak: 2, lstreak: 0 } }, current: { level: 5, color: "b", moves: ["e2e4"], undos: 1, hints: 2, usedUndo: true, usedHint: true }, recent: [{ date: "2026-11-14", level: 5, color: "b", result: "loss", reason: "resign", pgn: "1. e4 *", blunders: 3, plies: 1 }] } });
+  eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "version"]);
+});
+test("進行中對局：保存（localStorage）→ 恢復 → 重播出同一個局面；中途離開後可以繼續", () => {
+  const store = {};
+  global.localStorage = { getItem: k => (k in store ? store[k] : null), setItem: (k, v) => { store[k] = String(v); } };
+  try {
+    const g = playMoves(new Chess(), ["e4", "e5", "Nf3", "Nc6", "Bb5"]);
+    const s = State.loadState();
+    s.play.current = { level: 6, color: "b", moves: g.history({ verbose: true }).map(uciOf), undos: 1, hints: 2, usedUndo: true, usedHint: true };
+    State.saveState(s);
+    ok("chessops_state" in store);
+    const back = State.loadState().play.current;
+    eq(back.level, 6); eq(back.color, "b"); eq(back.hints, 2); eq(back.usedUndo, true);
+    eq(PLG.replay(Chess, back.moves).fen(), g.fen(), "重播後局面一致");
+    // 損壞嘅儲存內容：恢復時重播失敗要能偵測（回傳 null），唔會當機
+    store.chessops_state = JSON.stringify({ play: { current: { level: 3, color: "w", moves: ["e2e4", "e2e4"] } } });
+    eq(PLG.replay(Chess, State.loadState().play.current.moves), null);
+  } finally { delete global.localStorage; }
+});
+
+/* ---------- 引擎穩定（EngineManager）：載入失敗、無回應、重新載入、冷卻、退回 ---------- */
+function loadManager(fakeEngineFactory) {
+  const sandbox = { setTimeout, clearTimeout, Date, Promise, performance, console };
+  sandbox.self = sandbox;
+  sandbox.ChessOps = { Config: CFG, Engine: fakeEngineFactory };
+  vm.runInNewContext(fs.readFileSync(path.join(ROOT, "js/engine-manager.js"), "utf8"), sandbox);
+  return sandbox.ChessOps.EngineManager;
+}
+test("引擎穩定：正常載入有進度狀態；搜尋出錯會自動重新載入並由同一局面重試；全部失敗拋錯並進入冷卻（唔會卡死）", async () => {
+  const created = []; let plan = [];     // plan：每個新引擎嘅行為
+  function FakeEngine() { this.behaviour = plan.shift() || { init: "ok", move: "ok" }; this.id = created.length; created.push(this); this.terminated = false; this.lastInfo = { depth: 1, cp: 10, mate: null, pv: [] }; }
+  FakeEngine.prototype.init = function () { return this.behaviour.init === "ok" ? Promise.resolve({}) : this.behaviour.init === "hang" ? new Promise(() => {}) : Promise.reject(new Error("init 失敗")); };
+  FakeEngine.prototype.bestMove = function (fen) { return this.behaviour.move === "ok" ? Promise.resolve("e2e4") : this.behaviour.move === "hang" ? new Promise(() => {}) : Promise.reject(new Error("worker 出錯")); };
+  FakeEngine.prototype.terminate = function () { this.terminated = true; };
+  FakeEngine.prototype.stop = function () {};
+  const EM = loadManager(FakeEngine);
+  const cfgBackup = JSON.stringify(CFG.ENGINE);
+  CFG.ENGINE.initTimeoutMs = 60; CFG.ENGINE.moveTimeoutMs = 60; CFG.ENGINE.coolDownMs = 150;
+  try {
+    // (a) 正常：loading → ready
+    let st = []; let mgr = new EM("x.js", s => st.push(s));
+    plan = [{ init: "ok", move: "ok" }];
+    eq((await mgr.run("fen", {})).uci, "e2e4"); eq(st, ["loading", "ready"]); eq(created.length, 1);
+    // (b) 搜尋出錯：自動重新載入新引擎並重試成功
+    st = []; created.length = 0; mgr = new EM("x.js", s => st.push(s));
+    plan = [{ init: "ok", move: "error" }, { init: "ok", move: "ok" }];
+    eq((await mgr.run("fen", {})).uci, "e2e4");
+    eq(created.length, 2, "重新載入咗一個新引擎"); ok(created[0].terminated, "舊引擎已終止"); ok(st.includes("recovering"));
+    // (c) 搜尋無回應（逾時）：同樣重新載入並成功
+    created.length = 0; mgr = new EM("x.js", () => {});
+    plan = [{ init: "ok", move: "hang" }, { init: "ok", move: "ok" }];
+    eq((await mgr.run("fen", {})).uci, "e2e4"); eq(created.length, 2);
+    // (d) 載入無回應（逾時）：重新載入成功
+    created.length = 0; mgr = new EM("x.js", () => {});
+    plan = [{ init: "hang" }, { init: "ok", move: "ok" }];
+    eq((await mgr.run("fen", {})).uci, "e2e4"); eq(created.length, 2);
+    // (e) 全部失敗：拋錯、狀態 failed、冷卻期內即刻拋錯（唔再建立引擎）
+    created.length = 0; st = []; mgr = new EM("x.js", s => st.push(s));
+    plan = [{ init: "fail" }, { init: "fail" }];
+    let threw = null; try { await mgr.run("fen", {}); } catch (e) { threw = e; }
+    ok(threw, "全部失敗要拋錯"); ok(st.includes("failed")); eq(created.length, 2);
+    const t0 = Date.now(); let threw2 = false;
+    try { await mgr.run("fen", {}); } catch (e) { threw2 = true; }
+    ok(threw2 && created.length === 2 && Date.now() - t0 < 50, "冷卻期內即刻拋錯，唔再等");
+    // pickMove 配合：引擎不可用 → 退回隨機合法步（唔卡死）
+    const game = new Chess(POSITIONS.middlegame);
+    const r = await PM.pickMove(8, game, { Chess, engine: mgr, rng: mulberry32(3) });
+    ok(r && isLegal(game, r.move) && r.source === "fallback", "退回隨機合法步");
+    // 冷卻期過後（或 reset）可以恢復
+    plan = [{ init: "ok", move: "ok" }];
+    mgr.reset();
+    eq((await mgr.run("fen", {})).uci, "e2e4");
+    // (f) 排隊：同時兩個呼叫按次序完成
+    created.length = 0; mgr = new EM("x.js", () => {});
+    plan = [{ init: "ok", move: "ok" }];
+    const order = [];
+    await Promise.all([mgr.run("a", {}).then(() => order.push(1)), mgr.run("b", {}).then(() => order.push(2))]);
+    eq(order, [1, 2]); eq(created.length, 1, "兩次搜尋共用同一個引擎");
+  } finally { Object.assign(CFG.ENGINE, JSON.parse(cfgBackup)); }
+});
+
+/* ---------- 原始碼規範 ---------- */
+test("對電腦下棋：用 App 內對話框（唔用 alert／confirm／prompt）；提示用 Stockfish 全力設定；引擎設定唔含弱化參數", () => {
+  for (const f of walk(path.join(ROOT, "js"), [".js"])) {
+    const src = stripComments(fs.readFileSync(f, "utf8"), "js");
+    ok(!/\b(alert|confirm|prompt)\s*\(/.test(src), path.relative(ROOT, f) + " 唔應該用瀏覽器對話框");
+  }
+  const play = fs.readFileSync(path.join(ROOT, "js/play.js"), "utf8");
+  ok(play.includes("mgr.run(board.game.fen(), CFG.HINT)"), "提示用 config.HINT");
+  ok(!("skill" in CFG.HINT) && !("elo" in CFG.HINT), "提示唔可以用弱化設定（Skill Level／UCI_Elo）");
+  ok(CFG.HINT.depth >= CFG.PICKMOVE.BEST_SEARCH.depth, "提示深度 >= 電腦「最佳步」深度");
+  ok(play.includes("CFG.REVIEW.maxMsPerMove") && play.includes("CFG.THINK_PAUSE"), "檢討時間同出棋停頓來自 config");
+  ok(fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8").includes(".invisible"));
+});
+test("首頁：「對電腦下棋」已開放，顯示目前級別（真實數字）；play.html 引用檔案齊全", () => {
+  const mods = require(path.join(ROOT, "js/modules.js"));
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "puzzles.html", "play.html"]);
+  const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
+  ok(home.includes("homeState.playLevel") && home.includes("目前第 "));
+  const html = fs.readFileSync(path.join(ROOT, "play.html"), "utf8");
+  for (const f of ["js/config.js", "js/pickmove.js", "js/engine.js", "js/engine-manager.js", "js/play-logic.js", "js/review-logic.js", "js/dialog.js", "js/play.js"]) ok(html.includes(f), "play.html 應引用 " + f);
+  ok(html.indexOf("js/config.js") < html.indexOf("js/pickmove.js"), "config.js 要喺 pickmove.js 之前");
 });
 
 /* ---------- 執行 ---------- */

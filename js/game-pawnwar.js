@@ -1,4 +1,4 @@
-/* 兵仗：雙方只有王和 8 隻兵。兵先走到對方底線即勝；也可以將死；逼和／其他和棋則和局。
+/* 兵仗：雙方只有王和 8 枚兵。兵先走到對方底線即勝；也可以將死；逼和／其他和棋則和局。
  * 對電腦（第 1–4 級，用 pickMove；玩家執白）或兩人同一部 iPad 對戰。 */
 import { createBoard } from "./board.js";
 import { Chess } from "../vendor/chess.js/chess.esm.js";
@@ -33,8 +33,8 @@ function setup() {
     el("details", { class: "card", open: true }, [
       el("summary", { style: "font-weight:800;font-size:18px;cursor:pointer;min-height:44px", text: "規則" }),
       el("ol", {}, [
-        el("li", { text: "雙方只有王和 8 隻兵，擺在起始位置，白方先走。" }),
-        el("li", { text: "任何一隻兵走到對方底線，即時獲勝（不需要升變）。" }),
+        el("li", { text: "雙方只有王和 8 枚兵，擺在起始位置，白方先走。" }),
+        el("li", { text: "任何一枚兵走到對方底線，即時獲勝（不需要升變）。" }),
         el("li", { text: "將死對方王，獲勝。" }),
         el("li", { text: "輪到走棋的一方沒有合法步又沒有被將軍（逼和），或出現三次重複等和棋規則，則為和棋。" }),
         el("li", { text: "其餘走法照正常規則：兵直走、斜吃，可以吃過路兵；王不可以走到被攻擊的格。" })])]),
@@ -96,7 +96,8 @@ async function start() {
     const t0 = performance.now();
     let r = null;
     try { r = await CO.PickMove.pickMove(level, board.game, { Chess, engine }); } catch (e) { r = null; }
-    const wait = Math.max(0, 500 - (performance.now() - t0));      // 最少停 0.5 秒，避免電腦走得太突然
+    const tp = CO.Config.THINK_PAUSE, pause = tp.minMs + Math.random() * (tp.maxMs - tp.minMs);   // 出棋前停頓（js/config.js）
+    const wait = Math.max(0, pause - (performance.now() - t0));      // 最少停 0.5 秒，避免電腦走得太突然
     await new Promise(res => setTimeout(res, wait));
     if (board !== mine) return;
     thinking = false; board.unlock();

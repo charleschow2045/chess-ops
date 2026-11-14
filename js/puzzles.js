@@ -3,7 +3,7 @@
  *  - 題目 FEN 是「對手走之前」的局面；moves[0] 是對手的步，App 自動走（停約 0.5 秒，有動畫），之後輪到玩家，
  *    玩家以自己一方在下面。玩家逐步走出 moves 內屬於自己的步，對手的回應由 App 自動走。
  *  - 玩家最後一步與答案不同、但同樣是將死，一樣當答對（Lichess 同樣接受）。
- *  - 走錯：即時顯示「答錯」＋箭咀標示正確走法，然後可以「再試一次」或「下一題」。
+ *  - 走錯：即時顯示「答錯」＋箭頭標示正確走法，然後可以「再試一次」或「下一題」。
  *  - 計分：第一次嘗試就答對＝贏，答錯＝輸（Elo，見 puzzle-logic.js）；用咗提示唔計分。
  */
 import { createBoard } from "./board.js";
@@ -114,9 +114,12 @@ function runPuzzle(p, ctx) {
     const retryBtn = el("button", { class: "btn hidden", type: "button", id: "retry", text: "再試一次" });
     const nextBtn = el("button", { class: "btn primary hidden", type: "button", id: "next", text: ctx.index === ctx.total - 1 ? "看小結" : "下一題 ›" });
     const tags = p.themes.map(t => el("span", { class: "chip" + (t === shownTheme ? " accent" : ""), text: themeName(t) }));
+    // 「推薦」模式：答完先顯示主題標籤（避免提示解法類型）；「按主題練習」一開始就顯示。
+    // 用 visibility:hidden（invisible）而唔係 display:none，因為標籤出現會令棋盤位置移動，Chessground 快取咗舊位置會令點擊錯位
+    const tagsEl = el("div", { class: "found-list" + (ctx.cfg.mode === "recommended" ? " invisible" : ""), id: "tags" }, tags);
     stage.append(
       el("div", { class: "topbar-lite meta-row" }, [el("span", { class: "q-prog", text: (ctx.cfg.mode === "book" ? "錯題本・" : "") + "第 " + (ctx.index + 1) + " / " + ctx.total + " 題" }), el("span", { class: "chip gold", text: "題目分 " + p.rating })]),
-      el("div", { class: "found-list" }, tags),
+      tagsEl,
       status, wrap, fb, el("div", { class: "btn-row" }, [hintBtn, retryBtn, nextBtn]));
 
     const board = createBoard(wrap, {
@@ -156,7 +159,7 @@ function runPuzzle(p, ctx) {
         res = PL.applyResult(pz, p.rating, won, usedHint);
         res.puzzles.done = PL.markDone(res.puzzles.done, p.id);
       }
-      res.puzzles.wrong = PL.updateWrongBook(res.puzzles.wrong, p.id, p.rating, won);
+      res.puzzles.wrong = PL.updateWrongBook(res.puzzles.wrong, p.id, p.rating, PL.countsAsCorrect(won, usedHint));
       res.puzzles.history = PL.pushHistory(res.puzzles.history, { id: p.id, ok: won, hint: usedHint, rated: res.rated, theme: shownTheme, delta: res.delta });
       s.puzzles = res.puzzles;
       ST.saveState(s);
@@ -170,8 +173,9 @@ function runPuzzle(p, ctx) {
     function solved() {
       finished = true; board.setInteractive(false); hintBtn.disabled = true; board.feedback(true);
       if (!recorded) record(true);
+      tagsEl.classList.remove("invisible");
       const retry = mistakes > 0;
-      CO.Feedback.show(fb, { ok: true, title: retry ? "這次答對了" : "答對了！", text: (retry ? "這題之前已記錄為答錯。" : "") + scoreText() });
+      CO.Feedback.show(fb, { ok: true, title: retry ? "這次答對了" : "答對了！", text: (retry ? "這題之前已記錄為答錯。" : "") + scoreText() + (usedHint ? "已加入錯題本，之後可以再練習。" : "") });
       status.textContent = "完成";
       nextBtn.classList.remove("hidden");
     }
@@ -180,7 +184,8 @@ function runPuzzle(p, ctx) {
       board.undo(); board.setInteractive(false); hintBtn.disabled = true; board.feedback(false);
       board.setShapes([{ orig: moves[idx].slice(0, 2), dest: moves[idx].slice(2, 4), brush: "green" }]);
       if (!recorded) record(false);
-      CO.Feedback.show(fb, { ok: false, title: "答錯了", text: "綠色箭咀是正確的走法。" + scoreText() + "這題已加入錯題本。" });
+      tagsEl.classList.remove("invisible");
+      CO.Feedback.show(fb, { ok: false, title: "答錯了", text: "綠色箭頭是正確的走法。" + scoreText() + "這題已加入錯題本。" });
       retryBtn.classList.remove("hidden"); nextBtn.classList.remove("hidden");
     }
     hintBtn.addEventListener("click", () => {
@@ -188,8 +193,8 @@ function runPuzzle(p, ctx) {
       usedHint = true; hintLevel++;
       const u = moves[idx];
       if (hintLevel === 1) board.setShapes([{ orig: u.slice(0, 2), brush: "green" }]);                              // 第一次：圈出要走的棋子
-      else board.setShapes([{ orig: u.slice(0, 2), brush: "green" }, { orig: u.slice(0, 2), dest: u.slice(2, 4), brush: "green" }]);   // 第二次：箭咀顯示答案
-      CO.Feedback.show(fb, { ok: true, title: hintLevel === 1 ? "提示 1：要走這隻棋子" : "提示 2：箭咀是答案", text: recorded ? "" : "使用提示後，這題不計謎題分。" });
+      else board.setShapes([{ orig: u.slice(0, 2), brush: "green" }, { orig: u.slice(0, 2), dest: u.slice(2, 4), brush: "green" }]);   // 第二次：箭頭顯示答案
+      CO.Feedback.show(fb, { ok: true, title: hintLevel === 1 ? "提示 1：要走這枚棋子" : "提示 2：箭頭是答案", text: recorded ? "" : "使用提示後，這題不計謎題分。" });
     });
     retryBtn.addEventListener("click", start);
     // 供 tools/shots2.js 自動測試使用

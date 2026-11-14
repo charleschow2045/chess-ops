@@ -112,12 +112,51 @@
         return { rating: int(v.rating, 100, 3000, 700), rated: int(v.rated, 0, 1000000, 0), done: done, wrong: wrong, history: history };
       }
     },
+    /*
+     * 對電腦下棋（第 3 階段）。目前級別用下面嘅 playLevel。
+     *   levels   各級紀錄：{ w 勝, d 和, l 負, streak 連贏（唔計用過悔棋／提示嘅勝局）, lstreak 連輸 }
+     *   current  進行中嘅對局（中途離開自動保存）：{ level, color, moves（uci 序列）, undos, hints, usedUndo, usedHint }，冇就係 null
+     *   recent   最近 20 局（新→舊）：{ date, level, color, result（win/loss/draw）, reason, pgn, blunders（未檢討就係 null）, plies }
+     *            只存結果同 PGN，唔存分析過程
+     */
+    play: {
+      def: function () { return { levels: defaultPlayLevels(), current: null, recent: [] }; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var levels = {}, lv = isObj(v.levels) ? v.levels : {};
+        for (var l = 1; l <= 8; l++) {
+          var e = isObj(lv[l]) ? lv[l] : {};
+          levels[l] = { w: int(e.w, 0, 100000, 0), d: int(e.d, 0, 100000, 0), l: int(e.l, 0, 100000, 0), streak: int(e.streak, 0, 1000, 0), lstreak: int(e.lstreak, 0, 1000, 0) };
+        }
+        var current = null, c = v.current;
+        if (isObj(c) && Array.isArray(c.moves)) {
+          var mv = c.moves.filter(function (m) { return typeof m === "string" && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(m); }).slice(0, 700);
+          current = {
+            level: int(c.level, 1, 8, 3), color: c.color === "b" ? "b" : "w", moves: mv,
+            undos: int(c.undos, 0, 3, 0), hints: int(c.hints, 0, 3, 0), usedUndo: c.usedUndo === true, usedHint: c.usedHint === true
+          };
+        }
+        var recent = (Array.isArray(v.recent) ? v.recent : []).filter(isObj).slice(0, 20).map(function (g) {
+          return {
+            date: dateStr(g.date), level: int(g.level, 1, 8, 3), color: g.color === "b" ? "b" : "w",
+            result: oneOf(["win", "loss", "draw"], "draw")(g.result),
+            reason: oneOf(["checkmate", "stalemate", "insufficient", "threefold", "fifty", "draw", "resign"], "draw")(g.reason),
+            pgn: typeof g.pgn === "string" ? g.pgn.slice(0, 30000) : "",
+            blunders: g.blunders === null || g.blunders === undefined ? null : int(g.blunders, 0, 500, 0),
+            plies: int(g.plies, 0, 1000, 0)
+          };
+        });
+        return { levels: levels, current: current, recent: recent };
+      }
+    },
     // 對電腦下棋：目前選擇嘅級別（1–8）
     playLevel: {
       def: function () { return 3; },
       clean: function (v) { return int(v, 1, 8, 3); }
     }
   };
+
+  function defaultPlayLevels() { var o = {}; for (var l = 1; l <= 8; l++) o[l] = { w: 0, d: 0, l: 0, streak: 0, lstreak: 0 }; return o; }
 
   function defaultState() {
     var s = {};

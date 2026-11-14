@@ -47,7 +47,9 @@ async function solve(page) {
     await playUci(page, u);
     await page.waitForTimeout(800);                         // 對手回應（0.5 秒）
   }
-  return (await page.locator("#next").isVisible()) && (await page.locator(".feedback.ok").count()) > 0;
+  const done = (await page.locator("#next").isVisible()) && (await page.locator(".feedback.ok").count()) > 0;
+  if (!done) console.log("    （除錯）solve 失敗：", JSON.stringify(await page.evaluate(() => ({ p: window.__chessopsDebug.puzzle(), exp: window.__chessopsDebug.expected(), mistakes: window.__chessopsDebug.mistakes(), fb: document.querySelector(".feedback") && document.querySelector(".feedback").textContent }))));
+  return done;
 }
 
 (async () => {
@@ -61,7 +63,7 @@ async function solve(page) {
 
   console.log("首頁（戰術謎題入口已開放，顯示謎題分）");
   await go("index.html");
-  ok(await page.locator("a.mod").count() === 2, "首頁有 2 個可進入的模組");
+  ok(await page.locator("a.mod").count() === 3, "首頁有 3 個可進入的模組");
   ok((await text(page, "a.mod[href='puzzles.html']")).includes("謎題分 700"), "首頁顯示真實謎題分 700");
   await shot(page, "01-home");
 
@@ -78,16 +80,18 @@ async function solve(page) {
   const white = await page.evaluate(fen => fen.split(" ")[1] === "b", p1.fen);   // FEN 輪到黑 → 玩家執白
   ok((await boardRect(page)).flipped === !white, "棋盤方向：玩家一方在下面（玩家執" + (white ? "白" : "黑") + "）");
   ok(await page.locator("cg-board square.last-move").count() >= 1, "對手第 1 步已自動走出（有最後一步高亮）");
+  ok(await page.locator("#tags").isHidden(), "推薦模式：答題前不顯示主題標籤");
   await shot(page, "03-puzzle-before");
 
-  console.log("走錯一步：即時顯示答錯＋箭咀，然後可「再試一次」");
+  console.log("走錯一步：即時顯示答錯＋箭頭，然後可「再試一次」");
   const bad = await page.evaluate(() => window.__chessopsDebug.wrongMove());
   await playUci(page, bad);
   ok(await page.locator(".feedback.bad").count() === 1, "顯示「答錯了」");
-  ok(await page.locator(".cg-shapes line, .cg-shapes path, .cg-shapes polygon").count() > 0, "用箭咀顯示正確走法");
+  ok(await page.locator(".cg-shapes line, .cg-shapes path, .cg-shapes polygon").count() > 0, "用箭頭顯示正確走法");
   ok(await page.locator("#retry").isVisible() && await page.locator("#next").isVisible(), "有「再試一次」同「下一題」");
   let st = await stateOf(page);
   ok(st.puzzles.rating < 700 && st.puzzles.wrong.length === 1, "答錯：謎題分下降（" + st.puzzles.rating + "），並加入錯題本");
+  ok(await page.locator("#tags").isVisible(), "答完後顯示主題標籤");
   await shot(page, "04-puzzle-wrong");
   const ratingAfterWrong = st.puzzles.rating;
   await page.locator("#retry").click(); await waitPlayerTurn(page);
@@ -106,19 +110,21 @@ async function solve(page) {
   await shot(page, "05-puzzle-correct");
   await page.locator("#next").click(); await page.waitForTimeout(400);
 
-  console.log("第 3 題：用提示（第一次圈出棋子，第二次箭咀）→ 不計分");
+  console.log("第 3 題：用提示（第一次圈出棋子，第二次箭頭）→ 不計分");
   await waitPlayerTurn(page);
   const before3 = (await stateOf(page)).puzzles;
+  const hintId = await page.evaluate(() => window.__chessopsDebug.puzzle().id);
   await page.locator("#hint").click(); await page.waitForTimeout(250);
   const circles1 = await page.locator(".cg-shapes circle").count();
   ok(circles1 >= 1, "提示 1：圈出要走的棋子");
   await page.locator("#hint").click(); await page.waitForTimeout(250);
-  ok(await page.locator(".cg-shapes line, .cg-shapes path, .cg-shapes polygon").count() > 0, "提示 2：箭咀顯示答案");
+  ok(await page.locator(".cg-shapes line, .cg-shapes path, .cg-shapes polygon").count() > 0, "提示 2：箭頭顯示答案");
   await shot(page, "06-puzzle-hint");
   ok(await solve(page), "用提示後答對");
   const after3 = (await stateOf(page)).puzzles;
   ok(after3.rating === before3.rating && after3.rated === before3.rated, "用提示的題目不計分（謎題分同已計分題數不變）");
   ok(/不計分/.test(await text(page, ".feedback")), "回饋顯示「不計分」");
+  ok((await stateOf(page)).puzzles.wrong.some(w => w.id === hintId), "用提示答對的題目都入錯題本");
   await page.locator("#next").click(); await page.waitForTimeout(400);
 
   for (const n of [4, 5]) {
@@ -136,18 +142,23 @@ async function solve(page) {
 
   console.log("錯題本：重做，連續答對 2 次移出");
   await page.locator("#back-home").click(); await page.waitForTimeout(300);
-  ok((await text(page, "#book")).includes("錯題本（1 題）"), "錯題本有 1 題");
+  ok((await text(page, "#book")).includes("錯題本（2 題）"), "錯題本有 2 題（答錯 1 題＋用提示 1 題）");
   await shot(page, "08-wrong-book");
   const ratingBeforeBook = (await stateOf(page)).puzzles.rating;
+  const nBook = st.puzzles.wrong.length;
   for (let i = 1; i <= 2; i++) {
     await page.locator("#book").click();
-    await page.waitForSelector("cg-board"); await waitPlayerTurn(page);
-    if (i === 1) await shot(page, "09-wrong-book-run");
-    ok(await solve(page), "錯題本第 " + i + " 次答對");
-    await page.locator("#next").click(); await page.waitForSelector("#back-home");
+    for (let k = 0; k < nBook; k++) {
+      await page.waitForSelector("cg-board"); await waitPlayerTurn(page);
+      ok(await page.locator("#tags").isVisible(), "錯題本題目一開始就顯示主題標籤");
+      if (i === 1 && k === 0) await shot(page, "09-wrong-book-run");
+      ok(await solve(page), "錯題本第 " + i + " 輪第 " + (k + 1) + " 題答對");
+      await page.locator("#next").click(); await page.waitForTimeout(500);
+    }
+    await page.waitForSelector("#back-home");
     await page.locator("#back-home").click(); await page.waitForTimeout(300);
     st = await stateOf(page);
-    if (i === 1) ok(st.puzzles.wrong.length === 1 && st.puzzles.wrong[0].streak === 1, "答對 1 次：連勝 1，仍在錯題本");
+    if (i === 1) ok(st.puzzles.wrong.length === nBook && st.puzzles.wrong.every(w => w.streak === 1), "答對 1 次：連勝 1，仍在錯題本");
   }
   ok(st.puzzles.wrong.length === 0, "連續答對 2 次後移出錯題本");
   ok(st.puzzles.rating === ratingBeforeBook, "錯題本練習不影響謎題分");
@@ -155,7 +166,7 @@ async function solve(page) {
   console.log("按主題練習（捉雙 Fork）");
   await page.locator("button[data-theme='fork']").click();
   await page.waitForSelector("cg-board"); await waitPlayerTurn(page);
-  ok((await text(page, ".found-list")).includes("捉雙 Fork"), "題目標籤包含「捉雙 Fork」");
+  ok(await page.locator("#tags").isVisible() && (await text(page, "#tags")).includes("捉雙 Fork"), "按主題練習：一開始就顯示標籤，包含「捉雙 Fork」");
   const p2 = page;                                    // 同一個分頁（sessionStorage 唔變，儲存唔會被清走）
   const go2 = async url => { await p2.goto(BASE + url); await p2.waitForTimeout(600); };
 

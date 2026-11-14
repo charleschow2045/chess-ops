@@ -20,14 +20,12 @@
 
   var VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
 
-  // 預設值（寫入 docs/stage0-report.md，等用戶睇過再調）
-  var P_BEST      = { 1: 0.10, 2: 0.20, 3: 0.30, 4: 0.45, 5: 0.60, 6: 0.75 };   // 用 Stockfish 最佳步嘅機率
-  var P_TAKE_FREE = { 1: 0.85, 2: 0.90, 3: 0.95 };                                // 見到白食嘅子，會食嘅機率
-  var BEST_SEARCH = { depth: 10 };                                                // 「最佳步」嘅搜尋深度（lite 單執行緒）
-  var LOWEST = {
-    7: { skill: 0, depth: 2 },                // Skill Level 0（最低），搜尋好淺
-    8: { elo: 1320, movetime: 150 }           // UCI_LimitStrength，UCI_Elo = 最低值 1320
-  };
+  // 所有比例同引擎設定都集中喺 js/config.js（PICKMOVE），要調就改嗰度
+  var CFG = (typeof module === "object" && module.exports) ? require("./config.js") : self.ChessOps.Config;
+  var P_BEST = CFG.PICKMOVE.P_BEST;
+  var P_TAKE_FREE = CFG.PICKMOVE.P_TAKE_FREE;
+  var BEST_SEARCH = CFG.PICKMOVE.BEST_SEARCH;
+  var LOWEST = CFG.PICKMOVE.LOWEST;
 
   function legalMoves(game) { return game.moves({ verbose: true }); }
 
