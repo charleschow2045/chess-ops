@@ -78,7 +78,7 @@ const waitMyTurn = (page, t) => page.waitForFunction(() => /輪到你/.test(docu
     // 悔棋：每次退雙方各一步，最多 3 次
     for (let i = 1; i <= 3; i++) {
       ok(await page.locator("#undo").isEnabled(), "悔棋第 " + i + " 次可用");
-      await page.locator("#undo").click(); await page.waitForTimeout(200);
+      await page.locator("#undo").click(); await page.waitForTimeout(500);
       ok(await page.locator("#moves .mv").count() === 0, "悔棋後退回雙方各一步（棋譜清空）");
       if (i < 3) { await move(page, "d2", "d4"); await waitMyTurn(page); }
     }
@@ -241,6 +241,19 @@ const waitMyTurn = (page, t) => page.waitForFunction(() => /輪到你/.test(docu
     await page.locator("#start").click(); await page.waitForSelector("cg-board");
     await waitMyTurn(page, 30000);
     ok(await page.locator("#moves .mv").count() === 1, "引擎無回應，電腦改用隨機步，遊戲繼續");
+  });
+
+  await scenario(browser, "慢網絡：引擎載入提示消失令棋盤移位後，點擊仍然正確（Chessground 位置快取）", null, async page => {
+    await page.route("**/stockfish-19-lite-single.wasm", async r => { await new Promise(x => setTimeout(x, 2500)); r.continue(); });
+    await page.goto(BASE + "play.html"); await page.waitForTimeout(500);
+    await page.locator("button[data-level='2']").click(); await page.locator("button[data-color='w']").click();
+    await page.locator("#start").click(); await page.waitForSelector("cg-board");
+    const top0 = (await rect(page)).y;
+    await page.waitForFunction(() => !document.querySelector("#engine-box .card"), null, { timeout: 30000 });
+    await page.waitForTimeout(300);
+    ok((await rect(page)).y < top0 - 20, "引擎提示消失後棋盤向上移位（" + Math.round(top0) + " → " + Math.round((await rect(page)).y) + "）");
+    await move(page, "e2", "e4");
+    ok(await page.locator("#moves .mv").count() >= 1, "移位之後第一次點擊走棋仍然成功");
   });
 
   await browser.close();

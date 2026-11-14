@@ -66,6 +66,10 @@ export function createRawBoard(el, extra = {}) {
   edgeLabels(ranks, files, extra.orientation);
   const cg = Chessground(holder, Object.assign(baseConfig(squareNamesSetting()), extra));
   cg.setEdgeLabels = (orientation) => edgeLabels(ranks, files, orientation);
+  // Chessground 會快取棋盤位置；頁面上方嘅內容改變（例如引擎載入提示消失）會令棋盤移位，快取就會過期，點擊錯位。
+  // 每次按下／觸碰棋盤前先清走快取（捕獲階段，早過 Chessground 自己嘅處理）。
+  const refreshBounds = () => { try { cg.state.dom.bounds.clear(); } catch (e) { /* 忽略 */ } };
+  ["mousedown", "touchstart"].forEach(t => el.addEventListener(t, refreshBounds, true));
   return cg;
 }
 
