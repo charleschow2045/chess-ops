@@ -3,8 +3,8 @@
 俾小五學生用 iPad 直向玩嘅國際象棋學習 App，目標係提升 chess.com 水平（主要問題：送子、睇漏）。
 
 - 網址：https://charleschow2045.github.io/chess-ops/
-- 狀態：**第 3 階段（對電腦下棋、賽後檢討）**。走棋前三問、開局、殘局、我的對局未開始。
-- 報告：[第 0 階段](docs/stage0-report.md)、[第 1 階段](docs/stage1-report.md)、[題目清單](docs/stage1-content.md)、[第 2 階段](docs/stage2-report.md)、[謎題抽查](docs/stage2-content.md)、[第 3 階段](docs/stage3-report.md)　第三方授權：[docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)
+- 狀態：**第 4 階段（走棋前三問、開局訓練、檢討改良）**。殘局、我的對局未開始。
+- 報告：[第 0 階段](docs/stage0-report.md)、[第 1 階段](docs/stage1-report.md)、[題目清單](docs/stage1-content.md)、[第 2 階段](docs/stage2-report.md)、[謎題抽查](docs/stage2-content.md)、[第 3 階段](docs/stage3-report.md)、[第 4 階段](docs/stage4-report.md)、[第 4 階段題目清單](docs/stage4-content.md)　第三方授權：[docs/THIRD_PARTY.md](docs/THIRD_PARTY.md)
 
 ## 授權
 
@@ -21,7 +21,7 @@
 
 ```
 index.html          首頁（7 個模組入口；「規則快測與小遊戲」「戰術謎題」已開放）
-puzzles.html play.html settings.html   戰術謎題、對電腦下棋（含賽後檢討）、設定（顯示格名）
+puzzles.html play.html three.html openings.html settings.html   戰術謎題、對電腦下棋（含賽後檢討）、設定（顯示格名）
 rules.html quiz.html game-*.html   規則快測與 4 個小遊戲
 dev.html            開發者頁：測試頁同設計預覽連結
 css/                theme.css（設計 A token）、board.css、test.css

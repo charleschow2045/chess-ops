@@ -48,8 +48,8 @@ async function fresh(ctx, url) {
 
   console.log("首頁");
   let page = await fresh(ctx, "index.html");
-  ok(await page.locator(".mod.soon").count() === 4, "4 個模組顯示「即將推出」");
-  ok(await page.locator("a.mod").count() === 3, "有 3 個模組可以進入（規則快測、戰術謎題、對電腦下棋）");
+  ok(await page.locator(".mod.soon").count() === 2, "2 個模組顯示「即將推出」");
+  ok(await page.locator("a.mod").count() === 5, "有 5 個模組可以進入");
   await shot(page, "01-home");
   await page.close();
 

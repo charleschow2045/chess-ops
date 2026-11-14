@@ -21,6 +21,10 @@
     <span class="txt"><b>顯示格名</b><span class="desc">開啟後，棋盤每一格都會顯示小寫格名（例如 e4）。預設關閉，棋盤邊永遠有 a–h、1–8 座標。</span></span>
     <input class="switch" type="checkbox" id="square-names" role="switch">
   </label>
+  <label class="set-row" style="margin-top:12px">
+    <span class="txt"><b>對局中顯示三問提醒</b><span class="desc">輪到你走棋時，棋盤上方顯示一行提示：先想三問（對方想做甚麼？我有機會嗎？這步安全嗎？）。只是提醒，不會替你判斷。預設開啟。</span></span>
+    <input class="switch" type="checkbox" id="three-reminder" role="switch">
+  </label>
   <p class="muted" id="saved" aria-live="polite"></p>
 </main>
 <script src="js/state.js"></script>
