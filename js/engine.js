@@ -1,6 +1,6 @@
 /*
  * Stockfish 引擎封裝（Web Worker，lite 單執行緒）。只喺瀏覽器用。
- *   const e = new ChessOps.Engine("vendor/stockfish/stockfish-18-lite-single.js");
+ *   const e = new ChessOps.Engine("vendor/stockfish/stockfish-19-lite-single.js");
  *   const t = await e.init();                       // → { workerStartMs, uciokMs, readyMs, totalMs, options:[...] }
  *   const r = await e.bestMove(fen, {depth:10});    // 回傳 uci 字串；e.lastInfo 有 { ms, depth, nodes }
  * search：{ depth, movetime, skill（Skill Level 0–20）, elo（UCI_Elo；有就開 UCI_LimitStrength） }

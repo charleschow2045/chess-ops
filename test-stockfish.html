@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>Stockfish 測試</title>
 <link rel="stylesheet" href="css/test.css">
 </head>
@@ -10,7 +11,7 @@
 <div class="page">
   <div class="topbar"><a class="btn-back" href="./">‹ 返回</a></div>
   <h1>Stockfish 引擎測試</h1>
-  <p class="muted">Stockfish.js 18 lite 單執行緒（Web Worker）。請用 iPad 撳「全部測試」，等數十秒，然後撳「複製結果」貼俾我。</p>
+  <p class="muted">Stockfish.js 19 lite 單執行緒（Web Worker）。請用 iPad 撳「全部測試」，等數十秒，然後撳「複製結果」貼俾我。</p>
 
   <div class="row">
     <button class="btn primary" id="runAll">全部測試</button>
@@ -39,7 +40,7 @@ import { Chess } from "./vendor/chess.js/chess.esm.js";
 
 const { Engine, POSITIONS, PickMove } = window.ChessOps;
 const $ = id => document.getElementById(id);
-const ENGINE_URL = "vendor/stockfish/stockfish-18-lite-single.js";
+const ENGINE_URL = "vendor/stockfish/stockfish-19-lite-single.js";
 const results = { env: {}, load: null, best: [], levels: [] };
 let engine = null;
 
@@ -59,7 +60,7 @@ async function load() {
   const e = new Engine(ENGINE_URL);
   const t = await e.init();
   engine = e;
-  const size = await fetch("vendor/stockfish/stockfish-18-lite-single.wasm").then(r => r.blob()).then(b => b.size).catch(() => 0);   // 載入完之後先量，唔影響計時
+  const size = await fetch("vendor/stockfish/stockfish-19-lite-single.wasm").then(r => r.blob()).then(b => b.size).catch(() => 0);   // 載入完之後先量，唔影響計時
   const uciOpts = ["Skill Level", "UCI_LimitStrength", "UCI_Elo", "Hash", "Threads"].map(n => (t.options.find(o => o.startsWith("option name " + n + " ")) || n + "（未找到）").replace("option name ", ""));
   results.load = { wasmBytes: size, workerStartMs: t.workerStartMs, uciokMs: t.uciokMs, readyMs: t.readyMs, options: uciOpts };
   $("loadResult").innerHTML = "wasm 大小：" + (size / 1048576).toFixed(2) + " MB<br>Worker 建立：" + t.workerStartMs + " ms<br>引擎 uciok：" + t.uciokMs + " ms<br>引擎 readyok（可以用）：<b>" + t.readyMs + " ms</b><br><span class='muted'>" + uciOpts.join("<br>") + "</span>";
