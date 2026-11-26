@@ -200,7 +200,7 @@ async function playWithEngine(page, maxMoves) {
   }, async page => {
     await page.route("**/data/three.js", async route => {
       const resp = await route.fetch(); let body = await resp.text();
-      body = body.replace("return [", "return (function (a) { return a.filter(function (q) { return q.theme === 'mateThreat'; }); })([").replace(/\n  \];\n/, "\n  ]);\n");
+      body = body.replace("return [", "return (function (a) { return a.filter(function (q) { return q.theme === 'mateThreat'; }); })([").replace(/(\r?\n)  \];(\r?\n)/, "$1  ]);$2");
       await route.fulfill({ response: resp, body });
     });
   });

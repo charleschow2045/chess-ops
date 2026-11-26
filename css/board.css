@@ -63,13 +63,6 @@ cg-board {
 .score-box .big { font-size: 56px; font-weight: 900; color: var(--gold); line-height: 1.1; }
 
 /* App 內對話框 */
-.dlg-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, .66); display: flex; align-items: center; justify-content: center; z-index: 120; padding: 16px; }
-.dlg-box { background: var(--surface); border-radius: var(--radius); padding: 22px 22px 18px; max-width: 520px; width: 100%; text-align: center; box-shadow: 0 10px 40px rgba(0, 0, 0, .5); }
-.dlg-box h3 { margin: 0 0 8px; font-size: 22px; }
-.dlg-box p { margin: 0 0 14px; font-size: 17px; color: var(--text); }
-.dlg-big { font-size: 56px; line-height: 1.1; color: var(--gold); font-weight: 900; margin-bottom: 4px; }
-.dlg-btns { display: flex; gap: 10px; flex-wrap: wrap; }
-.dlg-btns .btn { flex: 1 1 160px; }
 
 /* 對電腦下棋 */
 .player-row { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 2px 4px; font-size: 16px; font-weight: 700; }

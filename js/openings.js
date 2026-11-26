@@ -133,6 +133,7 @@ function practice(route) {
       st = OL.applyRun(r, clean);
       s.openings.routes[route.id] = st;
     });
+    CO.Activity.log("mini");
     status.textContent = "路線完成";
     CO.Feedback.show(fb, { ok: clean, title: clean ? (st.mastered && st.streak === NEED ? "已掌握這條路線！" : "全對！") : "完成，但這次走錯了 " + mistakes + " 次",
       text: clean ? "連續全對 " + st.streak + " / " + NEED + " 次" + (st.mastered ? "，已掌握。" : "，再練 " + (NEED - st.streak) + " 次就掌握。") : "連續全對次數歸零，再練習一次吧。" });

@@ -488,13 +488,13 @@ test("已刪除「自己寫」棋盤；Stockfish 已升級到 19（18 檔案不�
     ok(!/board-custom|CustomBoard|stockfish-18/.test(src), path.relative(ROOT, f) + " 仍有舊引用");
   }
 });
-test("首頁：7 個模組，其中 6 個有連結（規則快測、走棋前三問、戰術謎題、對電腦下棋、開局、殘局），其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
+test("首頁：7 個模組，全部有連結（規則快測、走棋前三問、戰術謎題、對電腦下棋、開局、殘局、我的對局）；首頁沒有假數字（稱號／任務／連續日數）", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
   eq(mods.length, 7);
-  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "走棋前三問", "戰術謎題 Tactics", "對電腦下棋", "開局 Openings", "殘局 Endgames"]);
+  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "走棋前三問", "戰術謎題 Tactics", "對電腦下棋", "開局 Openings", "殘局 Endgames", "我的對局 My Games"]);
   eq(new Set(mods.map(m => m.icon)).size, 7, "7 個模組要用 7 個不同圖示");
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8") + fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
-  ok(!/稱號|連續|今日任務|經驗/.test(html), "首頁不應有稱號卡／任務／連續日數");
+  ok(!/經驗/.test(html) && html.includes("Daily.titleInfo") && html.includes("Daily.status"), "首頁嘅稱號、任務、連續日數全部由 js/daily.js 用真實數據計出（第 6 階段起）；冇「經驗值」");
 });
 
 /* ======================= 第 2 階段新增測試 ======================= */
@@ -684,14 +684,14 @@ test("謎題儲存：done 最多 2,000（保留最近）、history 最多 50、�
   const s = State.normalizeState({ puzzles: { rating: 815, rated: 12, done: ["aaaaa", "bbbbb"], wrong: [{ id: "ccccc", r: 1000, streak: 1 }], history: [{ id: "aaaaa", ok: true, hint: true, rated: false, theme: "pin", delta: 0 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
   eq(State.defaultState().puzzles, { rating: 700, rated: 0, done: [], wrong: [], history: [] });
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("首頁：「戰術謎題」入口已開放並顯示真實謎題分；puzzles.html 引用嘅檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html", "mygames.html"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.puzzles.rating"), "首頁要用儲存嘅謎題分");
-  ok(!/經驗|稱號|連續日數/.test(home));
+  ok(!/經驗/.test(home) && home.includes("Daily.titleInfo"));
   const html = fs.readFileSync(path.join(ROOT, "puzzles.html"), "utf8");
   for (const f of ["js/puzzle-logic.js", "js/puzzles.js", "js/state.js"]) ok(html.includes(f), "puzzles.html 應引用 " + f);
 });
@@ -1074,7 +1074,7 @@ test("儲存（play 欄位）：白名單清洗、最近 20 局、不存分析�
   eq(n.recent[0].blunders, null); eq(n.recent[1].blunders, 2); eq(n.recent[1].reason, "draw", "不明原因會被清洗");
   const s = State.normalizeState({ playLevel: 5, play: { levels: { 5: { w: 3, d: 0, l: 1, streak: 2, lstreak: 0 } }, current: { level: 5, color: "b", moves: ["e2e4"], undos: 1, hints: 2, usedUndo: true, usedHint: true }, recent: [{ date: "2026-11-14", level: 5, color: "b", result: "loss", reason: "resign", pgn: "1. e4 *", blunders: 3, plies: 1 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("進行中對局：保存（localStorage）→ 恢復 → 重播出同一個局面；中途離開後可以繼續", () => {
   const store = {};
@@ -1170,7 +1170,7 @@ test("對電腦下棋：用 App 內對話框（唔用 alert／confirm／prompt�
 });
 test("首頁：「對電腦下棋」已開放，顯示目前級別（真實數字）；play.html 引用檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html", "mygames.html"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.playLevel") && home.includes("目前第 "));
   const html = fs.readFileSync(path.join(ROOT, "play.html"), "utf8");
@@ -1353,11 +1353,11 @@ test("儲存（three、openings 欄位）：白名單清洗、備份往返；首
   eq(o.routes["w-italian"], { streak: 2, mastered: true, runs: 5 }); eq(o.quiz, { plays: 3, best: 10 });
   const s = State.normalizeState({ three: { plays: 4, asked: 60, correct: 51 }, openings: { routes: { "b-scholar": { streak: 1, mastered: false, runs: 2 } }, quiz: { plays: 1, best: 8 } } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.three.plays") && home.includes("homeState.openings.routes"), "首頁用儲存嘅真數字");
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html", "mygames.html"]);
 });
 test("頁面：three.html／openings.html 引用嘅檔案齊全；play.html 有載入 tactics.js", () => {
   const th = fs.readFileSync(path.join(ROOT, "three.html"), "utf8"), oh = fs.readFileSync(path.join(ROOT, "openings.html"), "utf8");
@@ -1617,7 +1617,7 @@ test("儲存（endgames 欄位）：預設、白名單清洗（未知 id、多�
   const s = State.normalizeState({ endgames: { pos: { "k2rk-3": { stars: 2, wins: 4, runs: 6, best: 5 }, "kpk-1": { stars: 3, wins: 1, runs: 1, best: 0 } } } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
   eq(State.normalizeState(s), s, "冪等");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("殘局頁面：endgames.html 引用檔案齊全（config、logic、data 次序正確）；首頁「殘局」入口顯示真實星數；殘局資料 id 全部可儲存", () => {
   const h = fs.readFileSync(path.join(ROOT, "endgames.html"), "utf8");
@@ -1632,6 +1632,350 @@ test("殘局頁面：endgames.html 引用檔案齊全（config、logic、data �
   const js = fs.readFileSync(path.join(ROOT, "js/endgames.js"), "utf8");
   ok(js.includes("CFG.HINT_LIMIT") && js.includes("CFG.DEFENDER") && js.includes("CFG.HINT"), "引擎設定來自 config.ENDGAME");
   ok(js.includes("白方能贏") && js.includes("只能和棋") && js.includes("判斷：這局面能贏嗎？") && js.includes("白方贏：把兵升變為后"), "王兵對王兩種課題文字");
+});
+
+/* ======================= 第 6 階段（稱號、每日任務、週報、備份、我的對局）新增測試 ======================= */
+const DAILY = require(path.join(ROOT, "js/daily.js"));
+const RPT = require(path.join(ROOT, "js/report-logic.js"));
+const MGL = require(path.join(ROOT, "js/mygames-logic.js"));
+const EGD6 = require(path.join(ROOT, "data/endgames.js"));
+const dt = (y, m, d, h, mi) => new Date(y, m - 1, d, h || 12, mi || 0);
+
+/* ---------- A：車殺王說明卡 ---------- */
+test("車殺王說明卡第 3 點已改為新句子，舊句子不再出現；其他說明卡不變（5 點）", () => {
+  const krk = EGD6.TOPICS.find(t => t.id === "krk");
+  eq(krk.steps.length, 5);
+  eq(krk.steps[2], "兩個王面對面（中間隔一格，叫做「對王」）時，輪到你走就用車將軍，對方的王只能後退一行。");
+  ok(!JSON.stringify(EGD6).includes("輪到對方走棋時，對方的王只能後退或讓開"), "舊句子不應再出現");
+});
+
+/* ---------- B：稱號 ---------- */
+function mkState(o) {
+  const s = State.defaultState();
+  s.puzzles.rating = o.puzzle === undefined ? 700 : o.puzzle; s.playLevel = o.play === undefined ? 3 : o.play;
+  const ids = State.OPENING_ROUTE_IDS;
+  ids.forEach((id, i) => { s.openings.routes[id].mastered = i < (o.routes || 0); });
+  if (o.rank !== undefined) s.rank.index = o.rank;
+  return s;
+}
+const titleOf = (o) => DAILY.titleInfo(mkState(o), { stars: o.stars || 0 }).index;
+test("稱號條件（config.TITLES）同指令完全一致：6 個稱號、各級數字", () => {
+  eq(CFG.TITLES.NAMES, ["入門棋手", "俱樂部棋手", "候選大師", "國際棋聯大師", "國際大師", "特級大師"]);
+  eq(CFG.TITLES.REQ[1], { mode: "any", conds: { puzzle: 800, play: 4 } });
+  eq(CFG.TITLES.REQ[2], { mode: "all", conds: { puzzle: 950, play: 5 } });
+  eq(CFG.TITLES.REQ[3], { mode: "all", conds: { puzzle: 1100, play: 6, stars: 40 } });
+  eq(CFG.TITLES.REQ[4], { mode: "all", conds: { puzzle: 1250, play: 7, routes: 4 } });
+  eq(CFG.TITLES.REQ[5], { mode: "all", conds: { puzzle: 1400, play: 8, stars: 70 } });
+});
+test("稱號計算：每個門檻上下（俱樂部：謎題分 800 或電腦第 4 級；其餘要全部達成；逐級取得）", () => {
+  eq(titleOf({}), 0);
+  eq(titleOf({ puzzle: 799, play: 3 }), 0); eq(titleOf({ puzzle: 800 }), 1); eq(titleOf({ puzzle: 700, play: 4 }), 1, "電腦第 4 級也可以");
+  eq(titleOf({ puzzle: 949, play: 5 }), 1); eq(titleOf({ puzzle: 950, play: 4 }), 1); eq(titleOf({ puzzle: 950, play: 5 }), 2);
+  eq(titleOf({ puzzle: 1100, play: 6, stars: 39 }), 2); eq(titleOf({ puzzle: 1099, play: 6, stars: 40 }), 2); eq(titleOf({ puzzle: 1100, play: 5, stars: 40 }), 2);
+  eq(titleOf({ puzzle: 1100, play: 6, stars: 40 }), 3);
+  eq(titleOf({ puzzle: 1250, play: 7, routes: 3, stars: 40 }), 3); eq(titleOf({ puzzle: 1249, play: 7, routes: 4, stars: 40 }), 3); eq(titleOf({ puzzle: 1250, play: 6, routes: 4, stars: 40 }), 3);
+  eq(titleOf({ puzzle: 1250, play: 7, routes: 4, stars: 40 }), 4);
+  eq(titleOf({ puzzle: 1400, play: 8, routes: 4, stars: 69 }), 4); eq(titleOf({ puzzle: 1399, play: 8, routes: 4, stars: 70 }), 4); eq(titleOf({ puzzle: 1400, play: 7, routes: 4, stars: 70 }), 4);
+  eq(titleOf({ puzzle: 1400, play: 8, routes: 4, stars: 70 }), 5);
+  eq(titleOf({ puzzle: 1400, play: 8, routes: 3, stars: 70 }), 3, "要逐級取得：未達國際大師（路線不足），特級大師唔會跳級");
+  eq(DAILY.titleInfo(mkState({ puzzle: 1400, play: 8, routes: 6, stars: 84 }), { stars: 84 }).next, null, "最高級冇下一級");
+});
+test("稱號卡進度：每個條件有「現值 / 目標」（例如謎題分 812 / 950）；俱樂部條件係任一項", () => {
+  const s = mkState({ puzzle: 812, play: 5, rank: 1 });
+  const i = DAILY.titleInfo(s, { stars: 12 });
+  eq(i.index, 1); eq(i.name, "俱樂部棋手"); eq(i.next.name, "候選大師"); eq(i.next.mode, "all");
+  eq(i.next.conds.map(c => c.label + " " + c.have + " / " + c.need), ["謎題分 812 / 950", "電腦級別 5 / 5"]);
+  eq(i.next.conds.map(c => c.ok), [false, true]);
+  const i0 = DAILY.titleInfo(mkState({}), { stars: 0 });
+  eq(i0.next.mode, "any"); eq(i0.next.conds.map(c => c.label + " " + c.have + " / " + c.need), ["謎題分 700 / 800", "電腦級別 3 / 4"]);
+  const i3 = DAILY.titleInfo(mkState({ puzzle: 1100, play: 6, stars: 40 }), { stars: 40 });
+  eq(i3.next.conds.map(c => c.label + " " + c.have + " / " + c.need), ["謎題分 1100 / 1250", "電腦級別 6 / 7", "已掌握開局路線 0 / 4"]);
+  const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8"), idx = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  ok(home.includes("App 內稱號，與國際棋聯正式稱號無關") && home.includes('class: "muted fine"'), "稱號卡有註明");
+  ok(/\.fine \{[^}]*font-size:\s*13px/.test(fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8")), "註明字體 13px（不細過 13px）");
+  ok(idx.includes('id="title-card"') && idx.includes('id="daily-card"'));
+});
+test("升稱號恭喜只出一次：高過「最高已恭喜稱號」先恭喜；標記後唔再出；唔會降低；rank 欄位係唯一新增嘅稱號儲存", () => {
+  const s = mkState({ puzzle: 950, play: 5 });                       // 候選大師（2）
+  eq(DAILY.titleCongrats(s, { stars: 0 }), 2);
+  DAILY.markCongratulated(s, 2);
+  eq(DAILY.titleCongrats(s, { stars: 0 }), null, "已恭喜過");
+  DAILY.markCongratulated(s, 1); eq(s.rank.index, 2, "唔會降低");
+  const s2 = State.normalizeState(JSON.parse(JSON.stringify(s)));
+  eq(DAILY.titleCongrats(s2, { stars: 0 }), null, "儲存再載入之後都唔會再恭喜");
+  s2.puzzles.rating = 1100; s2.playLevel = 6;
+  eq(DAILY.titleCongrats(s2, { stars: 40 }), 3, "再升級先再恭喜");
+  eq(DAILY.titleCongrats(mkState({}), { stars: 0 }), null, "入門棋手冇恭喜");
+  eq(State.defaultState().rank, { index: 0, xp: 0 });
+});
+
+/* ---------- C：每日任務、連續日數 ---------- */
+test("每日任務：謎題 5 題 + 1 個小練習；星期一、三、五、日加「對電腦下一局」；其他日子唔顯示", () => {
+  eq(CFG.DAILY, { PUZZLES: 5, PLAY_DAYS: [0, 1, 3, 5], KEEP_DAYS: 60, IDLE_MS: 120000 });
+  const names = { 23: "一", 24: "二", 25: "三", 26: "四", 27: "五", 28: "六", 29: "日" };
+  for (let d = 23; d <= 29; d++) {
+    const st = DAILY.status(State.defaultState(), dt(2026, 11, d));
+    const needPlay = [23, 25, 27, 29].includes(d);
+    eq(st.items.map(i => i.id), needPlay ? ["puzzles", "mini", "play"] : ["puzzles", "mini"], "星期" + names[d]);
+  }
+  const s = State.defaultState(), tue = dt(2026, 11, 24);
+  for (let i = 0; i < 4; i++) DAILY.apply(s, "puzzle", { ok: i % 2 === 0, delta: 3 }, tue);
+  eq(DAILY.status(s, tue).items.find(i => i.id === "puzzles").have, 4);
+  eq(DAILY.status(s, tue).done, false);
+  DAILY.apply(s, "mini", {}, tue); eq(DAILY.status(s, tue).done, false, "謎題未夠 5 題");
+  const r = DAILY.apply(s, "puzzle", { ok: true, delta: 3 }, tue);
+  eq([r.done, r.newlyDone], [true, true], "星期二：5 題 + 小練習就完成（唔使對局）");
+  ok(DAILY.status(s, tue).items.every(i => i.ok));
+  const mon = dt(2026, 11, 23), s2 = State.defaultState();
+  for (let i = 0; i < 5; i++) DAILY.apply(s2, "puzzle", { ok: true, delta: 0 }, mon);
+  DAILY.apply(s2, "mini", {}, mon);
+  eq(DAILY.status(s2, mon).done, false, "星期一要對局先完成");
+  eq(DAILY.apply(s2, "play", { result: "loss" }, mon).newlyDone, true, "輸咗都算下咗一局");
+});
+test("每日任務：任何一種小練習都計（三問、小遊戲、殘局、開局）；每日紀錄記錄勝和負、謎題分變化、殘局新增星數", () => {
+  const d = dt(2026, 11, 24), s = State.defaultState();
+  DAILY.apply(s, "mini", {}, d);                                       // 例如三問一輪／小遊戲／殘局一題／開局路線一次，全部經同一個 "mini"
+  DAILY.apply(s, "eg", { gain: 2 }, d); DAILY.apply(s, "eg", { gain: -5 }, d);
+  DAILY.apply(s, "play", { result: "win" }, d); DAILY.apply(s, "play", { result: "draw" }, d); DAILY.apply(s, "play", { result: "loss" }, d);
+  DAILY.apply(s, "puzzle", { ok: true, delta: 8 }, d); DAILY.apply(s, "puzzle", { ok: false, delta: -6 }, d);
+  eq(s.daily.days["2026-11-24"], { puz: 2, puzOk: 1, pdelta: 2, mini: 1, w: 1, d: 1, l: 1, eg: 2, sec: 0, done: false });
+  let threw = false; try { DAILY.apply(s, "nope", {}, d); } catch (e) { threw = true; } ok(threw, "未登記活動會拋錯");
+  for (const f of ["js/game-check.js", "js/game-mate1.js", "js/game-maze.js", "js/game-pawnwar.js", "js/three.js", "js/openings.js", "js/endgames.js"]) ok(fs.readFileSync(path.join(ROOT, f), "utf8").includes('CO.Activity.log("mini")'), f + " 要記錄小練習");
+  ok(fs.readFileSync(path.join(ROOT, "js/play.js"), "utf8").includes('CO.Activity.log("play"') && fs.readFileSync(path.join(ROOT, "js/puzzles.js"), "utf8").includes('CO.Activity.log("puzzle"'));
+});
+test("每日任務跨午夜：23:59 同 00:01 係兩個日子，各自計算；日期用本機時間", () => {
+  const s = State.defaultState();
+  DAILY.apply(s, "puzzle", { ok: true, delta: 0 }, dt(2026, 11, 24, 23, 59));
+  DAILY.apply(s, "puzzle", { ok: true, delta: 0 }, dt(2026, 11, 25, 0, 1));
+  eq(Object.keys(s.daily.days).sort(), ["2026-11-24", "2026-11-25"]);
+  eq(DAILY.status(s, dt(2026, 11, 25, 0, 30)).items[0].have, 1, "新一日重新由 0 計（只有 00:01 嗰題）");
+  eq(DAILY.status(s, dt(2026, 11, 24, 23, 59)).items[0].have, 1);
+  eq(DAILY.dateKey(new Date(2026, 0, 5, 0, 0, 1)), "2026-01-05"); eq(DAILY.dateKey(new Date(2026, 11, 31, 23, 59, 59)), "2026-12-31");
+  eq(DAILY.dateKey(DAILY.addDays(dt(2026, 12, 31), 1)), "2027-01-01"); eq(DAILY.dateKey(DAILY.addDays(dt(2026, 3, 1), -1)), "2026-02-28");
+});
+test("連續日數：連續完成 +1；隔一日冇完成重新計；同日重複完成唔重複計；顯示用「今日或昨日」先算", () => {
+  const s = State.defaultState();
+  const finish = d => { for (let i = 0; i < 5; i++) DAILY.apply(s, "puzzle", { ok: true, delta: 0 }, d); return DAILY.apply(s, "mini", {}, d); };
+  const tue = dt(2026, 11, 24), wed = dt(2026, 11, 25), thu = dt(2026, 11, 26);
+  // 避開要求對局嘅日子：星期二、四（星期三要對局）
+  eq(finish(tue).newlyDone, true); eq(s.streak, { count: 1, lastDay: "2026-11-24" });
+  DAILY.apply(s, "mini", {}, tue); eq(s.streak.count, 1, "同日再做唔會重複計");
+  for (let i = 0; i < 5; i++) DAILY.apply(s, "puzzle", { ok: true, delta: 0 }, wed); DAILY.apply(s, "mini", {}, wed);
+  eq(DAILY.status(s, wed).done, false, "星期三未對局");
+  DAILY.apply(s, "play", { result: "win" }, wed); eq(s.streak, { count: 2, lastDay: "2026-11-25" }, "連續第二日");
+  eq(DAILY.streakNow(s, thu), 2, "昨日完成，今日未做：仍然顯示 2");
+  eq(DAILY.streakNow(s, dt(2026, 11, 27)), 0, "隔咗一日（星期四冇完成）：顯示 0");
+  finish(dt(2026, 11, 28));                                            // 星期六完成（唔使對局）
+  eq(s.streak, { count: 1, lastDay: "2026-11-28" }, "中斷之後重新計");
+  eq(DAILY.streakNow(State.defaultState(), tue), 0);
+});
+test("每日紀錄只保留最近 60 日（apply 同儲存清洗都會裁剪；60 同 config 一致）", () => {
+  eq(State.DAILY_KEEP, CFG.DAILY.KEEP_DAYS); eq(CFG.DAILY.KEEP_DAYS, 60);
+  const s = State.defaultState();
+  for (let i = 0; i < 75; i++) DAILY.apply(s, "mini", {}, DAILY.addDays(dt(2026, 9, 1), i));
+  const keys = Object.keys(s.daily.days).sort();
+  eq(keys.length, 60); eq(keys[59], DAILY.dateKey(DAILY.addDays(dt(2026, 9, 1), 74))); eq(keys[0], DAILY.dateKey(DAILY.addDays(dt(2026, 9, 1), 15)));
+  const raw = { daily: { days: {} } };
+  for (let i = 0; i < 90; i++) raw.daily.days[DAILY.dateKey(DAILY.addDays(dt(2026, 6, 1), i))] = { puz: 1 };
+  const n = State.normalizeState(raw).daily.days;
+  eq(Object.keys(n).length, 60); ok(!("2026-06-01" in n) && ("2026-08-29" in n));
+  eq(Object.keys(State.normalizeState({ daily: { days: { "bad": { puz: 1 }, "2026-13": { puz: 1 }, "2026-11-01": { puz: 2, puzOk: 9, sec: 999999, junk: 1 } } } }).daily.days), ["2026-11-01"]);
+  eq(State.normalizeState({ daily: { days: { "2026-11-01": { puz: 2, puzOk: 9, sec: 999999, junk: 1 } } } }).daily.days["2026-11-01"], { puz: 2, puzOk: 2, pdelta: 0, mini: 0, w: 0, d: 0, l: 0, eg: 0, sec: 86400, done: false });
+});
+
+/* ---------- D：練習時間 ---------- */
+test("練習時間：只計前景而且有操作；停 2 分鐘冇操作就停止計；背景唔計；回到前景要再有操作", () => {
+  const tr = DAILY.createTracker(120000);
+  tr.activity(0);
+  for (let t = 10000; t <= 300000; t += 10000) tr.tick(t);
+  eq(tr.takeSeconds(), 120, "只計操作後 2 分鐘");
+  tr.activity(300000);
+  for (let t = 310000; t <= 360000; t += 10000) tr.tick(t);
+  eq(tr.takeSeconds(), 60);
+  tr.activity(360000); tr.visibility(380000, false);                   // 20 秒後切去背景
+  for (let t = 390000; t <= 600000; t += 10000) tr.tick(t);
+  eq(tr.takeSeconds(), 20, "背景時間唔計（之前 20 秒前景有計）");
+  tr.visibility(600000, true); tr.activity(600000);
+  for (let t = 610000; t <= 640000; t += 10000) tr.tick(t);
+  eq(tr.takeSeconds(), 40);
+  const t2 = DAILY.createTracker(120000);
+  for (let t = 0; t <= 100000; t += 10000) t2.tick(t);
+  eq(t2.takeSeconds(), 0, "完全冇操作就唔計");
+  t2.activity(100000); t2.activity(150000); t2.activity(200000);
+  for (let t = 210000; t <= 400000; t += 10000) t2.tick(t);
+  eq(t2.takeSeconds(), 200 - 100 + 120, "持續操作期間全部計，最後一次操作後再計 2 分鐘");
+  ok(CFG.DAILY.IDLE_MS === 120000);
+  const act = fs.readFileSync(path.join(ROOT, "js/activity.js"), "utf8");
+  ok(act.includes("visibilitychange") && act.includes("pagehide") && act.includes("IDLE_MS") && act.includes("pointerdown") && act.includes("keydown"), "瀏覽器端有監聽前景／離開／操作");
+});
+
+/* ---------- 週報 ---------- */
+test("家長週報：任務完成格仔、連續日數、練習分鐘、謎題題數／正確率／謎題分變化、大錯比較、殘局／開局／錯題本；總結只講數字", () => {
+  const s = State.defaultState(), today = dt(2026, 11, 29);   // 星期日
+  const put = (k, o) => { s.daily.days[k] = Object.assign(DAILY.emptyDay(), o); };
+  put("2026-11-22", { puz: 5, puzOk: 3, pdelta: 10, mini: 1, w: 1, sec: 600, done: true });       // 7 日之前（唔計，第 8 日）
+  put("2026-11-23", { puz: 5, puzOk: 4, pdelta: 12, mini: 1, w: 1, sec: 1200, done: true });
+  put("2026-11-24", { puz: 6, puzOk: 3, pdelta: -4, mini: 1, sec: 590, done: true, eg: 3 });
+  put("2026-11-26", { puz: 2, puzOk: 1, pdelta: 0, sec: 30 });
+  put("2026-11-27", { puz: 5, puzOk: 5, pdelta: 28, mini: 2, d: 1, l: 1, sec: 1800, done: true, eg: 2 });
+  s.streak = { count: 3, lastDay: "2026-11-28" };
+  s.puzzles.rating = 746; s.playLevel = 4;
+  s.openings.routes["w-italian"].mastered = true; s.openings.routes["b-scholar"].mastered = true;
+  s.puzzles.wrong = [{ id: "aaaaa", r: 700, streak: 0 }, { id: "bbbbb", r: 800, streak: 1 }];
+  s.play.recent = [{ date: "2026-11-28", level: 3, color: "w", result: "loss", reason: "resign", pgn: "", blunders: 4, plies: 30 }, { date: "2026-11-25", level: 3, color: "w", result: "win", reason: "checkmate", pgn: "", blunders: 1, plies: 30 },
+    { date: "2026-11-24", level: 3, color: "w", result: "win", reason: "checkmate", pgn: "", blunders: null, plies: 30 }, { date: "2026-11-20", level: 3, color: "w", result: "win", reason: "checkmate", pgn: "", blunders: 6, plies: 30 },
+    { date: "2026-11-10", level: 3, color: "w", result: "win", reason: "checkmate", pgn: "", blunders: 9, plies: 30 }];
+  const r = RPT.build(s, today, { stars: 12, starsAll: 84 });
+  eq(r.days.map(d => d.key), ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29"]);
+  eq(r.days.map(d => d.done), [true, true, false, false, true, false, false]); eq(r.doneDays, 3);
+  eq(r.days.map(d => d.minutes), [20, 10, 0, 1, 30, 0, 0]); eq(r.minutesTotal, Math.round((1200 + 590 + 30 + 1800) / 60));
+  eq(r.days[6].today, true); eq(r.days[0].weekday, "一"); eq(r.days[6].weekday, "日");
+  eq(r.streak, 3);
+  eq([r.puzzles.count, r.puzzles.ok, r.puzzles.accuracy, r.puzzles.change, r.puzzles.ratingNow, r.puzzles.ratingBefore], [18, 13, 72, 36, 746, 710], "11/22 唔計；pdelta 12 − 4 + 0 + 28 = 36");
+  eq([r.play.w, r.play.d, r.play.l, r.play.level], [1, 1, 1, 4]);
+  eq(r.play.avgBlunders, { avg: 2.5, games: 2 }, "本週只計已檢討（blunders 不是 null）嘅 11/23–11/29 對局"); eq(r.play.prevAvgBlunders, { avg: 6, games: 1 }, "上一個 7 日 11/16–11/22");
+  eq([r.endgames.gained, r.endgames.stars, r.endgames.starsAll], [5, 12, 84]); eq([r.openings.mastered, r.openings.total], [2, 6]); eq(r.wrongBook, 2);
+  eq(r.summary, "本週完成任務 3 天，練習 60 分鐘，做了 18 題謎題（正確率 72%），謎題分上升 36 分。");
+  ok(!/很好|加油|不錯|可惜|希望|建議|應該|太少|太多/.test(r.summary), "總結只講數字事實，唔作評語");
+  eq(RPT.build(State.defaultState(), today, {}).summary, "本週完成任務 0 天。", "冇資料：只講 0 天，唔作評語");
+  const down = State.defaultState(); down.daily.days["2026-11-29"] = Object.assign(DAILY.emptyDay(), { puz: 3, puzOk: 1, pdelta: -9, sec: 120 });
+  eq(RPT.build(down, today, {}).summary, "本週完成任務 0 天，練習 2 分鐘，做了 3 題謎題（正確率 33%），謎題分下降 9 分。");
+  const html = fs.readFileSync(path.join(ROOT, "report.html"), "utf8") + fs.readFileSync(path.join(ROOT, "js/report.js"), "utf8");
+  for (const f of ["js/report-logic.js", "js/report.js", "js/daily.js"]) ok(html.includes(f), "report.html 引用 " + f);
+  ok(fs.readFileSync(path.join(ROOT, "index.html"), "utf8").includes('href="report.html"'), "首頁頁底有「家長週報」入口");
+});
+
+/* ---------- E：備份與還原 ---------- */
+test("備份：匯出帶版本號、用 normalizeState 處理；匯入往返一致（包括 daily、mygames、endgames）；檔名帶日期", () => {
+  const s = State.normalizeState({ puzzles: { rating: 888 }, playLevel: 5, daily: { days: { "2026-11-24": { puz: 5, sec: 300, done: true } } }, rank: { index: 2, xp: 0 },
+    endgames: { pos: { "kqk-1": { stars: 3, wins: 1, runs: 1, best: 2 } } }, mygames: { user: "someone", puzzles: [{ id: "mabc123", fen: "8/8/8/8/8/8/8/K1k5 w - - 0 1", best: "a1a2", bestSan: "Ka2", cp: 50, side: "w", date: "2026-11-20" }], recent: [] } });
+  const text = State.exportBackup(s, new Date(2026, 10, 27, 10, 0));
+  const obj = JSON.parse(text);
+  eq([obj.app, obj.version, typeof obj.exportedAt], ["chessops", State.SCHEMA_VERSION, "string"]); eq(State.SCHEMA_VERSION, 2);
+  eq(State.parseBackup(text), s, "往返一致");
+  eq(State.parseBackup(State.exportBackup({ puzzles: { rating: 99999 }, evil: 1 })).puzzles.rating, 3000, "匯出經過 normalizeState");
+  eq(State.backupFileName(new Date(2026, 10, 5)), "chessops-backup-2026-11-05.json"); eq(State.backupFileName(new Date(2027, 0, 31)), "chessops-backup-2027-01-31.json");
+  eq(State.sizeBytes("abc"), 3); eq(State.sizeBytes("棋"), 3, "UTF-8：中文 3 位元組");
+  const kb = State.sizeBytes(JSON.stringify(State.defaultState()));
+  ok(kb > 200 && kb < 4000, "預設資料大小 " + kb);
+});
+test("匯入備份：格式或版本不對會拋出清楚原因（書面語）而且唔會寫入；舊／缺欄位資料補預設值", () => {
+  const good = JSON.parse(State.exportBackup(State.defaultState()));
+  const bad = (v, re) => { let msg = ""; try { State.parseBackup(typeof v === "string" ? v : JSON.stringify(v)); } catch (e) { msg = e.message; } ok(re.test(msg), "應拒絕並說明：" + re + " 得到：" + msg); };
+  bad("", /沒有內容/); bad("   ", /沒有內容/); bad("{不是 json", /不是有效的 JSON/);
+  bad({ version: 2, state: {} }, /不是「國際象棋 Ops」的備份/); bad(Object.assign({}, good, { app: "other" }), /不是「國際象棋 Ops」的備份/); bad([1, 2], /不是「國際象棋 Ops」的備份/);
+  bad(Object.assign({}, good, { version: undefined }), /沒有有效的版本號/); bad(Object.assign({}, good, { version: "2" }), /沒有有效的版本號/); bad(Object.assign({}, good, { version: 1.5 }), /沒有有效的版本號/); bad(Object.assign({}, good, { version: 0 }), /沒有有效的版本號/);
+  bad(Object.assign({}, good, { version: 99 }), /較新的版本（版本 99）/);
+  bad(Object.assign({}, good, { state: null }), /沒有資料/); bad(Object.assign({}, good, { state: [] }), /沒有資料/);
+  bad("x".repeat(3000001), /太大/);
+  const old = State.parseBackup(JSON.stringify({ app: "chessops", version: 1, state: { puzzles: { rating: 900 } } }));
+  eq(old.puzzles.rating, 900); eq(old.daily, { days: {} }); eq(old.mygames, { user: "", puzzles: [], recent: [] }, "版本 1 備份：新欄位補預設值");
+  eq(State.parseBackup(JSON.stringify({ app: "chessops", version: 2, state: { junk: 1, playLevel: 99 } })).playLevel, 8, "經 normalizeState 清洗");
+  const src = fs.readFileSync(path.join(ROOT, "js/settings.js"), "utf8");
+  const iParse = src.indexOf("State.parseBackup"), iDlg = src.indexOf("Dialog.show", iParse), iSave = src.indexOf("State.saveState(parsed)");
+  ok(iParse > 0 && iDlg > iParse && iSave > iDlg, "先檢查格式 → App 內對話框確認 → 先寫入");
+  ok(src.includes("會覆蓋這部裝置上的現有紀錄") && src.includes('catch (e) { say("無法匯入：" + e.message') && !/\balert\(|\bconfirm\(/.test(src), "確認文字、錯誤顯示原因、唔用 alert／confirm");
+  ok(src.includes("navigator.clipboard") && src.includes("State.backupFileName") && src.includes("a.download") && src.includes("State.storedBytes"), "匯出下載、複製後備、顯示資料大小");
+  const html = fs.readFileSync(path.join(ROOT, "settings.html"), "utf8");
+  for (const id of ["export", "copy-backup", "import-file", "import-text", "import-go", "data-size"]) ok(html.includes('id="' + id + '"'), "settings.html 有 #" + id);
+});
+
+/* ---------- F：我的對局 ---------- */
+const mkGame = (o) => Object.assign({ url: "https://www.chess.com/game/live/1", pgn: '[Event "Live Chess"]\n\n1. e4 e5 1-0', time_class: "rapid", rules: "chess", end_time: Math.floor(Date.UTC(2026, 10, 20) / 1000), uuid: "u1",
+  white: { username: "Kid_User", result: "win" }, black: { username: "Other", result: "resigned" } }, o);
+test("我的對局：篩選（最近 30 日、只取中速棋同快棋、標準規則、有 PGN、最多 20 局、最新優先）；顏色同結果判斷", () => {
+  eq(CFG.MYGAMES, { MAX_GAMES: 20, DAYS: 30, TIME_CLASSES: ["rapid", "blitz"], MAX_PUZZLES: 50, ACCEPT_DROP: 0.05, RECENT: 5 });
+  const now = Date.UTC(2026, 10, 27), day = 86400;
+  const games = [
+    mkGame({ uuid: "a", end_time: now / 1000 - 1 * day }),                                  // 合格（執白，贏）
+    mkGame({ uuid: "b", time_class: "blitz", end_time: now / 1000 - 2 * day, white: { username: "Other", result: "checkmated" }, black: { username: "kid_user", result: "win" } }),   // 執黑，贏（用戶名大細楷唔同）
+    mkGame({ uuid: "c", time_class: "bullet" }), mkGame({ uuid: "d", time_class: "daily" }),      // 唔取
+    mkGame({ uuid: "e", rules: "chess960" }), mkGame({ uuid: "f", pgn: undefined }),              // 唔取
+    mkGame({ uuid: "g", end_time: now / 1000 - 31 * day }),                                       // 超過 30 日
+    mkGame({ uuid: "h", white: { username: "A", result: "win" }, black: { username: "B", result: "x" } }),   // 唔係呢個用戶
+    mkGame({ uuid: "i", end_time: now / 1000 - 3 * day, white: { username: "Kid_User", result: "timeout" }, black: { username: "Other", result: "win" } }),   // 輸（超時）
+    mkGame({ uuid: "j", end_time: now / 1000 - 4 * day, white: { username: "Kid_User", result: "agreed" }, black: { username: "Other", result: "agreed" } })   // 和
+  ];
+  const out = MGL.filterGames(games, "Kid_User", now);
+  eq(out.map(g => g.id), ["a", "b", "i", "j"], "最新優先，其他全部過濾");
+  eq(out.map(g => g.color), ["w", "b", "w", "w"]); eq(out.map(g => g.result), ["win", "win", "loss", "draw"]); eq(out[1].opp, "Other"); eq(out[0].tc, "rapid");
+  const many = []; for (let i = 0; i < 30; i++) many.push(mkGame({ uuid: "m" + i, end_time: now / 1000 - i * 3600 }));
+  const lim = MGL.filterGames(many, "Kid_User", now); eq(lim.length, 20); eq(lim[0].id, "m0");
+  eq(MGL.cleanUser(" Kid_User "), "Kid_User"); eq(MGL.cleanUser("ab"), ""); eq(MGL.cleanUser("a b c"), ""); eq(MGL.cleanUser("x".repeat(26)), "");
+  eq(MGL.archivesUrl("Kid_User"), "https://api.chess.com/pub/player/kid_user/games/archives");
+});
+test("我的對局：PGN 解析（chess.com 格式含標籤同時間註解）、判斷執邊方；特殊局面／變體／太短會拒絕；貼上多局可以切開", () => {
+  const g = new Chess(); ["e4", "e5", "Nf3", "Nc6", "Bb5", "a6"].forEach(s => g.move(s));
+  g.setHeader("White", "Kid_User"); g.setHeader("Black", "Rival"); g.setHeader("Result", "0-1"); g.setHeader("UTCDate", "2026.11.20");
+  const pgn = g.pgn().replace("1. e4", "1. e4 {[%clk 0:09:58.9]}");
+  const r = MGL.parsePgn(Chess, pgn, "kid_user");
+  eq(r.ucis, ["e2e4", "e7e5", "g1f3", "b8c6", "f1b5", "a7a6"]); eq([r.color, r.result, r.date, r.white, r.black], ["w", "loss", "2026-11-20", "Kid_User", "Rival"]);
+  eq(MGL.parsePgn(Chess, pgn, "rival").color, "b"); eq(MGL.parsePgn(Chess, pgn, "rival").result, "win"); eq(MGL.parsePgn(Chess, pgn, "").color, null, "對唔到用戶名：由用戶揀");
+  const rejects = (p, re) => { let m = ""; try { MGL.parsePgn(Chess, p, "x"); } catch (e) { m = e.message; } ok(re.test(m), "應拒絕：" + m); };
+  rejects('[SetUp "1"]\n[FEN "8/8/8/8/8/8/8/K1k5 w - - 0 1"]\n\n1. Ka2 Kd2', /特殊局面/); rejects('[Variant "Chess960"]\n\n1. e4 e5', /變體/); rejects("1. e4", /步數太少|PGN 格式/); rejects("垃圾文字", /PGN/);
+  const two = pgn + "\n\n" + pgn.replace("Rival", "Second");
+  eq(MGL.splitPgns(two).length, 2); eq(MGL.splitPgns("").length, 0);
+});
+test("我的謎題：由大錯產生（局面＝走錯之前、答案＝引擎最佳步）；最多 50 題；重複唔加；移除；其他走法勝率跌幅 < 0.05 當啱", async () => {
+  // 假分析器：黑方 2…Nf6?? 錯過 Qh4#
+  const ucis = ["f2f3", "e7e5", "g2g4", "g8f6"];
+  const analyze = async fen => fen.startsWith("rnbqkbnr/pppp1ppp/8/4p3/6P1/5P2/PPPPP2P/RNBQKBNR b") ? { cp: null, mate: 1, best: "d8h4" } : { cp: 0, mate: null, best: "a2a3" };
+  const res = await RV.reviewGame(Chess, ucis, "b", analyze, {});
+  const bl = res.moves.find(m => m.cls === "blunder");
+  ok(bl, "有大錯"); eq(bl.reason, "missedMate");
+  const p = MGL.puzzleFromMove(bl, "b", "2026-11-20");
+  ok(/^m[0-9a-z]{4,12}$/.test(p.id), "id 格式 " + p.id);
+  eq([p.fen, p.best, p.bestSan, p.cp, p.side, p.date], [bl.fenBefore, "d8h4", "Qh4#", 1000, "b", "2026-11-20"]);
+  eq(MGL.puzzleFromMove(bl, "b", "x").id, p.id, "同一局面同答案 → 同一個 id");
+  eq(MGL.puzzleFromMove({ fenBefore: "x", bestUci: null }, "b", ""), null, "冇引擎建議就唔產生");
+  let list = [];
+  let r = MGL.addPuzzle(list, p); eq(r.status, "added"); list = r.list; eq(list.length, 1);
+  eq(MGL.addPuzzle(list, p).status, "dup"); eq(MGL.addPuzzle(list, p).list.length, 1);
+  let full = []; for (let i = 0; i < 50; i++) full = MGL.addPuzzle(full, Object.assign({}, p, { id: "m" + String(100000 + i) })).list;
+  eq(full.length, 50); eq(MGL.addPuzzle(full, p).status, "full"); eq(MGL.addPuzzle(full, p).list.length, 50, "最多 50 題");
+  eq(MGL.removePuzzle(full, "m100000").length, 49); eq(list.length, 1, "不改動傳入陣列");
+  // 其他走法：勝率跌幅 < 0.05 當啱
+  ok(MGL.isAcceptable(100, 90), "差 10 cp 當啱"); ok(MGL.isAcceptable(100, 100)); ok(MGL.isAcceptable(300, 300));
+  ok(!MGL.isAcceptable(100, -100), "差 200 cp 唔啱"); ok(!MGL.isAcceptable(1000, 0), "將死變 0 唔啱");
+  ok(MGL.isAcceptable(0, -20), "約 20 cp 內當啱（勝率跌幅約 0.04）"); ok(!MGL.isAcceptable(0, -40), "40 cp 唔啱（勝率跌幅約 0.07）");
+  const e = MGL.summaryEntry({ date: "2026-11-20", opp: "Rival", color: "b", result: "loss", tc: "rapid", plies: 40 }, { blunder: 2, mistake: 1, inaccuracy: 4 });
+  eq(e, { date: "2026-11-20", opp: "Rival", color: "b", result: "loss", tc: "rapid", plies: 40, blunders: 2, mistakes: 1, inaccuracies: 4 });
+});
+test("儲存（mygames 欄位）：用戶名、我的謎題（最多 50、id／FEN／答案要有效、重複刪走）、最近 5 局摘要；白名單清洗；備份往返", () => {
+  eq(State.defaultState().mygames, { user: "", puzzles: [], recent: [] });
+  const mk = i => ({ id: "m" + String(100000 + i), fen: "8/8/8/8/8/8/8/K1k5 w - - 0 1", best: "a1a2", bestSan: "Ka2", cp: 5000, side: "b", date: "2026-11-20", junk: 1 });
+  const raw = { mygames: { user: "Kid_User", puzzles: [].concat(Array.from({ length: 60 }, (_, i) => mk(i)), [{ id: "bad", fen: "x", best: "zz" }, mk(0)]), recent: Array.from({ length: 9 }, (_, i) => ({ date: "2026-11-2" + (i % 10), opp: "Rival", color: "b", result: "win", tc: "blitz", plies: 30 + i, blunders: 1, mistakes: 2, inaccuracies: 3, junk: 1 })), junk: 1 } };
+  const n = State.normalizeState(raw).mygames;
+  eq(Object.keys(n).sort(), ["puzzles", "recent", "user"]); eq(n.user, "Kid_User"); eq(n.puzzles.length, 50, "最多 50 題"); eq(n.recent.length, 5, "最多 5 局摘要");
+  eq(n.puzzles[0], { id: "m100000", fen: "8/8/8/8/8/8/8/K1k5 w - - 0 1", best: "a1a2", bestSan: "Ka2", cp: 1000, side: "w", date: "2026-11-20" }, "cp 夾範圍、side 由 FEN 決定、多餘欄位刪走");
+  eq(new Set(n.puzzles.map(p => p.id)).size, 50); ok(!n.puzzles.some(p => p.id === "bad"));
+  eq(State.normalizeState({ mygames: { user: "a b" } }).mygames.user, "", "無效用戶名清走"); eq(State.normalizeState({ mygames: "x" }).mygames, { user: "", puzzles: [], recent: [] });
+  eq(State.normalizeState(State.normalizeState(raw)), State.normalizeState(raw), "冪等"); eq(State.parseBackup(State.exportBackup(State.normalizeState(raw))), State.normalizeState(raw), "備份往返");
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+});
+test("我的對局頁面：引用檔案齊全；用同一套檢討（RV.reviewGame）；只分析自己嘅步；大錯先可加入我的謎題；謎題頁有「我的謎題」；首頁入口開放", () => {
+  const h = fs.readFileSync(path.join(ROOT, "mygames.html"), "utf8");
+  for (const f of ["js/mygames-logic.js", "js/mygames.js", "js/review-logic.js", "js/tactics.js", "js/engine-manager.js", "js/config.js", "js/activity.js"]) ok(h.includes(f), "mygames.html 引用 " + f);
+  ok(h.indexOf("js/tactics.js") < h.indexOf("js/review-logic.js") && h.indexOf("js/config.js") < h.indexOf("js/review-logic.js"));
+  const js = fs.readFileSync(path.join(ROOT, "js/mygames.js"), "utf8");
+  ok(js.includes("RV.reviewGame(Chess, ucis, g.color") && js.includes("不分析對手的步"), "用同一套檢討，只分析自己嘅步");
+  ok(js.includes('m.cls === "blunder"') && js.includes("加入我的謎題") && js.includes("貼上 PGN") && js.includes("api.chess.com") === false, "大錯加入我的謎題、PGN 後備；網址集中喺 mygames-logic");
+  ok(fs.readFileSync(path.join(ROOT, "js/mygames-logic.js"), "utf8").includes("https://api.chess.com/pub/player/"));
+  const pz = fs.readFileSync(path.join(ROOT, "js/puzzles.js"), "utf8") + fs.readFileSync(path.join(ROOT, "puzzles.html"), "utf8");
+  ok(pz.includes("我的謎題") && pz.includes("MG.isAcceptable") && pz.includes('mode: "mine"') && pz.includes("js/mygames-logic.js") && pz.includes("不計謎題分"));
+  const mods = require(path.join(ROOT, "js/modules.js"));
+  eq(mods.find(m => m.name.startsWith("我的對局")).href, "mygames.html"); eq(mods.filter(m => !m.href).length, 0, "7 個模組全部開放");
+});
+test("頁面引用：所有練習頁面載入 config → daily → activity；對話框樣式喺 theme.css（首頁、設定頁都用到）", () => {
+  for (const p of ["quiz", "game-check", "game-mate1", "game-maze", "game-pawnwar", "puzzles", "play", "three", "openings", "endgames", "mygames"]) {
+    const h = fs.readFileSync(path.join(ROOT, p + ".html"), "utf8");
+    const a = h.indexOf("js/config.js"), b = h.indexOf("js/daily.js"), c = h.indexOf("js/activity.js");
+    ok(a > 0 && a < b && b < c, p + ".html 要按次序載入 config、daily、activity");
+  }
+  const theme = fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8"), board = fs.readFileSync(path.join(ROOT, "css/board.css"), "utf8");
+  ok(theme.includes(".dlg-overlay") && !board.includes(".dlg-overlay"));
+  const idx = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  ok(idx.indexOf("js/config.js") < idx.indexOf("js/daily.js") && idx.includes("js/dialog.js"));
 });
 
 /* ---------- 執行 ---------- */

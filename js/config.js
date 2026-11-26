@@ -36,6 +36,39 @@
     /* ---------- 「白吃」門檻（淨得益，見 js/tactics.js）：走棋前三問用 1；賽後檢討嘅「送子」「漏吃」原因用 2 ---------- */
     TACTICS: { THREE_MIN_GAIN: 1, REVIEW_MIN_GAIN: 2 },
 
+    /* ---------- 稱號（js/daily.js）：全部由現有數據計出，唔另外儲存進度 ----------
+     * 條件 key：puzzle＝謎題分；play＝電腦目前級別（>= N 級）；stars＝殘局星數；routes＝已掌握開局路線數。
+     * mode "any"＝任一項達成即可；"all"＝全部達成。稱號要逐級取得（要先達成前一級）。 */
+    TITLES: {
+      NAMES: ["入門棋手", "俱樂部棋手", "候選大師", "國際棋聯大師", "國際大師", "特級大師"],
+      REQ: [
+        null,
+        { mode: "any", conds: { puzzle: 800, play: 4 } },
+        { mode: "all", conds: { puzzle: 950, play: 5 } },
+        { mode: "all", conds: { puzzle: 1100, play: 6, stars: 40 } },
+        { mode: "all", conds: { puzzle: 1250, play: 7, routes: 4 } },
+        { mode: "all", conds: { puzzle: 1400, play: 8, stars: 70 } }
+      ]
+    },
+
+    /* ---------- 每日任務、連續日數、練習時間（js/daily.js） ---------- */
+    DAILY: {
+      PUZZLES: 5,                   // 每日要做幾題戰術謎題（任何模式都計）
+      PLAY_DAYS: [0, 1, 3, 5],      // 要求「對電腦下一局」嘅星期（0 日、1 一、3 三、5 五）
+      KEEP_DAYS: 60,                // 每日紀錄（任務、練習時間、數字）只保留最近幾多日
+      IDLE_MS: 120000               // 練習時間：停咗呢段時間冇操作就停止計（2 分鐘）
+    },
+
+    /* ---------- 我的對局（js/mygames.js） ---------- */
+    MYGAMES: {
+      MAX_GAMES: 20,                // 最多讀取幾局
+      DAYS: 30,                     // 讀取最近幾多日
+      TIME_CLASSES: ["rapid", "blitz"],   // 只取中速棋同快棋
+      MAX_PUZZLES: 50,              // 「我的謎題」最多保存幾題
+      ACCEPT_DROP: 0.05,            // 其他走法勝率跌幅 < 呢個數值都當答對
+      RECENT: 5                     // 只保存最近分析過幾局嘅摘要
+    },
+
     /* ---------- 殘局訓練（js/endgames-logic.js、js/endgames.js） ---------- */
     ENDGAME: {
       CAP_MULT: 2, CAP_ADD: 5, CAP_MAX: 50,   // 殺王課題步數上限 = 引擎最短將死步數 × 2 + 5（最多 50 步）

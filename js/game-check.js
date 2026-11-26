@@ -103,6 +103,7 @@ function show() {
 
 function result() {
   const s = CO.State.recordResult(CO.State.loadState(), "check-find", solvedCount);
+  CO.Activity.log("mini");
   const rec = s.records["check-find"];
   stage.textContent = "";
   stage.append(

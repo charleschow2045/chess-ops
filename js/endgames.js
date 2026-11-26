@@ -115,7 +115,9 @@ function practice(t, p) {
     G.over = true; G.token++; G.busy = false;
     board.setInteractive(false); board.clearShapes();
     const st = ok ? EL.stars({ success: true, hints: G.hints, moves, shortest: p.shortest }) : 0;
+    const before = posStars(p.id);
     update(s => { s.endgames.pos[p.id] = EL.applyRun(s.endgames.pos[p.id], { success: ok, stars: st, moves: ok ? moves : 0 }); });
+    CO.Activity.log("mini"); CO.Activity.log("eg", { gain: posStars(p.id) - before });
     board.feedback(ok);
     refresh(); hintBtn.disabled = true;
     CO.Feedback.show(fb, { ok, title, text });
@@ -204,7 +206,9 @@ function judgeQ(t, p) {
     box.querySelectorAll(".opt").forEach(b => { b.disabled = true; if (b.dataset.ans === p.expect) b.classList.add("right"); });
     if (!ok) box.querySelector('[data-ans="' + k + '"]').classList.add("wrong");
     const st = ok ? 3 : 0;
+    const before = posStars(p.id);
     update(s => { s.endgames.pos[p.id] = EL.applyRun(s.endgames.pos[p.id], { success: ok, stars: st, moves: 0 }); });
+    CO.Activity.log("mini"); CO.Activity.log("eg", { gain: posStars(p.id) - before });
     board.feedback(ok);
     CO.Feedback.show(fb, { ok, title: ok ? "答對了！" : "答錯了", text: "正確答案：" + (p.expect === "win" ? "白方能贏。" : "只能和棋。") + p.explain });
     const next = t.positions[idx + 1];

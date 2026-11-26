@@ -17,7 +17,9 @@
   var KEYS = {
     state: "chessops_state"
   };
-  var SCHEMA_VERSION = 1;
+  var SCHEMA_VERSION = 2;      // 第 6 階段：新增 daily、mygames 欄位，備份檔帶版本號
+  var DAILY_KEEP = 60;         // 每日紀錄保留日數（同 config.DAILY.KEEP_DAYS 一致，tests 會核對）
+  var MY_PUZZLES_MAX = 50, MY_RECENT_MAX = 5;
 
   function isObj(v) { return v !== null && typeof v === "object" && !Array.isArray(v); }
   function int(v, min, max, dflt) {
@@ -52,7 +54,7 @@
       def: function () { return SCHEMA_VERSION; },
       clean: function () { return SCHEMA_VERSION; }
     },
-    // 稱號進度：0 入門棋手 … 5 特級大師；xp 係累積經驗值
+    // 稱號：稱號本身由現有數據計出（js/daily.js），唔儲存。index＝最高已經恭喜過嘅稱號（0 入門棋手 … 5 特級大師），用嚟令升稱號嘅恭喜畫面只出一次；xp 保留兼容舊資料
     rank: {
       def: function () { return { index: 0, xp: 0 }; },
       clean: function (v) {
@@ -203,6 +205,53 @@
         return { pos: pos };
       }
     },
+    /*
+     * 每日紀錄（第 6 階段）：days = { "YYYY-MM-DD": 當日紀錄 }，只保留最近 60 日。
+     *   puz 完成謎題題數、puzOk 第一次就答對、pdelta 謎題分變化合計；mini 小練習次數；w／d／l 對電腦勝和負；eg 殘局新增星數；
+     *   sec 練習秒數（只計頁面喺前景而且有操作）；done 當日任務全部完成
+     */
+    daily: {
+      def: function () { return { days: {} }; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var src = isObj(v.days) ? v.days : {};
+        var keys = Object.keys(src).filter(function (k) { return /^\d{4}-\d{2}-\d{2}$/.test(k) && isObj(src[k]); }).sort().slice(-DAILY_KEEP);
+        var days = {};
+        keys.forEach(function (k) {
+          var e = src[k], puz = int(e.puz, 0, 100000, 0);
+          days[k] = { puz: puz, puzOk: Math.min(puz, int(e.puzOk, 0, 100000, 0)), pdelta: int(e.pdelta, -3000, 3000, 0), mini: int(e.mini, 0, 100000, 0),
+            w: int(e.w, 0, 100000, 0), d: int(e.d, 0, 100000, 0), l: int(e.l, 0, 100000, 0), eg: int(e.eg, 0, 1000, 0), sec: int(e.sec, 0, 86400, 0),
+            done: e.done === true };
+        });
+        return { days: days };
+      }
+    },
+    /*
+     * 我的對局（第 6 階段）：
+     *   user    chess.com 用戶名（只存喺本機）
+     *   puzzles 我的謎題（最多 50 題）：{ id, fen（走錯之前）, best（引擎最佳步 uci）, bestSan, cp（走之前嘅評分，玩家角度）, side（w｜b）, date }
+     *   recent  最近分析過嘅 5 局摘要：{ date, opp, color, result, tc（時限類型）, plies, blunders, mistakes, inaccuracies }
+     */
+    mygames: {
+      def: function () { return { user: "", puzzles: [], recent: [] }; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var user = typeof v.user === "string" && /^[A-Za-z0-9_-]{3,25}$/.test(v.user) ? v.user : "";
+        var seen = {};
+        var puzzles = (Array.isArray(v.puzzles) ? v.puzzles : []).filter(function (p) {
+          return isObj(p) && typeof p.id === "string" && /^m[0-9a-z]{4,12}$/.test(p.id) && !seen[p.id] && (seen[p.id] = 1) &&
+            typeof p.fen === "string" && /^[prnbqkPRNBQK1-8\/]+ [wb] [KQkq-]+ [a-h1-8-]+ \d+ \d+$/.test(p.fen) && typeof p.best === "string" && /^[a-h][1-8][a-h][1-8][qrbn]?$/.test(p.best);
+        }).slice(0, MY_PUZZLES_MAX).map(function (p) {
+          return { id: p.id, fen: p.fen, best: p.best, bestSan: typeof p.bestSan === "string" ? p.bestSan.slice(0, 12) : "", cp: int(p.cp, -1000, 1000, 0), side: p.fen.split(" ")[1], date: dateStr(p.date) };
+        });
+        var recent = (Array.isArray(v.recent) ? v.recent : []).filter(isObj).slice(0, MY_RECENT_MAX).map(function (g) {
+          return { date: dateStr(g.date), opp: typeof g.opp === "string" && /^[A-Za-z0-9_-]{1,25}$/.test(g.opp) ? g.opp : "", color: g.color === "b" ? "b" : "w",
+            result: oneOf(["win", "loss", "draw"], "draw")(g.result), tc: oneOf(["rapid", "blitz", "other"], "other")(g.tc), plies: int(g.plies, 0, 1000, 0),
+            blunders: int(g.blunders, 0, 500, 0), mistakes: int(g.mistakes, 0, 500, 0), inaccuracies: int(g.inaccuracies, 0, 500, 0) };
+        });
+        return { user: user, puzzles: puzzles, recent: recent };
+      }
+    },
     // 對電腦下棋：目前選擇嘅級別（1–8）
     playLevel: {
       def: function () { return 3; },
@@ -257,18 +306,41 @@
   }
 
   /* 備份：輸出 JSON 字串；還原：解析後再 normalizeState */
-  function exportBackup(state) {
-    return JSON.stringify({ app: "chessops", exportedAt: new Date().toISOString(), state: normalizeState(state) }, null, 2);
+  function exportBackup(state, now) {
+    return JSON.stringify({ app: "chessops", version: SCHEMA_VERSION, exportedAt: (now || new Date()).toISOString(), state: normalizeState(state) }, null, 2);
   }
+  /* 備份檔名：chessops-備份-日期.json（用本機日期） */
+  function backupFileName(now) {
+    now = now || new Date();
+    var p = function (n) { return (n < 10 ? "0" : "") + n; };
+    return "chessops-backup-" + now.getFullYear() + "-" + p(now.getMonth() + 1) + "-" + p(now.getDate()) + ".json";
+  }
+  /* 檢查並解析備份：格式唔啱就拋出清楚講原因嘅錯誤（書面語），唔會寫入任何嘢 */
   function parseBackup(text) {
-    var obj = JSON.parse(text);
-    if (!isObj(obj) || obj.app !== "chessops" || !isObj(obj.state)) throw new Error("這不是有效的備份檔案");
+    if (typeof text !== "string" || !text.trim()) throw new Error("沒有內容可以匯入。請選擇備份檔案，或者貼上備份文字。");
+    if (text.length > 3000000) throw new Error("內容太大（超過 3 MB），不是這個 App 的備份。");
+    var obj;
+    try { obj = JSON.parse(text); } catch (e) { throw new Error("內容不是有效的 JSON，可能複製不完整或者檔案已損壞。"); }
+    if (!isObj(obj) || obj.app !== "chessops") throw new Error("這不是「國際象棋 Ops」的備份檔案（缺少 chessops 標記）。");
+    if (typeof obj.version !== "number" || Math.floor(obj.version) !== obj.version || obj.version < 1) throw new Error("備份檔案沒有有效的版本號。");
+    if (obj.version > SCHEMA_VERSION) throw new Error("這個備份來自較新的版本（版本 " + obj.version + "），請先更新 App 再匯入。");
+    if (!isObj(obj.state)) throw new Error("備份檔案內沒有資料。");
     return normalizeState(obj.state);
+  }
+  /* 目前儲存資料大約佔用幾多位元組（UTF-8） */
+  function sizeBytes(str) {
+    if (typeof TextEncoder !== "undefined") return new TextEncoder().encode(str).length;
+    var n = 0; for (var i = 0; i < str.length; i++) { var c = str.charCodeAt(i); n += c < 0x80 ? 1 : c < 0x800 ? 2 : 3; } return n;
+  }
+  function storedBytes() {
+    var ls = storage();
+    try { var v = ls ? ls.getItem(KEYS.state) : null; return v ? sizeBytes(v) : 0; } catch (e) { return 0; }
   }
 
   return {
     KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, PUZZLE_THEMES: PUZZLE_THEMES, OPENING_ROUTE_IDS: OPENING_ROUTE_IDS, ENDGAME_IDS: ENDGAME_IDS, recordResult: recordResult,
     defaultState: defaultState, normalizeState: normalizeState,
-    loadState: loadState, saveState: saveState, exportBackup: exportBackup, parseBackup: parseBackup
+    loadState: loadState, saveState: saveState, exportBackup: exportBackup, parseBackup: parseBackup, backupFileName: backupFileName, sizeBytes: sizeBytes, storedBytes: storedBytes,
+    DAILY_KEEP: DAILY_KEEP, MY_PUZZLES_MAX: MY_PUZZLES_MAX, MY_RECENT_MAX: MY_RECENT_MAX
   };
 });
