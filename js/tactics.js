@@ -1,6 +1,7 @@
 /*
  * 戰術判斷工具（純邏輯；需要 chess.js 嘅 Chess 類別由呼叫者傳入）
- * 「白吃」定義：淨得益 = 被吃子價值 −（吃完之後會被吃返 ? 自己嗰枚子價值 : 0）；兵 1、馬象 3、車 5、后 9。
+ * 「白吃」定義：淨得益 = 被吃子價值 −（吃完之後對方有「合法」吃子步落喺同一格 ? 自己嗰枚子價值 : 0）；兵 1、馬象 3、車 5、后 9。
+ * （用 moves({verbose:true}) 檢查合法性：王唔可以吃返有後援保護嘅棋子、被牽制嘅棋子唔可以吃返。）
  * 用於：走棋前三問、賽後檢討原因（送子、漏吃）、電腦（pickmove 有自己一份同定義嘅簡化版）。
  */
 (function (root, factory) {
@@ -19,7 +20,9 @@
     if (!m.captured) return 0;
     var c = new Chess(game.fen());
     c.move({ from: m.from, to: m.to, promotion: m.promotion });
-    var recapturable = c.isAttacked(m.to, c.turn());
+    // 吃返要係「合法」嘅吃子步落喺同一格（王唔可以吃返有後援保護嘅子；被牽制嘅子唔可以吃返）。
+    // 吃過路兵：我方吃子之後，我方兵企喺 m.to，對方吃返都係落喺 m.to，所以同一個檢查。
+    var recapturable = c.moves({ verbose: true }).some(function (x) { return x.to === m.to && !!x.captured; });
     return VALUE[m.captured] - (recapturable ? VALUE[m.piece] : 0);
   }
 

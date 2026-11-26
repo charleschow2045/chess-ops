@@ -47,7 +47,7 @@ const waitMyTurn = (page, t) => page.waitForFunction(() => /輪到你/.test(docu
 
   await scenario(browser, "首頁：「對電腦下棋」已開放，顯示目前級別", stateWith(s => { s.playLevel = 5; }), async page => {
     await page.goto(BASE + "index.html"); await page.waitForTimeout(500);
-    ok(await page.locator("a.mod").count() === 5, "首頁有 5 個可進入的模組");
+    ok(await page.locator("a.mod").count() === 6, "首頁有 6 個可進入的模組");
     ok((await page.locator("a.mod[href='play.html']").textContent()).includes("目前第 5 級"), "首頁顯示「目前第 5 級」（真實數字）");
     await shot(page, "01-home");
   });

@@ -1,6 +1,7 @@
 /*
  * 開局訓練（openings.html）
  *  - 路線練習：學習者走自己一方，App 自動走對方（約 0.5 秒）；走錯即時顯示正確走法（箭頭）同解釋，可以再試；
+ *    「也可以」走法（data 內 route.alts，Stockfish 驗證）：顯示「也可以！不過這條路線練習的是 X，請再走一次。」，還原棋步，唔當錯；
  *    同一條路線「連續 3 次全對」（整條路線冇走錯）= 已掌握。
  *  - 開局原則小測：10 題「下面哪一步最符合開局原則？」（3 個選項）。
  *  資料 data/openings.js 由 tools/verify-openings.js 產生，並已用 Stockfish 驗證（見 docs/stage4-content.md）。
@@ -105,6 +106,11 @@ function practice(route) {
       board.feedback(true);
       if (idx >= ucis.length) return finish();
       playOpponentUntilMine();
+    } else if (((route.alts && route.alts[idx]) || []).some(a => a.uci === u)) {
+      // 「也可以」走法（Stockfish 驗證勝率跌幅 < 0.03，符合開局原則）：唔當錯，還原棋步，等學習者走主線；唔影響「連續 3 次全對」
+      board.undo(); board.clearShapes();
+      board.setInteractive(mine === "w" ? "white" : "black");
+      CO.Feedback.show(fb, { ok: true, title: "也可以！", text: "不過這條路線練習的是 " + route.moves[idx] + "，請再走一次。" });
     } else {
       mistakes++;
       stage.querySelector("#mistakes").textContent = "走錯 " + mistakes + " 次";

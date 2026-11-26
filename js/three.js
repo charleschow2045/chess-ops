@@ -27,7 +27,7 @@ function home() {
       el("div", { class: "big", id: "acc", text: t.asked ? Math.round(t.correct / t.asked * 100) + "%" : "—" }),
       el("p", { class: "muted", text: t.plays ? "已完成 " + t.plays + " 輪・共答 " + t.asked + " 條・答對 " + t.correct + " 條（正確率）" : "尚未完成。一輪 5 個局面，每個局面 3 條問題。" })]),
     el("div", { class: "btn-row" }, [el("button", { class: "btn primary", id: "start", type: "button", text: "開始（5 個局面）", onclick: startRound })]),
-    el("p", { class: "muted", text: "局面來自 Lichess 的真實謎題（對手剛走完一步，輪到你）。答案由程式用 chess.js 計算，不是人手編寫。" }));
+    el("p", { class: "muted", text: "局面來自 Lichess 的真實謎題（部分局面是對方走棋之前的位置，用來練習發現將死的威脅）。答案由程式用 chess.js 計算，不是人手編寫。" }));
 }
 
 function startRound() {
@@ -130,7 +130,7 @@ function summary(results) {
   s.three.plays += 1; s.three.asked += total; s.three.correct += correct;
   CO.State.saveState(s);
   const three = CO.State.loadState().three;
-  const names = { hangingPiece: "送子", fork: "捉雙", pin: "牽制", mateIn1: "一步殺" };
+  const names = { hangingPiece: "送子", fork: "捉雙", pin: "牽制", mateIn1: "一步殺", mateThreat: "將死威脅" };
   stage.textContent = "";
   stage.append(
     el("div", { class: "card score-box" }, [

@@ -45,7 +45,7 @@ async function scenario(browser, name, init, fn) {
 
   await scenario(browser, "首頁：「走棋前三問」「開局」已開放並顯示真數字", stateWith(s => { s.three = { plays: 2, asked: 30, correct: 24 }; s.openings.routes["w-italian"].mastered = true; s.openings.routes["b-scholar"].mastered = true; }), async page => {
     await page.goto(BASE + "index.html"); await page.waitForTimeout(500);
-    ok(await page.locator("a.mod").count() === 5, "首頁有 5 個可進入的模組");
+    ok(await page.locator("a.mod").count() === 6, "首頁有 6 個可進入的模組");
     ok((await page.locator("a.mod[href='three.html']").textContent()).includes("已完成 2 輪・正確率 80%"), "走棋前三問顯示「已完成 2 輪・正確率 80%」");
     ok((await page.locator("a.mod[href='openings.html']").textContent()).includes("已掌握 2 / 6 條路線"), "開局顯示「已掌握 2 / 6 條路線」");
     await shot(page, "01-home");

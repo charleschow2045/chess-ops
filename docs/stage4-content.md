@@ -2,76 +2,86 @@
 
 由 `node tools/gen-stage4-content.js` 自動產生。FEN 可以貼到 lichess.org/editor 核對；Lichess 連結格式 `https://lichess.org/training/<id>`。
 
-## 一、走棋前三問（60 題）
+## 一、走棋前三問（70 題；第 5 階段已修正「白吃」判斷並加入 10 題「對方威脅將死」，見 stage5-content.md）
 
-局面＝Lichess 謎題「對手第一步走完」之後（輪到玩家）。三條問題的答案全部由程式用 chess.js 計出（見 `js/three-logic.js`）：
+局面＝Lichess 謎題「對手第一步走完」之後（輪到玩家）；主題「對方威脅將死」嘅局面係謎題 FEN 本身（對手第一步之前）。三條問題的答案全部由程式用 chess.js 計出（見 `js/three-logic.js`）：
 - Q1「對方上一步想做甚麼？」：假如輪到對方走（交換走棋方 FEN，清走吃過路兵格；玩家被將軍的局面不用）：對方可以白吃嘅己方棋子／對方可以一步將死／沒有直接威脅。
 - Q2「我有沒有機會？」：玩家可以白吃嘅對方棋子／可以一步將死／沒有。
 - Q3「這一步安全嗎？」：3 個候選步（1 個會送子或被將死，2 個安全；候選步不含謎題答案）。
-- 「白吃」＝被吃子價值 −（吃完之後會被吃返 ? 自己嗰枚子價值 : 0）≥ 1；兵 1、馬象 3、車 5、后 9。
+- 「白吃」＝被吃子價值 −（吃完之後會被吃返 ? 自己嗰枚子價值 : 0）≥ 1（三問；賽後檢討用 ≥ 2），而且「吃返」要係合法嘅吃子步（王唔可以吃返有保護嘅子、被牽制嘅子唔可以吃返）；兵 1、馬象 3、車 5、后 9。
 
 | # | Lichess | 分數 | 主題 | 走棋方 | FEN | Q1 答案 | Q2 答案 | Q3 三個候選步（✅＝會送子／被將死） |
 |---|---|---|---|---|---|---|---|---|
 | 1 | [901ij](https://lichess.org/training/901ij) | 433 | 牽制 | 黑 | `6k1/5p2/pR2pP1p/Pb1p2pP/2r5/5B2/4NPP1/5K2 b - - 5 33` | 選「沒有」類選項 | 選「將死」類選項 | Ba4 ✅、Ra4、Rc7 |
 | 2 | [7KnE5](https://lichess.org/training/7KnE5) | 437 | 捉雙 | 白 | `r1bqr1k1/pppp1ppp/5b2/8/8/4R3/PPPPQPPP/RNB3K1 w - - 5 12` | 選「沒有」類選項 | 選「沒有」類選項 | Rc3 ✅、Qd1、Qc4 |
 | 3 | [hftD7](https://lichess.org/training/hftD7) | 450 | 送子 | 黑 | `1r3r2/6k1/p2pq2p/2p2p1B/8/P6Q/1PP2RPP/4R2K b - - 0 35` | 點出 e6 | 點出 b2、e1 | Qg8、Rfe8 ✅、Qd5 |
-| 4 | [enhjq](https://lichess.org/training/enhjq) | 471 | 捉雙 | 白 | `2r3k1/5ppp/p1N5/8/8/P3P1P1/1P3PKP/8 w - - 2 25` | 點出 c6 | 選「沒有」類選項 | Nb8 ✅、Nd4、Nb4 |
-| 5 | [SB6PX](https://lichess.org/training/SB6PX) | 482 | 一步殺 | 白 | `2b2rk1/p1p2ppp/8/2n1p3/4Q3/3B4/1qP2PPP/4RK1R w - - 3 18` | 點出 e4 | 選「將死」類選項 | Qe2、Re3 ✅、Qxe5 |
-| 6 | [3V1DH](https://lichess.org/training/3V1DH) | 551 | 牽制 | 黑 | `8/1pp3pk/1b2Q2p/p4N2/3r4/P7/5RPP/6K1 b - - 0 30` | 點出 d4 | 選「沒有」類選項 | Rh4 ✅、Ra4、Rd3 |
-| 7 | [dU50E](https://lichess.org/training/dU50E) | 565 | 捉雙 | 白 | `3q1rk1/1p3R2/p3p1p1/4P1P1/PP5P/2P5/8/5RK1 w - - 0 31` | 選「沒有」類選項 | 點出 b7 | Rh7 ✅、Rxb7、R1f6 |
-| 8 | [EGXZl](https://lichess.org/training/EGXZl) | 570 | 一步殺 | 白 | `r2q1rk1/4b1p1/2b1p2p/p3Bp2/P1pPpPQ1/2P1P2R/2B3PP/R5K1 w - - 0 23` | 點出 g4 | 選「將死」類選項 | Qe2、Bxg7 ✅、Qg6 |
-| 9 | [FYJaI](https://lichess.org/training/FYJaI) | 583 | 一步殺 | 白 | `r1b2knr/1p1p1pbp/p2q2p1/2p5/P1B5/5Q2/1PPP1PPP/R1B1R1K1 w - - 0 13` | 選「沒有」類選項 | 選「將死」類選項 | Re4、Qf6 ✅、Qe2 |
+| 4 | [jz35I](https://lichess.org/training/jz35I) | 450 | 一步殺 | 白 | `6k1/q4p1p/4p1pP/5nP1/3p4/2Q5/rBP5/1K5R w - - 0 37` | 點出 c3 | 選「將死」類選項 | Qd2、Ba3 ✅、Qd3 |
+| 5 | [f8np6](https://lichess.org/training/f8np6) | 458 | 對方威脅將死 | 黑 | `r1b1k2r/pp3ppp/8/2n3B1/2PR4/1P6/1P3PPP/4KB1R b Kkq - 0 15` | 選「將死」類選項 | 點出 b3 | f6、Na4 ✅、f5 |
+| 6 | [enhjq](https://lichess.org/training/enhjq) | 471 | 捉雙 | 白 | `2r3k1/5ppp/p1N5/8/8/P3P1P1/1P3PKP/8 w - - 2 25` | 點出 c6 | 選「沒有」類選項 | Nb8 ✅、Nd4、Nb4 |
+| 7 | [3V1DH](https://lichess.org/training/3V1DH) | 551 | 牽制 | 黑 | `8/1pp3pk/1b2Q2p/p4N2/3r4/P7/5RPP/6K1 b - - 0 30` | 點出 d4 | 選「沒有」類選項 | Rh4 ✅、Ra4、Rd3 |
+| 8 | [8iDwM](https://lichess.org/training/8iDwM) | 559 | 對方威脅將死 | 黑 | `6k1/q4ppp/8/P7/8/3Q1P2/1rr3PP/4B1RK b - - 5 33` | 選「將死」類選項 | 選「沒有」類選項 | Rb1 ✅、Re2、Qe7 |
+| 9 | [dU50E](https://lichess.org/training/dU50E) | 565 | 捉雙 | 白 | `3q1rk1/1p3R2/p3p1p1/4P1P1/PP5P/2P5/8/5RK1 w - - 0 31` | 選「沒有」類選項 | 點出 b7 | Rh7 ✅、Rxb7、R1f6 |
 | 10 | [QI576](https://lichess.org/training/QI576) | 597 | 牽制 | 黑 | `4r1k1/6p1/8/8/8/1PP4P/P4pP1/5R1K b - - 1 41` | 點出 f2 | 選「沒有」類選項 | Rf8、Re6 ✅、Re2 |
-| 11 | [wcocX](https://lichess.org/training/wcocX) | 648 | 一步殺 | 黑 | `2r2k2/R3pp2/8/3B4/1p1Pn3/1P6/5r1P/4K2R b K - 0 25` | 點出 e4 | 選「將死」類選項 | Nf6 ✅、Rf4、f5 |
-| 12 | [2Wn7O](https://lichess.org/training/2Wn7O) | 665 | 牽制 | 黑 | `4r1k1/1pp3pp/p7/3prb2/8/6QP/PPR3P1/1K3N1R b - - 0 26` | 選「沒有」類選項 | 點出 c2 | Rc8 ✅、Be4、Bg6 |
-| 13 | [EZq17](https://lichess.org/training/EZq17) | 678 | 送子 | 白 | `1k3bnr/ppp2R2/3p4/7p/5B2/7B/PPP1rP1P/2K5 w - - 0 20` | 點出 f2 | 點出 f8 | Bf1 ✅、Bg3、Bg5 |
-| 14 | [NfzFV](https://lichess.org/training/NfzFV) | 680 | 捉雙 | 白 | `2r3k1/p5p1/2N2p2/3p2p1/8/8/PPP2PPP/5K2 w - - 1 26` | 點出 c6 | 點出 a7 | Nd4、Ne5 ✅、Nb4 |
-| 15 | [7iL9v](https://lichess.org/training/7iL9v) | 690 | 牽制 | 黑 | `8/p4ppk/2b4p/8/5Q2/P1N1r3/1P4RP/7K b - - 0 32` | 點出 e3、f7 | 點出 g2 | Re7、Rf3、Bb5 ✅ |
-| 16 | [DKj7y](https://lichess.org/training/DKj7y) | 694 | 捉雙 | 黑 | `8/8/7k/3K1np1/8/5P2/8/3B4 b - - 4 52` | 選「沒有」類選項 | 選「沒有」類選項 | Ng3、Nd6 ✅、Nh4 |
-| 17 | [069i5](https://lichess.org/training/069i5) | 737 | 送子 | 黑 | `8/6pk/2pBp2p/3PPq2/3P4/8/4Q1PP/1R5K b - - 0 38` | 點出 c6 | 點出 b1、d5 | Qf1+ ✅、cxd5、exd5 |
-| 18 | [7XFqs](https://lichess.org/training/7XFqs) | 759 | 一步殺 | 白 | `1b6/8/b6p/3Pr3/1B1pBkp1/P2P4/1P5P/6K1 w - - 4 36` | 選「沒有」類選項 | 選「將死」類選項 | Ba5、Bh7 ✅、d6 |
-| 19 | [R58zn](https://lichess.org/training/R58zn) | 766 | 送子 | 黑 | `5rk1/5ppp/1pp5/3bR2q/5B2/6Q1/PPP2PPP/3R2K1 b - - 8 21` | 點出 h5 | 點出 a2、d1 | f5、Qh6 ✅、Qg6 |
-| 20 | [QlYYC](https://lichess.org/training/QlYYC) | 770 | 一步殺 | 白 | `r4rk1/1b3p1p/pp1p1qpQ/2pPp3/P1P1P3/1B5R/1P1N2PP/6K1 w - - 0 26` | 選「沒有」類選項 | 選「將死」類選項 | Rc3、Qxf8+ ✅、Rh4 |
-| 21 | [ZUUbk](https://lichess.org/training/ZUUbk) | 771 | 牽制 | 白 | `8/8/8/pRp1n2k/8/4K3/8/8 w - - 10 51` | 選「沒有」類選項 | 點出 a5、c5 | Rxa5、Rb6、Rb4 ✅ |
-| 22 | [xiEb3](https://lichess.org/training/xiEb3) | 771 | 牽制 | 白 | `4b3/1p2kp1p/1r2p1p1/1P6/5P2/2N1R1K1/6P1/8 w - - 1 37` | 選「沒有」類選項 | 選「沒有」類選項 | Ne2 ✅、Rf3、Re5 |
-| 23 | [G23cA](https://lichess.org/training/G23cA) | 773 | 捉雙 | 白 | `8/p7/1p3k1p/2p3p1/2P1P3/2bpN1P1/P6P/3K4 w - - 6 37` | 選「沒有」類選項 | 選「沒有」類選項 | Ng2、Nf1、e5+ ✅ |
-| 24 | [FdRS8](https://lichess.org/training/FdRS8) | 776 | 送子 | 白 | `2r3k1/5ppp/4p3/1q1pP3/p2P4/N4NP1/5PKP/2R5 w - - 0 28` | 點出 c1 | 點出 b5、c8 | Ng1 ✅、Rg1、Re1 |
-| 25 | [CxYbj](https://lichess.org/training/CxYbj) | 800 | 送子 | 黑 | `r2r4/1p1bkppp/p2Rp1n1/2p5/N3P3/5N2/PPP2PPP/2KR4 b - - 4 14` | 點出 c5 | 點出 a4 | Rdc8、e5 ✅、c4 |
-| 26 | [KTmjE](https://lichess.org/training/KTmjE) | 822 | 一步殺 | 白 | `5k2/6p1/3N1q1p/4Q3/r7/6P1/4P1BP/1b4K1 w - - 1 34` | 點出 e5 | 選「將死」類選項 | Qd5、Qb5 ✅、Qc5 |
-| 27 | [XNXht](https://lichess.org/training/XNXht) | 840 | 捉雙 | 黑 | `4r1n1/1ppn1p1k/1p3P1p/4pR1P/1PP1P1N1/P2r4/1B6/5RK1 b - - 2 34` | 選「沒有」類選項 | 選「沒有」類選項 | Ne7 ✅、c6、Re6 |
-| 28 | [WSU09](https://lichess.org/training/WSU09) | 845 | 一步殺 | 黑 | `1r4k1/1p3ppp/p1b1p3/P2q4/1BN2Q2/1P1B2P1/2PP3P/R4RK1 b - - 0 23` | 點出 b8 | 選「將死」類選項 | Re8、Qxd3 ✅、Qd8 |
-| 29 | [TJlGq](https://lichess.org/training/TJlGq) | 850 | 捉雙 | 黑 | `2kN4/ppp5/8/5p1p/3q4/1P1P1Rb1/P1PQ1p2/5R1K b - - 0 34` | 點出 f5、g3 | 點出 d8 | Qe4 ✅、Qd5、Qg4 |
-| 30 | [da9mY](https://lichess.org/training/da9mY) | 856 | 送子 | 黑 | `2kr1b1r/p1p2p2/2Q5/6p1/2PqR3/1P4Pp/P2P1P1P/R5KB b - - 3 23` | 點出 d4 | 點出 a1、d2 | Qd3、Re8 ✅、Qxd2 |
-| 31 | [ehhRO](https://lichess.org/training/ehhRO) | 866 | 送子 | 黑 | `3r2k1/4rnp1/pp2p2p/3pP3/2B2P2/2P5/PP4PP/3RR1K1 b - - 0 27` | 點出 a6 | 點出 c4 | Nxe5 ✅、Ra8、Ra7 |
-| 32 | [XBTwS](https://lichess.org/training/XBTwS) | 878 | 牽制 | 黑 | `rn2k1nr/pp3pp1/2p1p3/7p/3q3P/2PB2NR/P3QPP1/R1B1K3 b Qkq - 0 14` | 點出 d4 | 點出 c3 | Rh6 ✅、Qa4、Qf6 |
-| 33 | [mmCFZ](https://lichess.org/training/mmCFZ) | 880 | 牽制 | 黑 | `3b2k1/p4bpp/5p2/1BN1p3/1p2P3/1P3P2/P1P2KPP/8 b - - 1 26` | 選「沒有」類選項 | 選「沒有」類選項 | Bc7、Ba5、Bxb3 ✅ |
-| 34 | [ItZVe](https://lichess.org/training/ItZVe) | 887 | 捉雙 | 白 | `8/8/8/7P/1k3b2/p1N5/2K5/8 w - - 5 63` | 選「沒有」類選項 | 選「沒有」類選項 | Na4 ✅、Nd1、Na2+ |
-| 35 | [MzlCN](https://lichess.org/training/MzlCN) | 895 | 送子 | 黑 | `r4rk1/2q1bpp1/p1n1bn1p/1p1p4/2pP1B2/2P2NN1/PPB2PPP/R2QR1K1 b - - 1 15` | 點出 c7 | 點出 f4 | Qb6、Qb7、Bg4 ✅ |
-| 36 | [eSgaa](https://lichess.org/training/eSgaa) | 904 | 一步殺 | 白 | `r2q1bkr/pppb2pp/8/2n1p1N1/3p4/5Q2/PPP2PPP/RNB3K1 w - - 0 13` | 選「沒有」類選項 | 選「將死」類選項 | Nf7、Qc6 ✅、Qd1 |
-| 37 | [sdNtJ](https://lichess.org/training/sdNtJ) | 906 | 一步殺 | 白 | `B1NQ1b1r/4pppp/k4n2/2p2q2/8/8/PPn2PPP/5K1R w - - 4 20` | 選「沒有」類選項 | 選「將死」類選項 | Be4 ✅、Nb6、f3 |
-| 38 | [JEBDV](https://lichess.org/training/JEBDV) | 920 | 捉雙 | 白 | `1r6/p3kp1p/4b1p1/2p5/3N4/2P5/P4PPP/4R1K1 w - - 0 23` | 點出 d4 | 選「沒有」類選項 | Nf3、Nc2、Rb1 ✅ |
-| 39 | [WywdY](https://lichess.org/training/WywdY) | 932 | 牽制 | 白 | `5qk1/1Q4p1/1p3n2/r6p/p2Pp1P1/4P2P/P4PK1/2R5 w - - 0 29` | 選「沒有」類選項 | 點出 b6 | Rc7、f4、Qd7 ✅ |
-| 40 | [XKTYL](https://lichess.org/training/XKTYL) | 942 | 牽制 | 黑 | `2r1kb1r/4pppp/p2p1n2/qb6/3PP3/4QN2/PP1B1PPP/RN2K2R b KQk - 8 13` | 點出 a5 | 選「將死」類選項 | Qc7、Rc2 ✅、Qd8 |
-| 41 | [lwRdC](https://lichess.org/training/lwRdC) | 946 | 一步殺 | 白 | `5k2/4rp2/p1r1pQp1/3pP3/8/2P2R2/5PPK/1q6 w - - 2 34` | 選「沒有」類選項 | 選「將死」類選項 | Rd3 ✅、Rh3、Qf4 |
-| 42 | [hOelk](https://lichess.org/training/hOelk) | 953 | 牽制 | 黑 | `2rr2k1/5ppp/bq2p3/1p1pn3/1P1N1P2/3B1N2/3Q2PP/R4RK1 b - - 1 21` | 點出 e5 | 選「沒有」類選項 | Qa5 ✅、Ng6、Nc6 |
-| 43 | [7v1xM](https://lichess.org/training/7v1xM) | 958 | 一步殺 | 黑 | `6k1/5pp1/2p5/1q2P3/P3Q1R1/7r/1PR2PK1/7r b - - 0 44` | 點出 b5 | 選「將死」類選項 | R1h2+、Qb6、c5 ✅ |
-| 44 | [Eh63i](https://lichess.org/training/Eh63i) | 959 | 送子 | 黑 | `4rk2/p2B1p1p/8/8/2P5/1P4QP/P1q2PP1/3R2K1 b - - 4 29` | 點出 e8 | 點出 a2、d1 | Qxf2+ ✅、Re7、Re2 |
-| 45 | [dmmmw](https://lichess.org/training/dmmmw) | 972 | 一步殺 | 白 | `1r4k1/7p/1q1p2pP/1B1P1p2/r3pP2/2Q5/P5P1/1KR5 w - - 0 37` | 點出 b5 | 選「將死」類選項 | Qc6、Qd3 ✅、Qb2 |
-| 46 | [QxAfr](https://lichess.org/training/QxAfr) | 987 | 送子 | 白 | `4r1k1/pp3p2/5qp1/2p5/P7/2Pr4/1P2QPK1/7R w - - 0 30` | 點出 e2 | 點出 d3、e8 | Rg1 ✅、Qg4、Qf1 |
-| 47 | [MdmAH](https://lichess.org/training/MdmAH) | 990 | 捉雙 | 黑 | `8/6r1/3k4/4n1P1/8/8/1Q3K2/8 b - - 24 74` | 選「沒有」類選項 | 點出 g5 | Rh7、Nc6 ✅、Rd7 |
-| 48 | [yzjbK](https://lichess.org/training/yzjbK) | 992 | 捉雙 | 白 | `r2k3r/ppp3pp/3p1p2/3PN3/1P6/6P1/P1P1bPBP/2K1R3 w - - 0 20` | 點出 e5 | 點出 e2 | Bh1 ✅、Nf3、Nd3 |
-| 49 | [SzMp0](https://lichess.org/training/SzMp0) | 993 | 牽制 | 黑 | `r3k2r/pp3pp1/1qn1p1p1/3pPn2/5P2/2NB4/P2BQ1PP/R4R1K b kq - 4 17` | 選「沒有」類選項 | 選「將死」類選項 | Na5、Qg1+ ✅、Qc7 |
-| 50 | [9hXEk](https://lichess.org/training/9hXEk) | 995 | 送子 | 白 | `8/1b4k1/6p1/1P1B4/1K6/5p2/8/8 w - - 0 63` | 點出 d5 | 點出 b7 | Bf7 ✅、Bc6、Be6 |
-| 51 | [4H851](https://lichess.org/training/4H851) | 996 | 送子 | 白 | `2r3k1/pp3ppp/8/3r3P/P5Q1/1q6/5PP1/3R2K1 w - - 0 26` | 選「沒有」類選項 | 點出 c8 | Rd2 ✅、Rf1、Ra1 |
-| 52 | [GbuVW](https://lichess.org/training/GbuVW) | 1058 | 牽制 | 黑 | `rn2kb1r/1pq2pp1/2p1p1p1/p3N3/3P4/1NQ3P1/PPP2P1P/R3K2R b KQkq - 1 16` | 選「沒有」類選項 | 選「沒有」類選項 | Ra6、Ba3 ✅、Rh7 |
-| 53 | [0VOtI](https://lichess.org/training/0VOtI) | 1059 | 一步殺 | 白 | `r2q4/p1pn3k/1p1bprRp/5p1P/3P4/2PB1P2/P1PQ1P2/R3K3 w Q - 2 17` | 選「沒有」類選項 | 選「將死」類選項 | Bc4、Ba6、Bxf5 ✅ |
-| 54 | [s8RW2](https://lichess.org/training/s8RW2) | 1061 | 捉雙 | 黑 | `3r1k1r/p3pp1p/Q5p1/4q3/8/1PNnB3/P1K2PPP/2R4R b - - 0 27` | 點出 a7 | 點出 c1 | Qg7 ✅、Rd7、Qb8 |
-| 55 | [6WhdB](https://lichess.org/training/6WhdB) | 1067 | 捉雙 | 黑 | `r1bq1rk1/pp2npbp/2n1p1p1/2N1P3/3p1P2/3P2P1/PPP1N1BP/R1BQK2R b KQ - 0 10` | 選「沒有」類選項 | 選「沒有」類選項 | Nf5、f6、Qd5 ✅ |
-| 56 | [I7Zkt](https://lichess.org/training/I7Zkt) | 1075 | 送子 | 白 | `2r4k/5rpp/p7/1p1Bb3/4P1Q1/P2q3P/1P4P1/4R1K1 w - - 0 27` | 點出 b2 | 點出 c8、f7 | Re2、Ba8 ✅、Qe2 |
-| 57 | [22FAH](https://lichess.org/training/22FAH) | 1078 | 一步殺 | 白 | `r1b2rk1/pp5p/4p3/3p2qQ/5b2/PN1B4/1P3PPP/4RRK1 w - - 5 19` | 點出 h5 | 選「將死」類選項 | Bxh7+、f3 ✅、Be2 |
-| 58 | [RA6Ys](https://lichess.org/training/RA6Ys) | 1085 | 牽制 | 黑 | `3r4/7p/1Q4pk/2p2p2/5b2/PKP4P/1P4P1/8 b - - 0 32` | 點出 c5、d8 | 選「沒有」類選項 | Rd5、Bc7 ✅、Rc8 |
-| 59 | [2cpHp](https://lichess.org/training/2cpHp) | 1093 | 捉雙 | 白 | `3Q4/5pqk/7p/8/8/7P/4r1P1/5R1K w - - 4 45` | 選「將死」類選項 | 選「沒有」類選項 | Ra1 ✅、Qd5、Qa8 |
-| 60 | [E4kSB](https://lichess.org/training/E4kSB) | 1094 | 送子 | 黑 | `6k1/5pbp/4p1p1/1Q2q3/3r4/2R1B1PP/P4P1K/8 b - - 0 29` | 點出 d4 | 點出 b5 | Qe4 ✅、Rd8、Re4 |
+| 11 | [ZVrTy](https://lichess.org/training/ZVrTy) | 635 | 對方威脅將死 | 黑 | `8/r5pp/P7/R4p2/3pkP2/2p3P1/4K2P/8 b - - 1 41` | 選「將死」類選項 | 選「沒有」類選項 | Ra8 ✅、Re7、d3+ |
+| 12 | [wcocX](https://lichess.org/training/wcocX) | 648 | 一步殺 | 黑 | `2r2k2/R3pp2/8/3B4/1p1Pn3/1P6/5r1P/4K2R b K - 0 25` | 點出 e4 | 選「將死」類選項 | Nf6 ✅、Rf4、f5 |
+| 13 | [DW5o3](https://lichess.org/training/DW5o3) | 661 | 一步殺 | 白 | `5k1r/3Q1ppp/4p3/4q3/6P1/4r3/PPP4P/2KR4 w - - 4 30` | 點出 h2 | 選「將死」類選項 | Rf1 ✅、Qd2、Qc8+ |
+| 14 | [2Wn7O](https://lichess.org/training/2Wn7O) | 665 | 牽制 | 黑 | `4r1k1/1pp3pp/p7/3prb2/8/6QP/PPR3P1/1K3N1R b - - 0 26` | 選「沒有」類選項 | 點出 c2 | Rc8 ✅、Be4、Bg6 |
+| 15 | [EZq17](https://lichess.org/training/EZq17) | 678 | 送子 | 白 | `1k3bnr/ppp2R2/3p4/7p/5B2/7B/PPP1rP1P/2K5 w - - 0 20` | 點出 f2 | 點出 f8 | Bf1 ✅、Bg3、Bg5 |
+| 16 | [NfzFV](https://lichess.org/training/NfzFV) | 680 | 捉雙 | 白 | `2r3k1/p5p1/2N2p2/3p2p1/8/8/PPP2PPP/5K2 w - - 1 26` | 點出 c6 | 點出 a7 | Nd4、Ne5 ✅、Nb4 |
+| 17 | [7iL9v](https://lichess.org/training/7iL9v) | 690 | 牽制 | 黑 | `8/p4ppk/2b4p/8/5Q2/P1N1r3/1P4RP/7K b - - 0 32` | 點出 e3、f7 | 點出 g2 | Re7、Rf3、Bb5 ✅ |
+| 18 | [DTzIC](https://lichess.org/training/DTzIC) | 691 | 對方威脅將死 | 白 | `2r4k/2p3pp/pp2Nn2/3bR1P1/5P1P/3Q2K1/q7/5R2 w - - 0 34` | 選「將死」類選項 | 點出 f6 | f5、Qe2、Nxg7 ✅ |
+| 19 | [DKj7y](https://lichess.org/training/DKj7y) | 694 | 捉雙 | 黑 | `8/8/7k/3K1np1/8/5P2/8/3B4 b - - 4 52` | 選「沒有」類選項 | 選「沒有」類選項 | Ng3、Nd6 ✅、Nh4 |
+| 20 | [UfrIO](https://lichess.org/training/UfrIO) | 696 | 一步殺 | 黑 | `r3kb1r/pR2pppp/2n2n2/2pp1Q2/3P1B2/2q2N2/P2NPPPP/4KB1R b Kkq - 0 9` | 選「沒有」類選項 | 選「將死」類選項 | Nd8、Qxd4 ✅、e6 |
+| 21 | [069i5](https://lichess.org/training/069i5) | 737 | 送子 | 黑 | `8/6pk/2pBp2p/3PPq2/3P4/8/4Q1PP/1R5K b - - 0 38` | 點出 c6 | 點出 b1、d5 | Qf1+ ✅、cxd5、exd5 |
+| 22 | [7XFqs](https://lichess.org/training/7XFqs) | 759 | 一步殺 | 白 | `1b6/8/b6p/3Pr3/1B1pBkp1/P2P4/1P5P/6K1 w - - 4 36` | 選「沒有」類選項 | 選「將死」類選項 | Ba5、Bh7 ✅、d6 |
+| 23 | [R58zn](https://lichess.org/training/R58zn) | 766 | 送子 | 黑 | `5rk1/5ppp/1pp5/3bR2q/5B2/6Q1/PPP2PPP/3R2K1 b - - 8 21` | 點出 h5 | 點出 a2、d1 | f5、Qh6 ✅、Qg6 |
+| 24 | [xiEb3](https://lichess.org/training/xiEb3) | 771 | 牽制 | 白 | `4b3/1p2kp1p/1r2p1p1/1P6/5P2/2N1R1K1/6P1/8 w - - 1 37` | 選「沒有」類選項 | 選「沒有」類選項 | Ne2 ✅、Rf3、Re5 |
+| 25 | [ZUUbk](https://lichess.org/training/ZUUbk) | 771 | 牽制 | 白 | `8/8/8/pRp1n2k/8/4K3/8/8 w - - 10 51` | 選「沒有」類選項 | 點出 a5、c5 | Rxa5、Rb6、Rb4 ✅ |
+| 26 | [G23cA](https://lichess.org/training/G23cA) | 773 | 捉雙 | 白 | `8/p7/1p3k1p/2p3p1/2P1P3/2bpN1P1/P6P/3K4 w - - 6 37` | 選「沒有」類選項 | 選「沒有」類選項 | Ng2、Nf1、e5+ ✅ |
+| 27 | [FdRS8](https://lichess.org/training/FdRS8) | 776 | 送子 | 白 | `2r3k1/5ppp/4p3/1q1pP3/p2P4/N4NP1/5PKP/2R5 w - - 0 28` | 點出 c1 | 點出 b5、c8 | Ng1 ✅、Rg1、Re1 |
+| 28 | [ecFie](https://lichess.org/training/ecFie) | 785 | 對方威脅將死 | 白 | `r1b2rk1/6p1/1p2p2p/1pnpP2P/2p5/2P2PN1/PP4P1/KR3B1R w - - 1 23` | 選「將死」類選項 | 選「沒有」類選項 | Rd1、Re1、Rh3 ✅ |
+| 29 | [fvWlP](https://lichess.org/training/fvWlP) | 821 | 一步殺 | 白 | `3r4/4k3/3N1R2/3KP3/3P4/8/8/r7 w - - 1 59` | 選「沒有」類選項 | 選「將死」類選項 | Rf5、Rf4、e6 ✅ |
+| 30 | [KTmjE](https://lichess.org/training/KTmjE) | 822 | 一步殺 | 白 | `5k2/6p1/3N1q1p/4Q3/r7/6P1/4P1BP/1b4K1 w - - 1 34` | 點出 e5 | 選「將死」類選項 | Qd5、Qb5 ✅、Qc5 |
+| 31 | [hQ68z](https://lichess.org/training/hQ68z) | 832 | 對方威脅將死 | 白 | `2Rb1rk1/1p3ppp/2nP4/4q1P1/7P/pP6/P1PQN3/1K1R4 w - - 0 27` | 選「將死」類選項 | 選「沒有」類選項 | c4、Rxd8 ✅、c3 |
+| 32 | [XNXht](https://lichess.org/training/XNXht) | 840 | 捉雙 | 黑 | `4r1n1/1ppn1p1k/1p3P1p/4pR1P/1PP1P1N1/P2r4/1B6/5RK1 b - - 2 34` | 選「沒有」類選項 | 選「沒有」類選項 | Ne7 ✅、c6、Re6 |
+| 33 | [iuEWm](https://lichess.org/training/iuEWm) | 845 | 捉雙 | 黑 | `6k1/2p2pp1/3p2p1/2pq4/P3R2P/3NQPn1/6PK/8 b - - 6 44` | 點出 g3 | 點出 e4 | Qb3 ✅、Nf5、Nh5 |
+| 34 | [TJlGq](https://lichess.org/training/TJlGq) | 850 | 捉雙 | 黑 | `2kN4/ppp5/8/5p1p/3q4/1P1P1Rb1/P1PQ1p2/5R1K b - - 0 34` | 點出 f5、g3 | 點出 d8 | Qe4 ✅、Qd5、Qg4 |
+| 35 | [da9mY](https://lichess.org/training/da9mY) | 856 | 送子 | 黑 | `2kr1b1r/p1p2p2/2Q5/6p1/2PqR3/1P4Pp/P2P1P1P/R5KB b - - 3 23` | 點出 d4 | 點出 a1、d2 | Qd3、Re8 ✅、Qxd2 |
+| 36 | [ehhRO](https://lichess.org/training/ehhRO) | 866 | 送子 | 黑 | `3r2k1/4rnp1/pp2p2p/3pP3/2B2P2/2P5/PP4PP/3RR1K1 b - - 0 27` | 點出 a6 | 點出 c4 | Nxe5 ✅、Ra8、Ra7 |
+| 37 | [Uo3nA](https://lichess.org/training/Uo3nA) | 867 | 一步殺 | 黑 | `2k4r/ppp1qppp/1r6/7b/4Q3/4PP1P/P1PB1PB1/2KR3R b - - 2 17` | 點出 e7 | 選「將死」類選項 | Qd6、Re8 ✅、Qg5 |
+| 38 | [kJQA9](https://lichess.org/training/kJQA9) | 872 | 一步殺 | 白 | `5rk1/p2q2b1/3p2n1/2pN4/6P1/1Q6/PP6/2K4R w - - 0 35` | 點出 g4 | 選「將死」類選項 | Qe3 ✅、Nc3+、Rg1 |
+| 39 | [XBTwS](https://lichess.org/training/XBTwS) | 878 | 牽制 | 黑 | `rn2k1nr/pp3pp1/2p1p3/7p/3q3P/2PB2NR/P3QPP1/R1B1K3 b Qkq - 0 14` | 點出 d4 | 點出 c3 | Rh6 ✅、Qa4、Qf6 |
+| 40 | [mmCFZ](https://lichess.org/training/mmCFZ) | 880 | 牽制 | 黑 | `3b2k1/p4bpp/5p2/1BN1p3/1p2P3/1P3P2/P1P2KPP/8 b - - 1 26` | 選「沒有」類選項 | 選「沒有」類選項 | Bc7、Ba5、Bxb3 ✅ |
+| 41 | [ItZVe](https://lichess.org/training/ItZVe) | 887 | 捉雙 | 白 | `8/8/8/7P/1k3b2/p1N5/2K5/8 w - - 5 63` | 選「沒有」類選項 | 選「沒有」類選項 | Na4 ✅、Nd1、Na2+ |
+| 42 | [MzlCN](https://lichess.org/training/MzlCN) | 895 | 送子 | 黑 | `r4rk1/2q1bpp1/p1n1bn1p/1p1p4/2pP1B2/2P2NN1/PPB2PPP/R2QR1K1 b - - 1 15` | 點出 c7 | 點出 f4 | Qb6、Qb7、Bg4 ✅ |
+| 43 | [eSgaa](https://lichess.org/training/eSgaa) | 904 | 一步殺 | 白 | `r2q1bkr/pppb2pp/8/2n1p1N1/3p4/5Q2/PPP2PPP/RNB3K1 w - - 0 13` | 選「沒有」類選項 | 選「將死」類選項 | Nf7、Qc6 ✅、Qd1 |
+| 44 | [sdNtJ](https://lichess.org/training/sdNtJ) | 906 | 一步殺 | 白 | `B1NQ1b1r/4pppp/k4n2/2p2q2/8/8/PPn2PPP/5K1R w - - 4 20` | 選「沒有」類選項 | 選「將死」類選項 | Be4 ✅、Nb6、f3 |
+| 45 | [JEBDV](https://lichess.org/training/JEBDV) | 920 | 捉雙 | 白 | `1r6/p3kp1p/4b1p1/2p5/3N4/2P5/P4PPP/4R1K1 w - - 0 23` | 點出 d4 | 選「沒有」類選項 | Nf3、Nc2、Rb1 ✅ |
+| 46 | [7SbJR](https://lichess.org/training/7SbJR) | 926 | 對方威脅將死 | 黑 | `3q1r2/rpp2kp1/p2p1nnp/3Pp3/2P1P1Q1/2N3P1/PPB4P/R4RK1 b - - 0 17` | 選「將死」類選項 | 選「沒有」類選項 | Qe8、Qe7、Nf4 ✅ |
+| 47 | [WywdY](https://lichess.org/training/WywdY) | 932 | 牽制 | 白 | `5qk1/1Q4p1/1p3n2/r6p/p2Pp1P1/4P2P/P4PK1/2R5 w - - 0 29` | 選「沒有」類選項 | 點出 b6 | Rc7、f4、Qd7 ✅ |
+| 48 | [XKTYL](https://lichess.org/training/XKTYL) | 942 | 牽制 | 黑 | `2r1kb1r/4pppp/p2p1n2/qb6/3PP3/4QN2/PP1B1PPP/RN2K2R b KQk - 8 13` | 點出 a5 | 選「將死」類選項 | Qc7、Rc2 ✅、Qd8 |
+| 49 | [lwRdC](https://lichess.org/training/lwRdC) | 946 | 一步殺 | 白 | `5k2/4rp2/p1r1pQp1/3pP3/8/2P2R2/5PPK/1q6 w - - 2 34` | 選「沒有」類選項 | 選「將死」類選項 | Rd3 ✅、Rh3、Qf4 |
+| 50 | [hOelk](https://lichess.org/training/hOelk) | 953 | 牽制 | 黑 | `2rr2k1/5ppp/bq2p3/1p1pn3/1P1N1P2/3B1N2/3Q2PP/R4RK1 b - - 1 21` | 點出 e5 | 選「沒有」類選項 | Qa5 ✅、Ng6、Nc6 |
+| 51 | [7v1xM](https://lichess.org/training/7v1xM) | 958 | 一步殺 | 黑 | `6k1/5pp1/2p5/1q2P3/P3Q1R1/7r/1PR2PK1/7r b - - 0 44` | 點出 b5 | 選「將死」類選項 | R1h2+、Qb6、c5 ✅ |
+| 52 | [Eh63i](https://lichess.org/training/Eh63i) | 959 | 送子 | 黑 | `4rk2/p2B1p1p/8/8/2P5/1P4QP/P1q2PP1/3R2K1 b - - 4 29` | 點出 e8 | 點出 a2、d1 | Qxf2+ ✅、Re7、Re2 |
+| 53 | [dmmmw](https://lichess.org/training/dmmmw) | 972 | 一步殺 | 白 | `1r4k1/7p/1q1p2pP/1B1P1p2/r3pP2/2Q5/P5P1/1KR5 w - - 0 37` | 點出 b5 | 選「將死」類選項 | Qc6、Qd3 ✅、Qb2 |
+| 54 | [QxAfr](https://lichess.org/training/QxAfr) | 987 | 送子 | 白 | `4r1k1/pp3p2/5qp1/2p5/P7/2Pr4/1P2QPK1/7R w - - 0 30` | 點出 e2 | 點出 d3、e8 | Rg1 ✅、Qg4、Qf1 |
+| 55 | [MdmAH](https://lichess.org/training/MdmAH) | 990 | 捉雙 | 黑 | `8/6r1/3k4/4n1P1/8/8/1Q3K2/8 b - - 24 74` | 選「沒有」類選項 | 點出 g5 | Rh7、Nc6 ✅、Rd7 |
+| 56 | [blWvG](https://lichess.org/training/blWvG) | 992 | 送子 | 黑 | `8/pQ1n1kp1/4R3/2b4p/6q1/8/P1P2PPP/3R2K1 b - - 0 26` | 點出 d7 | 點出 d1、e6 | Qa4、Qe2 ✅、Qxe6 |
+| 57 | [yzjbK](https://lichess.org/training/yzjbK) | 992 | 捉雙 | 白 | `r2k3r/ppp3pp/3p1p2/3PN3/1P6/6P1/P1P1bPBP/2K1R3 w - - 0 20` | 點出 e5 | 點出 e2 | Bh1 ✅、Nf3、Nd3 |
+| 58 | [zfXVc](https://lichess.org/training/zfXVc) | 992 | 對方威脅將死 | 黑 | `r4rk1/1b2pp1p/p2q2p1/1ppp4/2P2PN1/1P1PP3/PQ4PP/R4RK1 b - - 3 18` | 選「將死」類選項 | 選「沒有」類選項 | Qf6 ✅、Rfb8、d4 |
+| 59 | [SzMp0](https://lichess.org/training/SzMp0) | 993 | 牽制 | 黑 | `r3k2r/pp3pp1/1qn1p1p1/3pPn2/5P2/2NB4/P2BQ1PP/R4R1K b kq - 4 17` | 選「沒有」類選項 | 選「將死」類選項 | Na5、Qg1+ ✅、Qc7 |
+| 60 | [9hXEk](https://lichess.org/training/9hXEk) | 995 | 送子 | 白 | `8/1b4k1/6p1/1P1B4/1K6/5p2/8/8 w - - 0 63` | 點出 d5 | 點出 b7 | Bf7 ✅、Bc6、Be6 |
+| 61 | [4H851](https://lichess.org/training/4H851) | 996 | 送子 | 白 | `2r3k1/pp3ppp/8/3r3P/P5Q1/1q6/5PP1/3R2K1 w - - 0 26` | 選「沒有」類選項 | 點出 c8 | Rd2 ✅、Rf1、Ra1 |
+| 62 | [y0aRI](https://lichess.org/training/y0aRI) | 1039 | 對方威脅將死 | 黑 | `q7/6QK/6p1/7k/6r1/8/8/8 b - - 4 62` | 選「將死」類選項 | 選「沒有」類選項 | Rg2、Rg1、Rc4 ✅ |
+| 63 | [GbuVW](https://lichess.org/training/GbuVW) | 1058 | 牽制 | 黑 | `rn2kb1r/1pq2pp1/2p1p1p1/p3N3/3P4/1NQ3P1/PPP2P1P/R3K2R b KQkq - 1 16` | 選「沒有」類選項 | 選「沒有」類選項 | Ra6、Ba3 ✅、Rh7 |
+| 64 | [s8RW2](https://lichess.org/training/s8RW2) | 1061 | 捉雙 | 黑 | `3r1k1r/p3pp1p/Q5p1/4q3/8/1PNnB3/P1K2PPP/2R4R b - - 0 27` | 點出 a7 | 點出 c1 | Qg7 ✅、Rd7、Qb8 |
+| 65 | [6WhdB](https://lichess.org/training/6WhdB) | 1067 | 捉雙 | 黑 | `r1bq1rk1/pp2npbp/2n1p1p1/2N1P3/3p1P2/3P2P1/PPP1N1BP/R1BQK2R b KQ - 0 10` | 選「沒有」類選項 | 選「沒有」類選項 | Nf5、f6、Qd5 ✅ |
+| 66 | [I7Zkt](https://lichess.org/training/I7Zkt) | 1075 | 送子 | 白 | `2r4k/5rpp/p7/1p1Bb3/4P1Q1/P2q3P/1P4P1/4R1K1 w - - 0 27` | 點出 b2 | 點出 c8、f7 | Re2、Ba8 ✅、Qe2 |
+| 67 | [hI74A](https://lichess.org/training/hI74A) | 1082 | 對方威脅將死 | 黑 | `3q1k2/1b6/3bQpp1/7p/7P/P1P1BPP1/1P6/6K1 b - - 0 52` | 選「將死」類選項 | 點出 f3、g3 | Qe7、Ba6 ✅、Be7 |
+| 68 | [RA6Ys](https://lichess.org/training/RA6Ys) | 1085 | 牽制 | 黑 | `3r4/7p/1Q4pk/2p2p2/5b2/PKP4P/1P4P1/8 b - - 0 32` | 點出 c5、d8 | 選「沒有」類選項 | Rd5、Bc7 ✅、Rc8 |
+| 69 | [E4kSB](https://lichess.org/training/E4kSB) | 1094 | 送子 | 黑 | `6k1/5pbp/4p1p1/1Q2q3/3r4/2R1B1PP/P4P1K/8 b - - 0 29` | 點出 d4 | 點出 b5 | Qe4 ✅、Rd8、Re4 |
+| 70 | [XXh32](https://lichess.org/training/XXh32) | 1098 | 一步殺 | 黑 | `6k1/1p4pp/p7/4Pp2/P1q2P1b/2B2K1P/1P6/3Q4 b - - 4 30` | 選「沒有」類選項 | 選「將死」類選項 | Qc7、Bd8 ✅、Qa2 |
 
 ### 解釋文字（答完顯示）
 
@@ -90,290 +100,340 @@
 - Q2：你的后可以吃掉對方沒有保護的 e1 車；你的車可以吃掉對方沒有保護的 b2 兵。
 - Q3：走 Rfe8 之後，對方的車可以吃掉你價值較高的 e6 后。另外兩步是安全的。
 
-**4. enhjq**
+**4. jz35I**
+- Q1：對方的兵可以吃掉你價值較高的 c3 后。
+- Q2：你走 Qc8# 就可以將死對方。
+- Q3：走 Ba3 之後，對方的兵可以吃掉你沒有保護的 c3 后。另外兩步是安全的。
+
+**5. f8np6**
+- Q1：假如輪到對方走，對方走 Rd8# 就可以將死你。
+- Q2：你的馬可以吃掉對方沒有保護的 b3 兵。
+- Q3：走 Na4 之後，對方走 Rd8# 就可以將死你。另外兩步是安全的。
+
+**6. enhjq**
 - Q1：對方的車可以吃掉你沒有保護的 c6 馬。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Nb8 之後，對方的車可以吃掉你沒有保護的 b8 馬。另外兩步是安全的。
 
-**5. SB6PX**
-- Q1：對方的馬可以吃掉你價值較高的 e4 后。
-- Q2：你走 Qxh7# 就可以將死對方。
-- Q3：走 Re3 之後，對方的馬可以吃掉你價值較高的 e4 后。另外兩步是安全的。
-
-**6. 3V1DH**
+**7. 3V1DH**
 - Q1：對方的馬可以吃掉你價值較高的 d4 車。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Rh4 之後，對方的馬可以吃掉你沒有保護的 h4 車。另外兩步是安全的。
 
-**7. dU50E**
+**8. 8iDwM**
+- Q1：假如輪到對方走，對方走 Qd8# 就可以將死你。
+- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
+- Q3：走 Rb1 之後，對方走 Qd8# 就可以將死你。另外兩步是安全的。
+
+**9. dU50E**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你的車可以吃掉對方沒有保護的 b7 兵。
 - Q3：走 Rh7 之後，對方的王可以吃掉你沒有保護的 h7 車。另外兩步是安全的。
-
-**8. EGXZl**
-- Q1：對方的兵可以吃掉你沒有保護的 g4 后。
-- Q2：你走 Qxg7# 就可以將死對方。
-- Q3：走 Bxg7 之後，對方的兵可以吃掉你沒有保護的 g4 后。另外兩步是安全的。
-
-**9. FYJaI**
-- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
-- Q2：你走 Qxf7# 就可以將死對方。
-- Q3：走 Qf6 之後，對方的馬可以吃掉你沒有保護的 f6 后。另外兩步是安全的。
 
 **10. QI576**
 - Q1：對方的車可以吃掉你沒有保護的 f2 兵。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Re6 之後，對方的車可以吃掉你沒有保護的 f2 兵。另外兩步是安全的。
 
-**11. wcocX**
+**11. ZVrTy**
+- Q1：假如輪到對方走，對方走 Re5# 就可以將死你。
+- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
+- Q3：走 Ra8 之後，對方走 Re5# 就可以將死你。另外兩步是安全的。
+
+**12. wcocX**
 - Q1：對方的象可以吃掉你沒有保護的 e4 馬。
 - Q2：你走 Rc1# 就可以將死對方。
 - Q3：走 Nf6 之後，對方的王可以吃掉你沒有保護的 f2 車。另外兩步是安全的。
 
-**12. 2Wn7O**
+**13. DW5o3**
+- Q1：對方的后可以吃掉你沒有保護的 h2 兵。
+- Q2：你走 Qd8# 就可以將死對方。
+- Q3：走 Rf1 之後，對方的后可以吃掉你沒有保護的 h2 兵。另外兩步是安全的。
+
+**14. 2Wn7O**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你的象可以吃掉對方價值較高的 c2 車。
 - Q3：走 Rc8 之後，對方的后可以吃掉你沒有保護的 e5 車。另外兩步是安全的。
 
-**13. EZq17**
+**15. EZq17**
 - Q1：對方的車可以吃掉你沒有保護的 f2 兵。
 - Q2：你的車可以吃掉對方沒有保護的 f8 象。
 - Q3：走 Bf1 之後，對方的車可以吃掉你沒有保護的 f2 兵。另外兩步是安全的。
 
-**14. NfzFV**
+**16. NfzFV**
 - Q1：對方的車可以吃掉你沒有保護的 c6 馬。
 - Q2：你的馬可以吃掉對方沒有保護的 a7 兵。
 - Q3：走 Ne5 之後，對方的兵可以吃掉你沒有保護的 e5 馬。另外兩步是安全的。
 
-**15. 7iL9v**
+**17. 7iL9v**
 - Q1：對方的后可以吃掉你沒有保護的 e3 車；對方的后可以吃掉你沒有保護的 f7 兵。
 - Q2：你的象可以吃掉對方價值較高的 g2 車。
 - Q3：走 Bb5 之後，對方的后可以吃掉你沒有保護的 e3 車。另外兩步是安全的。
 
-**16. DKj7y**
+**18. DTzIC**
+- Q1：假如輪到對方走，對方走 Qg2# 就可以將死你。
+- Q2：你的兵可以吃掉對方價值較高的 f6 馬。
+- Q3：走 Nxg7 之後，對方走 Qg2# 就可以將死你。另外兩步是安全的。
+
+**19. DKj7y**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Nd6 之後，對方的王可以吃掉你沒有保護的 d6 馬。另外兩步是安全的。
 
-**17. 069i5**
+**20. UfrIO**
+- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
+- Q2：你走 Qc1# 就可以將死對方。
+- Q3：走 Qxd4 之後，對方的馬可以吃掉你價值較高的 d4 后。另外兩步是安全的。
+
+**21. 069i5**
 - Q1：對方的兵可以吃掉你沒有保護的 c6 兵。
 - Q2：你的后可以吃掉對方沒有保護的 b1 車；你的兵可以吃掉對方沒有保護的 d5 兵；你的兵可以吃掉對方沒有保護的 d5 兵。
 - Q3：走 Qf1+ 之後，對方的后可以吃掉你沒有保護的 f1 后。另外兩步是安全的。
 
-**18. 7XFqs**
+**22. 7XFqs**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你走 Bd2# 就可以將死對方。
 - Q3：走 Bh7 之後，對方的車可以吃掉你沒有保護的 d5 兵。另外兩步是安全的。
 
-**19. R58zn**
+**23. R58zn**
 - Q1：對方的車可以吃掉你沒有保護的 h5 后。
 - Q2：你的后可以吃掉對方沒有保護的 d1 車；你的象可以吃掉對方沒有保護的 a2 兵。
 - Q3：走 Qh6 之後，對方的象可以吃掉你價值較高的 h6 后。另外兩步是安全的。
 
-**20. QlYYC**
-- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
-- Q2：你走 Qxh7# 就可以將死對方。
-- Q3：走 Qxf8+ 之後，對方的車可以吃掉你沒有保護的 f8 后。另外兩步是安全的。
-
-**21. ZUUbk**
-- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
-- Q2：你的車可以吃掉對方沒有保護的 c5 兵；你的車可以吃掉對方沒有保護的 a5 兵。
-- Q3：走 Rb4 之後，對方的兵可以吃掉你沒有保護的 b4 車。另外兩步是安全的。
-
-**22. xiEb3**
+**24. xiEb3**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Ne2 之後，對方的象可以吃掉你沒有保護的 b5 兵。另外兩步是安全的。
 
-**23. G23cA**
+**25. ZUUbk**
+- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
+- Q2：你的車可以吃掉對方沒有保護的 c5 兵；你的車可以吃掉對方沒有保護的 a5 兵。
+- Q3：走 Rb4 之後，對方的兵可以吃掉你沒有保護的 b4 車。另外兩步是安全的。
+
+**26. G23cA**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 e5+ 之後，對方的王可以吃掉你沒有保護的 e5 兵。另外兩步是安全的。
 
-**24. FdRS8**
+**27. FdRS8**
 - Q1：對方的車可以吃掉你沒有保護的 c1 車。
 - Q2：你的馬可以吃掉對方沒有保護的 b5 后；你的車可以吃掉對方沒有保護的 c8 車。
 - Q3：走 Ng1 之後，對方的車可以吃掉你沒有保護的 c1 車。另外兩步是安全的。
 
-**25. CxYbj**
-- Q1：對方的馬可以吃掉你沒有保護的 c5 兵。
-- Q2：你的象可以吃掉對方沒有保護的 a4 馬。
-- Q3：走 e5 之後，對方的馬可以吃掉你沒有保護的 c5 兵。另外兩步是安全的。
+**28. ecFie**
+- Q1：假如輪到對方走，對方走 Nb3# 就可以將死你。
+- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
+- Q3：走 Rh3 之後，對方走 Nb3# 就可以將死你。另外兩步是安全的。
 
-**26. KTmjE**
+**29. fvWlP**
+- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
+- Q2：你走 Rf7# 就可以將死對方。
+- Q3：走 e6 之後，對方的王可以吃掉你沒有保護的 f6 車。另外兩步是安全的。
+
+**30. KTmjE**
 - Q1：對方的后可以吃掉你沒有保護的 e5 后。
 - Q2：你走 Qe8# 就可以將死對方。
 - Q3：走 Qb5 之後，對方的后可以吃掉你沒有保護的 d6 馬。另外兩步是安全的。
 
-**27. XNXht**
+**31. hQ68z**
+- Q1：假如輪到對方走，對方走 Qb2# 就可以將死你。
+- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
+- Q3：走 Rxd8 之後，對方走 Qb2# 就可以將死你。另外兩步是安全的。
+
+**32. XNXht**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Ne7 之後，對方的兵可以吃掉你價值較高的 e7 馬。另外兩步是安全的。
 
-**28. WSU09**
-- Q1：對方的后可以吃掉你沒有保護的 b8 車。
-- Q2：你走 Qg2# 就可以將死對方。
-- Q3：走 Qxd3 之後，對方的兵可以吃掉你沒有保護的 d3 后。另外兩步是安全的。
+**33. iuEWm**
+- Q1：對方的王可以吃掉你沒有保護的 g3 馬。
+- Q2：你的馬可以吃掉對方價值較高的 e4 車。
+- Q3：走 Qb3 之後，對方的王可以吃掉你沒有保護的 g3 馬。另外兩步是安全的。
 
-**29. TJlGq**
+**34. TJlGq**
 - Q1：對方的車可以吃掉你沒有保護的 g3 象；對方的車可以吃掉你沒有保護的 f5 兵。
 - Q2：你的王可以吃掉對方沒有保護的 d8 馬；你的后可以吃掉對方沒有保護的 d8 馬。
 - Q3：走 Qe4 之後，對方的兵可以吃掉你價值較高的 e4 后。另外兩步是安全的。
 
-**30. da9mY**
+**35. da9mY**
 - Q1：對方的車可以吃掉你價值較高的 d4 后。
 - Q2：你的后可以吃掉對方沒有保護的 a1 車；你的后可以吃掉對方沒有保護的 d2 兵。
 - Q3：走 Re8 之後，對方的車可以吃掉你沒有保護的 d4 后。另外兩步是安全的。
 
-**31. ehhRO**
+**36. ehhRO**
 - Q1：對方的象可以吃掉你沒有保護的 a6 兵。
 - Q2：你的兵可以吃掉對方沒有保護的 c4 象。
 - Q3：走 Nxe5 之後，對方的兵可以吃掉你沒有保護的 e5 馬。另外兩步是安全的。
 
-**32. XBTwS**
+**37. Uo3nA**
+- Q1：對方的后可以吃掉你沒有保護的 e7 后。
+- Q2：你走 Qa3# 就可以將死對方。
+- Q3：走 Re8 之後，對方的后可以吃掉你沒有保護的 h7 兵。另外兩步是安全的。
+
+**38. kJQA9**
+- Q1：對方的后可以吃掉你沒有保護的 g4 兵。
+- Q2：你走 Ne7# 就可以將死對方。
+- Q3：走 Qe3 之後，對方的后可以吃掉你沒有保護的 g4 兵。另外兩步是安全的。
+
+**39. XBTwS**
 - Q1：對方的兵可以吃掉你沒有保護的 d4 后。
 - Q2：你的后可以吃掉對方沒有保護的 c3 兵。
 - Q3：走 Rh6 之後，對方的兵可以吃掉你沒有保護的 d4 后。另外兩步是安全的。
 
-**33. mmCFZ**
+**40. mmCFZ**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Bxb3 之後，對方的馬可以吃掉你沒有保護的 b3 象。另外兩步是安全的。
 
-**34. ItZVe**
+**41. ItZVe**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Na4 之後，對方的王可以吃掉你沒有保護的 a4 馬。另外兩步是安全的。
 
-**35. MzlCN**
+**42. MzlCN**
 - Q1：對方的象可以吃掉你沒有保護的 c7 后。
 - Q2：你的后可以吃掉對方沒有保護的 f4 象。
 - Q3：走 Bg4 之後，對方的象可以吃掉你沒有保護的 c7 后。另外兩步是安全的。
 
-**36. eSgaa**
+**43. eSgaa**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你走 Qf7# 就可以將死對方。
 - Q3：走 Qc6 之後，對方的兵可以吃掉你沒有保護的 c6 后。另外兩步是安全的。
 
-**37. sdNtJ**
+**44. sdNtJ**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你走 Qb6# 就可以將死對方。
 - Q3：走 Be4 之後，對方的馬可以吃掉你沒有保護的 e4 象。另外兩步是安全的。
 
-**38. JEBDV**
+**45. JEBDV**
 - Q1：對方的兵可以吃掉你價值較高的 d4 馬。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Rb1 之後，對方走 Rxb1# 就可以將死你。另外兩步是安全的。
 
-**39. WywdY**
+**46. 7SbJR**
+- Q1：假如輪到對方走，對方走 Qe6# 就可以將死你。
+- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
+- Q3：走 Nf4 之後，對方的兵可以吃掉你價值較高的 f4 馬。另外兩步是安全的。
+
+**47. WywdY**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你的后可以吃掉對方沒有保護的 b6 兵。
 - Q3：走 Qd7 之後，對方的馬可以吃掉你沒有保護的 d7 后。另外兩步是安全的。
 
-**40. XKTYL**
+**48. XKTYL**
 - Q1：對方的象可以吃掉你沒有保護的 a5 后。
 - Q2：你走 Rc1# 就可以將死對方。
 - Q3：走 Rc2 之後，對方的象可以吃掉你沒有保護的 a5 后。另外兩步是安全的。
 
-**41. lwRdC**
+**49. lwRdC**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你走 Qh8# 就可以將死對方。
 - Q3：走 Rd3 之後，對方的后可以吃掉你沒有保護的 d3 車。另外兩步是安全的。
 
-**42. hOelk**
+**50. hOelk**
 - Q1：對方的兵可以吃掉你沒有保護的 e5 馬；對方的馬可以吃掉你沒有保護的 e5 馬。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Qa5 之後，對方的兵可以吃掉你沒有保護的 a5 后。另外兩步是安全的。
 
-**43. 7v1xM**
+**51. 7v1xM**
 - Q1：對方的兵可以吃掉你價值較高的 b5 后。
 - Q2：你走 Qf1# 就可以將死對方。
 - Q3：走 c5 之後，對方的兵可以吃掉你沒有保護的 b5 后。另外兩步是安全的。
 
-**44. Eh63i**
+**52. Eh63i**
 - Q1：對方的象可以吃掉你價值較高的 e8 車。
 - Q2：你的后可以吃掉對方沒有保護的 d1 車；你的后可以吃掉對方沒有保護的 a2 兵。
 - Q3：走 Qxf2+ 之後，對方的后可以吃掉你沒有保護的 f2 后。另外兩步是安全的。
 
-**45. dmmmw**
+**53. dmmmw**
 - Q1：對方的后可以吃掉你沒有保護的 b5 象。
 - Q2：你走 Qg7# 就可以將死對方。
 - Q3：走 Qd3 之後，對方的兵可以吃掉你價值較高的 d3 后。另外兩步是安全的。
 
-**46. QxAfr**
+**54. QxAfr**
 - Q1：對方的車可以吃掉你沒有保護的 e2 后。
 - Q2：你的后可以吃掉對方沒有保護的 d3 車；你的后可以吃掉對方沒有保護的 e8 車。
 - Q3：走 Rg1 之後，對方的車可以吃掉你沒有保護的 e2 后。另外兩步是安全的。
 
-**47. MdmAH**
+**55. MdmAH**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你的車可以吃掉對方沒有保護的 g5 兵。
 - Q3：走 Nc6 之後，對方的后可以吃掉你沒有保護的 g7 車。另外兩步是安全的。
 
-**48. yzjbK**
+**56. blWvG**
+- Q1：對方的后可以吃掉你沒有保護的 d7 馬；對方的車可以吃掉你沒有保護的 d7 馬。
+- Q2：你的王可以吃掉對方沒有保護的 e6 車；你的后可以吃掉對方沒有保護的 e6 車；你的后可以吃掉對方沒有保護的 d1 車。
+- Q3：走 Qe2 之後，對方的車可以吃掉你沒有保護的 e2 后。另外兩步是安全的。
+
+**57. yzjbK**
 - Q1：對方的兵可以吃掉你沒有保護的 e5 馬；對方的兵可以吃掉你沒有保護的 e5 馬。
 - Q2：你的車可以吃掉對方沒有保護的 e2 象。
 - Q3：走 Bh1 之後，對方的兵可以吃掉你沒有保護的 e5 馬。另外兩步是安全的。
 
-**49. SzMp0**
+**58. zfXVc**
+- Q1：假如輪到對方走，對方走 Nh6# 就可以將死你。
+- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
+- Q3：走 Qf6 之後，對方的馬可以吃掉你價值較高的 f6 后。另外兩步是安全的。
+
+**59. SzMp0**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你走 Ng3# 就可以將死對方。
 - Q3：走 Qg1+ 之後，對方的車可以吃掉你沒有保護的 g1 后。另外兩步是安全的。
 
-**50. 9hXEk**
+**60. 9hXEk**
 - Q1：對方的象可以吃掉你沒有保護的 d5 象。
 - Q2：你的象可以吃掉對方沒有保護的 b7 象。
 - Q3：走 Bf7 之後，對方的王可以吃掉你沒有保護的 f7 象。另外兩步是安全的。
 
-**51. 4H851**
+**61. 4H851**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：你的后可以吃掉對方沒有保護的 c8 車。
 - Q3：走 Rd2 之後，對方的車可以吃掉你沒有保護的 d2 車。另外兩步是安全的。
 
-**52. GbuVW**
+**62. y0aRI**
+- Q1：假如輪到對方走，對方走 Qh6# 就可以將死你。
+- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
+- Q3：走 Rc4 之後，對方的后可以吃掉你沒有保護的 g6 兵。另外兩步是安全的。
+
+**63. GbuVW**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Ba3 之後，對方的兵可以吃掉你沒有保護的 a3 象。另外兩步是安全的。
 
-**53. 0VOtI**
-- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
-- Q2：你走 Qxh6# 就可以將死對方。
-- Q3：走 Bxf5 之後，對方的兵可以吃掉你沒有保護的 f5 象。另外兩步是安全的。
-
-**54. s8RW2**
+**64. s8RW2**
 - Q1：對方的后可以吃掉你沒有保護的 a7 兵；對方的象可以吃掉你沒有保護的 a7 兵。
 - Q2：你的馬可以吃掉對方價值較高的 c1 車。
 - Q3：走 Qg7 之後，對方的后可以吃掉你沒有保護的 a7 兵。另外兩步是安全的。
 
-**55. 6WhdB**
+**65. 6WhdB**
 - Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Qd5 之後，對方的象可以吃掉你價值較高的 d5 后。另外兩步是安全的。
 
-**56. I7Zkt**
+**66. I7Zkt**
 - Q1：對方的象可以吃掉你沒有保護的 b2 兵。
 - Q2：你的象可以吃掉對方沒有保護的 f7 車；你的后可以吃掉對方沒有保護的 c8 車。
 - Q3：走 Ba8 之後，對方的車可以吃掉你沒有保護的 a8 象。另外兩步是安全的。
 
-**57. 22FAH**
-- Q1：對方的后可以吃掉你沒有保護的 h5 后。
-- Q2：你走 Qxh7# 就可以將死對方。
-- Q3：走 f3 之後，對方的后可以吃掉你沒有保護的 h5 后。另外兩步是安全的。
+**67. hI74A**
+- Q1：假如輪到對方走，對方走 Bh6# 就可以將死你。
+- Q2：你的象可以吃掉對方沒有保護的 f3 兵；你的象可以吃掉對方沒有保護的 g3 兵。
+- Q3：走 Ba6 之後，對方走 Bh6# 就可以將死你。另外兩步是安全的。
 
-**58. RA6Ys**
+**68. RA6Ys**
 - Q1：對方的后可以吃掉你沒有保護的 d8 車；對方的后可以吃掉你沒有保護的 c5 兵。
 - Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
 - Q3：走 Bc7 之後，對方的后可以吃掉你沒有保護的 c7 象。另外兩步是安全的。
 
-**59. 2cpHp**
-- Q1：假如輪到對方走，對方走 Qxg2# 就可以將死你。
-- Q2：目前沒有可以白吃的對方棋子，也沒有一步將死的機會。
-- Q3：走 Ra1 之後，對方走 Qxg2# 就可以將死你。另外兩步是安全的。
-
-**60. E4kSB**
+**69. E4kSB**
 - Q1：對方的象可以吃掉你價值較高的 d4 車。
 - Q2：你的后可以吃掉對方沒有保護的 b5 后。
 - Q3：走 Qe4 之後，對方的象可以吃掉你價值較高的 d4 車。另外兩步是安全的。
+
+**70. XXh32**
+- Q1：假如輪到對方走，對方沒有可以白吃你的棋子，也沒有一步將死的威脅。
+- Q2：你走 Qe4# 就可以將死對方。
+- Q3：走 Bd8 之後，對方的后可以吃掉你沒有保護的 d8 象。另外兩步是安全的。
 
 ## 二、開局路線（最終走法＋每步解釋＋引擎驗證）
 
@@ -395,7 +455,7 @@
 | 4 | 2…Nc6 | 對方（自動） | 黑方走 Nc6：出馬，並保護 e5 兵。 | — |
 | 5 | 3.Bc4 | 學習者 | 白方出象到 c4：瞄準對方較弱的 f7，同時是出子。 | 跌幅 0.006（引擎最佳：d4） |
 | 6 | 3…Bc5 | 對方（自動） | 黑方走 Bc5：出象，同樣瞄準對方的 f2。 | — |
-| 7 | 4.c3 | 學習者 | 白方走 c3：準備下一步 d4，爭取更多中心空間。 | 跌幅 0（引擎最佳：d3） |
+| 7 | 4.c3 | 學習者 | 白方走 c3：為日後推進 d4 做準備，爭取更多中心空間。 | 跌幅 0（引擎最佳：d3） |
 | 8 | 4…Nf6 | 對方（自動） | 黑方走 Nf6：出另一枚馬，並攻擊 e4 兵。 | — |
 | 9 | 5.d3 | 學習者 | 白方走 d3：保護 e4 兵，同時讓 c1 的象有出路。 | 跌幅 0（引擎最佳：d4） |
 | 10 | 5…d6 | 對方（自動） | 黑方走 d6：保護 e5 兵，也讓 c8 的象有出路。 | — |
@@ -432,10 +492,10 @@
 | 1 | 1.e4 | 學習者 | 白方走 e4：用兵佔據中心，同時打開象和后的出路。 | 跌幅 0（引擎最佳步） |
 | 2 | 1…e5 | 對方（自動） | 黑方也走 e5：同樣控制中心。 | — |
 | 3 | 2.Nf3 | 學習者 | 白方出馬到 f3：出子，同時攻擊 e5 兵。開局先出子，比亂走兵更重要。 | 跌幅 0（引擎最佳：Nc3） |
-| 4 | 2…d6 | 對方（自動） | 黑方走 d6：保護 e5 兵，但這樣會限制自己 c8 的象。 | — |
+| 4 | 2…d6 | 對方（自動） | 黑方走 d6：保護 e5 兵，但這樣會限制自己 f8 的象。 | — |
 | 5 | 3.d4 | 學習者 | 白方走 d4：用兵爭奪中心，這是對付 d6 最直接的走法。 | 跌幅 0（引擎最佳步） |
 | 6 | 3…exd4 | 對方（自動） | 黑方走 exd4：吃掉白兵，交換中心兵。 | — |
-| 7 | 4.Nxd4 | 學習者 | 白方用馬吃回 d4：出子的同時奪回兵，馬佔據中心。 | 跌幅 0（引擎最佳步） |
+| 7 | 4.Nxd4 | 學習者 | 白方走 Nxd4：用馬吃回兵，馬同時佔據中心。 | 跌幅 0（引擎最佳步） |
 | 8 | 4…Nf6 | 對方（自動） | 黑方走 Nf6：出馬，並攻擊 e4 兵。 | — |
 | 9 | 5.Nc3 | 學習者 | 白方走 Nc3：出另一枚馬，並保護 e4 兵。 | 跌幅 0（引擎最佳步） |
 | 10 | 5…Be7 | 對方（自動） | 黑方走 Be7：出象，為易位做準備。 | — |
@@ -457,7 +517,7 @@
 | 4 | 2…Nc6 | 學習者 | 黑方走 Nc6：出馬，並保護 e5 兵。 | 跌幅 0（引擎最佳步） |
 | 5 | 3.Bc4 | 對方（自動） | 白方出象到 c4：瞄準對方較弱的 f7，同時是出子。 | — |
 | 6 | 3…Bc5 | 學習者 | 黑方走 Bc5：出象，同樣瞄準對方的 f2。 | 跌幅 0（引擎最佳：Nf6） |
-| 7 | 4.c3 | 對方（自動） | 白方走 c3：準備下一步 d4，爭取更多中心空間。 | — |
+| 7 | 4.c3 | 對方（自動） | 白方走 c3：為日後推進 d4 做準備，爭取更多中心空間。 | — |
 | 8 | 4…Nf6 | 學習者 | 黑方走 Nf6：出另一枚馬，並攻擊 e4 兵。 | 跌幅 0（引擎最佳步） |
 | 9 | 5.d3 | 對方（自動） | 白方走 d3：保護 e4 兵，同時讓 c1 的象有出路。 | — |
 | 10 | 5…d6 | 學習者 | 黑方走 d6：保護 e5 兵，也讓 c8 的象有出路。 | 跌幅 0（引擎最佳步） |
@@ -479,7 +539,7 @@
 | 5 | 3.Bc4 | 對方（自動） | 白方出象到 c4：瞄準 f7，威脅 Qxf7 將死（學者殺法）。 | — |
 | 6 | 3…g6 | 學習者 | 黑方走 g6：攻擊白后，同時擋住后對 f7 的攻擊。 | 跌幅 0（引擎最佳：Qe7） |
 | 7 | 4.Qf3 | 對方（自動） | 白后退到 f3：繼續瞄準 f7，但已經失去了先手。 | — |
-| 8 | 4…Nf6 | 學習者 | 黑方走 Nf6：出馬保護 f7，同時出子，防守完成。 | 跌幅 0（引擎最佳步） |
+| 8 | 4…Nf6 | 學習者 | 黑方走 Nf6：出馬擋住白后對 f7 的攻擊，同時出子，防守完成。 | 跌幅 0（引擎最佳步） |
 
 ### 對 2.Bc4（學習者執黑，id：`b-bishop`）
 
@@ -512,9 +572,9 @@
 | 4 | `r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3`（黑） | h6（-0.135／-74）、a6（-0.162／-89）、Bc5（-0.044／-24） | **Bc5** | 0.091 | 出象到 c5：出子，控制中心對角線。a6、h6 沒有出子，落後於對方的出子速度。 |
 | 5 | `r1bqk2r/ppp2ppp/2np1n2/2b1p3/2B1P3/2PP1N2/PP3PPP/RNBQK2R w KQkq - 0 6`（白） | O-O（0.031／17）、h4（-0.114／-62）、Ke2（-0.17／-93） | **O-O** | 0.145 | 易位：王走到安全位置，車也出動。h4 和 Ke2 都沒有幫助出子，Ke2 還令王留在中心。 |
 | 6 | `r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/2P2N2/PP1P1PPP/RNBQK2R b KQkq - 0 4`（黑） | a6（-0.217／-120）、Nf6（-0.028／-15）、h6（-0.296／-166） | **Nf6** | 0.19 | 走 Nf6：出另一枚馬，並攻擊 e4 兵。h6、a6 不是出子。 |
-| 7 | `rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2`（黑） | h6（-0.219／-121）、a6（-0.11／-60）、Nc6（0.063／34） | **Nc6** | 0.173 | 走 Nc6：出馬並保護 e5 兵，不用急着趕走對方的后。 |
+| 7 | `rnbqkbnr/pppp1ppp/8/4p2Q/4P3/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2`（黑） | h6（-0.219／-121）、a6（-0.11／-60）、Nc6（0.063／34） | **Nc6** | 0.173 | 走 Nc6：出馬並保護 e5 兵，不用急著趕走對方的后。 |
 | 8 | `rnbqkb1r/pppp1ppp/4pn2/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq - 1 3`（黑） | a6（-0.18／-99）、h6（-0.168／-92）、d5（-0.031／-17） | **d5** | 0.136 | 走 d5：用兵爭奪中心。a6、h6 都不是出子，也不爭中心。 |
-| 9 | `r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4`（白） | Nxd4（0.052／28）、Qxd4（-0.846／-674）、h3（-0.037／-20） | **Nxd4** | 0.088 | 用馬吃回 d4：出子並奪回兵。Qxd4 會被 Nxd4 吃掉后。 |
+| 9 | `r1bqkbnr/pppp1ppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4`（白） | Nxd4（0.052／28）、Qxd4（-0.846／-674）、h3（-0.037／-20） | **Nxd4** | 0.088 | 用馬吃回 d4 的兵，馬同時佔據中心。Qxd4 會被 Nxd4 吃掉后。 |
 | 10 | `rnbqkbnr/ppp2ppp/3p4/4p3/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3`（黑） | h6（-0.237／-131）、Qd7（-0.291／-163）、Nf6（-0.101／-55） | **Nf6** | 0.136 | 走 Nf6：出馬並攻擊 e4 兵。Qd7 把后太早放出來，還擋住象的出路。 |
 
 候選題共 18 題，合格 11 題，取頭 10 題。不合格（已換走）：

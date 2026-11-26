@@ -1,0 +1,138 @@
+{
+ "changed": [
+  {
+   "id": "SB6PX",
+   "theme": "mateIn1",
+   "rating": 482,
+   "reasons": [
+    "局面不再適用"
+   ]
+  },
+  {
+   "id": "EGXZl",
+   "theme": "mateIn1",
+   "rating": 570,
+   "reasons": [
+    "局面不再適用"
+   ]
+  },
+  {
+   "id": "FYJaI",
+   "theme": "mateIn1",
+   "rating": 583,
+   "reasons": [
+    "局面不再適用"
+   ]
+  },
+  {
+   "id": "QlYYC",
+   "theme": "mateIn1",
+   "rating": 770,
+   "reasons": [
+    "局面不再適用"
+   ]
+  },
+  {
+   "id": "CxYbj",
+   "theme": "hangingPiece",
+   "rating": 800,
+   "reasons": [
+    "Q3 不再成立（候選步安全／不安全判斷改變）"
+   ]
+  },
+  {
+   "id": "WSU09",
+   "theme": "mateIn1",
+   "rating": 845,
+   "reasons": [
+    "Q1 答案改變：squares b8 → squares b8,f7",
+    "Q3 不再成立（候選步安全／不安全判斷改變）"
+   ]
+  },
+  {
+   "id": "0VOtI",
+   "theme": "mateIn1",
+   "rating": 1059,
+   "reasons": [
+    "局面不再適用"
+   ]
+  },
+  {
+   "id": "22FAH",
+   "theme": "mateIn1",
+   "rating": 1078,
+   "reasons": [
+    "局面不再適用"
+   ]
+  },
+  {
+   "id": "2cpHp",
+   "theme": "fork",
+   "rating": 1093,
+   "reasons": [
+    "局面不再適用"
+   ]
+  }
+ ],
+ "replacedBy": [
+  {
+   "id": "iuEWm",
+   "theme": "fork",
+   "rating": 845
+  },
+  {
+   "id": "DW5o3",
+   "theme": "mateIn1",
+   "rating": 661
+  },
+  {
+   "id": "fvWlP",
+   "theme": "mateIn1",
+   "rating": 821
+  },
+  {
+   "id": "XXh32",
+   "theme": "mateIn1",
+   "rating": 1098
+  },
+  {
+   "id": "Uo3nA",
+   "theme": "mateIn1",
+   "rating": 867
+  },
+  {
+   "id": "UfrIO",
+   "theme": "mateIn1",
+   "rating": 696
+  },
+  {
+   "id": "kJQA9",
+   "theme": "mateIn1",
+   "rating": 872
+  },
+  {
+   "id": "jz35I",
+   "theme": "mateIn1",
+   "rating": 450
+  },
+  {
+   "id": "blWvG",
+   "theme": "hangingPiece",
+   "rating": 992
+  }
+ ],
+ "threatChanged": [],
+ "mateThreatIds": [
+  "zfXVc",
+  "hQ68z",
+  "f8np6",
+  "ecFie",
+  "ZVrTy",
+  "y0aRI",
+  "DTzIC",
+  "7SbJR",
+  "8iDwM",
+  "hI74A"
+ ],
+ "total": 70
+}

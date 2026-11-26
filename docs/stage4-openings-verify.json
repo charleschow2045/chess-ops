@@ -2,6 +2,7 @@
  "depth": 14,
  "maxDrop": 0.1,
  "minMargin": 0.05,
+ "altMaxDrop": 0.03,
  "routes": [
   {
    "id": "w-italian",
@@ -256,6 +257,552 @@
    ]
   }
  ],
+ "alts": {
+  "w-italian": [
+   {
+    "ply": 0,
+    "san": "d4",
+    "drop": 0,
+    "cp": 24,
+    "kept": true
+   },
+   {
+    "ply": 0,
+    "san": "Nf3",
+    "drop": 0.011,
+    "cp": 17,
+    "kept": true
+   },
+   {
+    "ply": 0,
+    "san": "c4",
+    "drop": 0.029,
+    "cp": 7,
+    "kept": false
+   },
+   {
+    "ply": 2,
+    "san": "Nc3",
+    "drop": 0,
+    "cp": 27,
+    "kept": true
+   },
+   {
+    "ply": 2,
+    "san": "Bc4",
+    "drop": 0.033,
+    "cp": 4,
+    "kept": false
+   },
+   {
+    "ply": 4,
+    "san": "Bb5",
+    "drop": 0.006,
+    "cp": 25,
+    "kept": true
+   },
+   {
+    "ply": 4,
+    "san": "Nc3",
+    "drop": 0,
+    "cp": 30,
+    "kept": true
+   },
+   {
+    "ply": 4,
+    "san": "d4",
+    "drop": 0.017,
+    "cp": 19,
+    "kept": false
+   },
+   {
+    "ply": 6,
+    "san": "d3",
+    "drop": 0.017,
+    "cp": 15,
+    "kept": false
+   },
+   {
+    "ply": 6,
+    "san": "O-O",
+    "drop": 0,
+    "cp": 25,
+    "kept": true
+   },
+   {
+    "ply": 6,
+    "san": "Nc3",
+    "drop": 0.013,
+    "cp": 17,
+    "kept": true
+   },
+   {
+    "ply": 8,
+    "san": "O-O",
+    "drop": 0.118,
+    "cp": -49,
+    "kept": false
+   },
+   {
+    "ply": 10,
+    "san": "Nbd2",
+    "drop": 0,
+    "cp": 21,
+    "kept": true
+   }
+  ],
+  "w-two-knights": [
+   {
+    "ply": 0,
+    "san": "d4",
+    "drop": 0,
+    "cp": 24,
+    "kept": true
+   },
+   {
+    "ply": 0,
+    "san": "Nf3",
+    "drop": 0.011,
+    "cp": 17,
+    "kept": true
+   },
+   {
+    "ply": 0,
+    "san": "c4",
+    "drop": 0.029,
+    "cp": 7,
+    "kept": false
+   },
+   {
+    "ply": 2,
+    "san": "Nc3",
+    "drop": 0,
+    "cp": 27,
+    "kept": true
+   },
+   {
+    "ply": 2,
+    "san": "Bc4",
+    "drop": 0.033,
+    "cp": 4,
+    "kept": false
+   },
+   {
+    "ply": 4,
+    "san": "Bb5",
+    "drop": 0.006,
+    "cp": 25,
+    "kept": true
+   },
+   {
+    "ply": 4,
+    "san": "Nc3",
+    "drop": 0,
+    "cp": 30,
+    "kept": true
+   },
+   {
+    "ply": 4,
+    "san": "d4",
+    "drop": 0.017,
+    "cp": 19,
+    "kept": false
+   },
+   {
+    "ply": 6,
+    "san": "O-O",
+    "drop": 0.083,
+    "cp": -36,
+    "kept": false
+   },
+   {
+    "ply": 6,
+    "san": "Nc3",
+    "drop": 0.044,
+    "cp": -15,
+    "kept": false
+   },
+   {
+    "ply": 6,
+    "san": "c3",
+    "drop": 0.15,
+    "cp": -73,
+    "kept": false
+   },
+   {
+    "ply": 8,
+    "san": "Nc3",
+    "drop": 0,
+    "cp": 29,
+    "kept": true
+   },
+   {
+    "ply": 8,
+    "san": "c3",
+    "drop": 0.013,
+    "cp": 12,
+    "kept": true
+   }
+  ],
+  "w-philidor": [
+   {
+    "ply": 0,
+    "san": "d4",
+    "drop": 0,
+    "cp": 24,
+    "kept": true
+   },
+   {
+    "ply": 0,
+    "san": "Nf3",
+    "drop": 0.011,
+    "cp": 17,
+    "kept": true
+   },
+   {
+    "ply": 0,
+    "san": "c4",
+    "drop": 0.029,
+    "cp": 7,
+    "kept": false
+   },
+   {
+    "ply": 2,
+    "san": "Nc3",
+    "drop": 0,
+    "cp": 27,
+    "kept": true
+   },
+   {
+    "ply": 2,
+    "san": "Bc4",
+    "drop": 0.033,
+    "cp": 4,
+    "kept": false
+   },
+   {
+    "ply": 4,
+    "san": "Bc4",
+    "drop": 0.051,
+    "cp": 38,
+    "kept": false
+   },
+   {
+    "ply": 4,
+    "san": "Nc3",
+    "drop": 0.057,
+    "cp": 35,
+    "kept": false
+   },
+   {
+    "ply": 4,
+    "san": "Bb5+",
+    "drop": 0.101,
+    "cp": 11,
+    "kept": false
+   },
+   {
+    "ply": 8,
+    "san": "Be2",
+    "drop": 0.162,
+    "cp": -39,
+    "kept": false
+   },
+   {
+    "ply": 8,
+    "san": "Bd3",
+    "drop": 0.004,
+    "cp": 47,
+    "kept": true
+   },
+   {
+    "ply": 8,
+    "san": "Be3",
+    "drop": 0.149,
+    "cp": -32,
+    "kept": false
+   },
+   {
+    "ply": 10,
+    "san": "Be3",
+    "drop": 0.026,
+    "cp": 46,
+    "kept": true
+   },
+   {
+    "ply": 10,
+    "san": "Bd3",
+    "drop": 0.029,
+    "cp": 44,
+    "kept": true
+   },
+   {
+    "ply": 12,
+    "san": "Be3",
+    "drop": 0.024,
+    "cp": 21,
+    "kept": true
+   },
+   {
+    "ply": 12,
+    "san": "Nb3",
+    "drop": 0.035,
+    "cp": 15,
+    "kept": false
+   },
+   {
+    "ply": 12,
+    "san": "Bf3",
+    "drop": 0.057,
+    "cp": 3,
+    "kept": false
+   }
+  ],
+  "b-italian": [
+   {
+    "ply": 1,
+    "san": "c5",
+    "drop": 0.022,
+    "cp": -44,
+    "kept": true
+   },
+   {
+    "ply": 1,
+    "san": "e6",
+    "drop": 0.026,
+    "cp": -46,
+    "kept": true
+   },
+   {
+    "ply": 1,
+    "san": "c6",
+    "drop": 0.038,
+    "cp": -53,
+    "kept": false
+   },
+   {
+    "ply": 3,
+    "san": "Nf6",
+    "drop": 0.018,
+    "cp": -37,
+    "kept": true
+   },
+   {
+    "ply": 3,
+    "san": "d6",
+    "drop": 0.071,
+    "cp": -66,
+    "kept": false
+   },
+   {
+    "ply": 5,
+    "san": "Nf6",
+    "drop": 0,
+    "cp": -9,
+    "kept": true
+   },
+   {
+    "ply": 5,
+    "san": "Be7",
+    "drop": 0.031,
+    "cp": -42,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "d6",
+    "drop": 0.102,
+    "cp": -82,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "Qe7",
+    "drop": 0.097,
+    "cp": -79,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "Be7",
+    "drop": 0.21,
+    "cp": -143,
+    "kept": false
+   },
+   {
+    "ply": 9,
+    "san": "O-O",
+    "drop": 0,
+    "cp": -13,
+    "kept": true
+   },
+   {
+    "ply": 9,
+    "san": "Be7",
+    "drop": 0.033,
+    "cp": -36,
+    "kept": false
+   }
+  ],
+  "b-scholar": [
+   {
+    "ply": 1,
+    "san": "c5",
+    "drop": 0.022,
+    "cp": -44,
+    "kept": true
+   },
+   {
+    "ply": 1,
+    "san": "e6",
+    "drop": 0.026,
+    "cp": -46,
+    "kept": true
+   },
+   {
+    "ply": 1,
+    "san": "c6",
+    "drop": 0.038,
+    "cp": -53,
+    "kept": false
+   },
+   {
+    "ply": 3,
+    "san": "Nf6",
+    "drop": 0.055,
+    "cp": -7,
+    "kept": false
+   },
+   {
+    "ply": 3,
+    "san": "Bc5",
+    "drop": 0.614,
+    "cp": -353,
+    "kept": false
+   },
+   {
+    "ply": 5,
+    "san": "Nf6",
+    "drop": 0.986,
+    "cp": -1000,
+    "kept": false
+   },
+   {
+    "ply": 5,
+    "san": "d6",
+    "drop": 0.986,
+    "cp": -1000,
+    "kept": false
+   },
+   {
+    "ply": 5,
+    "san": "Nh6",
+    "drop": 0.052,
+    "cp": -9,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "d6",
+    "drop": 1.017,
+    "cp": -1000,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "Bc5",
+    "drop": 1.017,
+    "cp": -1000,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "Nh6",
+    "drop": 0.051,
+    "cp": 8,
+    "kept": false
+   }
+  ],
+  "b-bishop": [
+   {
+    "ply": 1,
+    "san": "c5",
+    "drop": 0.022,
+    "cp": -44,
+    "kept": true
+   },
+   {
+    "ply": 1,
+    "san": "e6",
+    "drop": 0.026,
+    "cp": -46,
+    "kept": true
+   },
+   {
+    "ply": 1,
+    "san": "c6",
+    "drop": 0.038,
+    "cp": -53,
+    "kept": false
+   },
+   {
+    "ply": 3,
+    "san": "Nc6",
+    "drop": 0.031,
+    "cp": -21,
+    "kept": false
+   },
+   {
+    "ply": 3,
+    "san": "Bc5",
+    "drop": 0.046,
+    "cp": -29,
+    "kept": false
+   },
+   {
+    "ply": 5,
+    "san": "Be7",
+    "drop": 0.031,
+    "cp": -23,
+    "kept": false
+   },
+   {
+    "ply": 5,
+    "san": "d5",
+    "drop": 0.039,
+    "cp": -27,
+    "kept": false
+   },
+   {
+    "ply": 5,
+    "san": "Bc5",
+    "drop": 0.039,
+    "cp": -27,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "d6",
+    "drop": 0.098,
+    "cp": -78,
+    "kept": false
+   },
+   {
+    "ply": 7,
+    "san": "Bc5",
+    "drop": 0,
+    "cp": -18,
+    "kept": true
+   },
+   {
+    "ply": 9,
+    "san": "d6",
+    "drop": 0.004,
+    "cp": -25,
+    "kept": true
+   }
+  ]
+ },
  "quizAll": [
   {
    "n": 0,

@@ -1,0 +1,902 @@
+{
+ "sfDepth": 30,
+ "sfMs": 5000,
+ "mate": [
+  {
+   "topic": "kqk",
+   "N": 1,
+   "cap": 7,
+   "chosen": "8/8/5K2/7k/8/8/3Q4/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/5K2/7k/8/8/3Q4/8 w - - 0 1",
+     "tb": {
+      "dtm": 1,
+      "dtz": 1
+     },
+     "sf": {
+      "mate": 1,
+      "cp": null,
+      "depth": 30,
+      "ms": 27
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 1,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "kqk",
+   "N": 2,
+   "cap": 9,
+   "chosen": "8/8/8/8/7k/8/5KQ1/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/8/8/7k/8/5KQ1/8 w - - 0 1",
+     "tb": {
+      "dtm": 3,
+      "dtz": 3
+     },
+     "sf": {
+      "mate": 2,
+      "cp": null,
+      "depth": 30,
+      "ms": 19
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 2,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "kqk",
+   "N": 3,
+   "cap": 11,
+   "chosen": "8/8/8/8/8/8/2Q5/5k1K w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/8/8/8/8/2Q5/5k1K w - - 0 1",
+     "tb": {
+      "dtm": 5,
+      "dtz": 5
+     },
+     "sf": {
+      "mate": 3,
+      "cp": null,
+      "depth": 30,
+      "ms": 24
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 3,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "kqk",
+   "N": 4,
+   "cap": 13,
+   "chosen": "8/8/8/6K1/2Q5/8/8/4k3 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/8/6K1/2Q5/8/8/4k3 w - - 0 1",
+     "tb": {
+      "dtm": 7,
+      "dtz": 7
+     },
+     "sf": {
+      "mate": 4,
+      "cp": null,
+      "depth": 30,
+      "ms": 355
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 4,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "kqk",
+   "N": 6,
+   "cap": 17,
+   "chosen": "1k6/8/8/8/8/8/4K3/Q7 w - - 0 1",
+   "tried": [
+    {
+     "fen": "1k6/8/8/8/8/8/4K3/Q7 w - - 0 1",
+     "tb": {
+      "dtm": 11,
+      "dtz": 11
+     },
+     "sf": {
+      "mate": 6,
+      "cp": null,
+      "depth": 30,
+      "ms": 639
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 7,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "kqk",
+   "N": 8,
+   "cap": 21,
+   "chosen": "4Q3/8/8/8/1k6/8/7K/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/8/5k2/8/1K6/8/Q7 w - - 0 1",
+     "tb": {
+      "dtm": 15,
+      "dtz": 15
+     },
+     "sf": {
+      "mate": 9,
+      "cp": null,
+      "depth": 30,
+      "ms": 1435
+     },
+     "rejected": "Stockfish mate 9 ≠ 殘局庫 8"
+    },
+    {
+     "fen": "4Q3/8/8/8/1k6/8/7K/8 w - - 0 1",
+     "tb": {
+      "dtm": 15,
+      "dtz": 15
+     },
+     "sf": {
+      "mate": 8,
+      "cp": null,
+      "depth": 30,
+      "ms": 1082
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 11,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "kqk",
+   "N": 9,
+   "cap": 23,
+   "chosen": "8/Q7/8/4k3/8/8/8/K7 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/Q7/8/4k3/8/8/8/K7 w - - 0 1",
+     "tb": {
+      "dtm": 17,
+      "dtz": 17
+     },
+     "sf": {
+      "mate": 9,
+      "cp": null,
+      "depth": 30,
+      "ms": 2752
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 11,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "krk",
+   "N": 1,
+   "cap": 7,
+   "chosen": "2R5/8/8/8/8/1K6/8/k7 w - - 0 1",
+   "tried": [
+    {
+     "fen": "2R5/8/8/8/8/1K6/8/k7 w - - 0 1",
+     "tb": {
+      "dtm": 1,
+      "dtz": 1
+     },
+     "sf": {
+      "mate": 1,
+      "cp": null,
+      "depth": 30,
+      "ms": 13
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 1,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "krk",
+   "N": 2,
+   "cap": 9,
+   "chosen": "4R3/8/8/8/8/5K2/7k/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "4R3/8/8/8/8/5K2/7k/8 w - - 0 1",
+     "tb": {
+      "dtm": 3,
+      "dtz": 3
+     },
+     "sf": {
+      "mate": 2,
+      "cp": null,
+      "depth": 30,
+      "ms": 11
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 2,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "krk",
+   "N": 4,
+   "cap": 13,
+   "chosen": "8/8/8/5K2/8/8/4R3/7k w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/8/5K2/8/8/4R3/7k w - - 0 1",
+     "tb": {
+      "dtm": 7,
+      "dtz": 7
+     },
+     "sf": {
+      "mate": 4,
+      "cp": null,
+      "depth": 30,
+      "ms": 88
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 5,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "krk",
+   "N": 6,
+   "cap": 17,
+   "chosen": "8/8/8/8/8/8/1R6/2K1k3 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/8/8/8/8/1R6/2K1k3 w - - 0 1",
+     "tb": {
+      "dtm": 11,
+      "dtz": 11
+     },
+     "sf": {
+      "mate": 6,
+      "cp": null,
+      "depth": 30,
+      "ms": 135
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 6,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "krk",
+   "N": 9,
+   "cap": 23,
+   "chosen": "8/1K6/8/8/k7/5R2/8/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/7k/3R4/8/3K4/8/8 w - - 0 1",
+     "tb": {
+      "dtm": 17,
+      "dtz": 17
+     },
+     "sf": {
+      "mate": 11,
+      "cp": null,
+      "depth": 30,
+      "ms": 504
+     },
+     "rejected": "Stockfish mate 11 ≠ 殘局庫 9"
+    },
+    {
+     "fen": "1K6/8/8/3R4/8/k7/8/8 w - - 0 1",
+     "tb": {
+      "dtm": 17,
+      "dtz": 17
+     },
+     "sf": {
+      "mate": 10,
+      "cp": null,
+      "depth": 30,
+      "ms": 305
+     },
+     "rejected": "Stockfish mate 10 ≠ 殘局庫 9"
+    },
+    {
+     "fen": "8/8/5K2/7R/8/8/k7/8 w - - 0 1",
+     "tb": {
+      "dtm": 17,
+      "dtz": 17
+     },
+     "sf": {
+      "mate": 12,
+      "cp": null,
+      "depth": 30,
+      "ms": 339
+     },
+     "rejected": "Stockfish mate 12 ≠ 殘局庫 9"
+    },
+    {
+     "fen": "8/1K6/8/8/k7/5R2/8/8 w - - 0 1",
+     "tb": {
+      "dtm": 17,
+      "dtz": 17
+     },
+     "sf": {
+      "mate": 9,
+      "cp": null,
+      "depth": 30,
+      "ms": 247
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 9,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "krk",
+   "N": 12,
+   "cap": 29,
+   "chosen": "8/8/8/7k/8/K7/8/2R5 w - - 0 1",
+   "tried": [
+    {
+     "fen": "2k5/8/8/8/R7/8/8/1K6 w - - 0 1",
+     "tb": {
+      "dtm": 23,
+      "dtz": 23
+     },
+     "sf": {
+      "mate": 13,
+      "cp": null,
+      "depth": 30,
+      "ms": 770
+     },
+     "rejected": "Stockfish mate 13 ≠ 殘局庫 12"
+    },
+    {
+     "fen": "8/8/8/7k/8/K7/8/2R5 w - - 0 1",
+     "tb": {
+      "dtm": 23,
+      "dtz": 23
+     },
+     "sf": {
+      "mate": 12,
+      "cp": null,
+      "depth": 30,
+      "ms": 301
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 16,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "krk",
+   "N": 14,
+   "cap": 33,
+   "chosen": null,
+   "tried": [
+    {
+     "fen": "5k2/8/8/8/8/8/K5R1/8 w - - 0 1",
+     "tb": {
+      "dtm": 27,
+      "dtz": 27
+     },
+     "sf": {
+      "mate": 15,
+      "cp": null,
+      "depth": 30,
+      "ms": 2544
+     },
+     "rejected": "Stockfish mate 15 ≠ 殘局庫 14"
+    },
+    {
+     "fen": "8/6R1/8/4k3/8/1K6/8/8 w - - 0 1",
+     "tb": {
+      "dtm": 27,
+      "dtz": 27
+     },
+     "sf": {
+      "mate": null,
+      "cp": 9165,
+      "depth": 23,
+      "ms": 5017
+     },
+     "rejected": "Stockfish mate null ≠ 殘局庫 14"
+    },
+    {
+     "fen": "5K2/8/8/8/5R2/8/8/4k3 w - - 0 1",
+     "tb": {
+      "dtm": 27,
+      "dtz": 27
+     },
+     "sf": {
+      "mate": 15,
+      "cp": null,
+      "depth": 30,
+      "ms": 3237
+     },
+     "rejected": "Stockfish mate 15 ≠ 殘局庫 14"
+    },
+    {
+     "fen": "K7/8/1R6/7k/8/8/8/8 w - - 0 1",
+     "tb": {
+      "dtm": 27,
+      "dtz": 27
+     },
+     "sf": {
+      "mate": 15,
+      "cp": null,
+      "depth": 30,
+      "ms": 1136
+     },
+     "rejected": "Stockfish mate 15 ≠ 殘局庫 14"
+    },
+    {
+     "fen": "6K1/8/8/8/8/8/4k3/R7 w - - 0 1",
+     "tb": {
+      "dtm": 27,
+      "dtz": 27
+     },
+     "sf": {
+      "mate": null,
+      "cp": 9165,
+      "depth": 27,
+      "ms": 5006
+     },
+     "rejected": "Stockfish mate null ≠ 殘局庫 14"
+    },
+    {
+     "fen": "8/4k3/8/8/8/1R6/8/1K6 w - - 0 1",
+     "tb": {
+      "dtm": 27,
+      "dtz": 27
+     },
+     "sf": {
+      "mate": 15,
+      "cp": null,
+      "depth": 30,
+      "ms": 2318
+     },
+     "rejected": "Stockfish mate 15 ≠ 殘局庫 14"
+    }
+   ]
+  },
+  {
+   "topic": "k2rk",
+   "N": 1,
+   "cap": 7,
+   "chosen": "4k2K/1R6/8/R7/8/8/8/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "4k2K/1R6/8/R7/8/8/8/8 w - - 0 1",
+     "tb": {
+      "dtm": 1,
+      "dtz": 1
+     },
+     "sf": {
+      "mate": 1,
+      "cp": null,
+      "depth": 30,
+      "ms": 13
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 1,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "k2rk",
+   "N": 2,
+   "cap": 9,
+   "chosen": "1k6/8/8/8/2R5/6K1/8/7R w - - 0 1",
+   "tried": [
+    {
+     "fen": "1k6/8/8/8/2R5/6K1/8/7R w - - 0 1",
+     "tb": {
+      "dtm": 3,
+      "dtz": 3
+     },
+     "sf": {
+      "mate": 2,
+      "cp": null,
+      "depth": 30,
+      "ms": 13
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 2,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "k2rk",
+   "N": 3,
+   "cap": 11,
+   "chosen": "8/8/2R5/8/8/7k/2K5/R7 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/2R5/8/8/7k/2K5/R7 w - - 0 1",
+     "tb": {
+      "dtm": 5,
+      "dtz": 4
+     },
+     "sf": {
+      "mate": 3,
+      "cp": null,
+      "depth": 30,
+      "ms": 87
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 3,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "k2rk",
+   "N": 3,
+   "cap": 11,
+   "chosen": "5R2/4K1k1/8/8/3R4/8/8/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "5R2/4K1k1/8/8/3R4/8/8/8 w - - 0 1",
+     "tb": {
+      "dtm": 5,
+      "dtz": 4
+     },
+     "sf": {
+      "mate": 3,
+      "cp": null,
+      "depth": 30,
+      "ms": 23
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 3,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "k2rk",
+   "N": 4,
+   "cap": 13,
+   "chosen": "8/8/5K1R/8/5k2/8/4R3/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/5K1R/8/5k2/8/4R3/8 w - - 0 1",
+     "tb": {
+      "dtm": 7,
+      "dtz": 4
+     },
+     "sf": {
+      "mate": 4,
+      "cp": null,
+      "depth": 30,
+      "ms": 200
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 4,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "k2rk",
+   "N": 4,
+   "cap": 13,
+   "chosen": "8/8/K7/R1R5/8/8/5k2/8 w - - 0 1",
+   "tried": [
+    {
+     "fen": "8/8/K7/R1R5/8/8/5k2/8 w - - 0 1",
+     "tb": {
+      "dtm": 7,
+      "dtz": 6
+     },
+     "sf": {
+      "mate": 4,
+      "cp": null,
+      "depth": 30,
+      "ms": 544
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 6,
+      "why": ""
+     }
+    }
+   ]
+  },
+  {
+   "topic": "k2rk",
+   "N": 5,
+   "cap": 15,
+   "chosen": "2R5/8/4k3/8/8/8/7K/3R4 w - - 0 1",
+   "tried": [
+    {
+     "fen": "2R5/8/4k3/8/8/8/7K/3R4 w - - 0 1",
+     "tb": {
+      "dtm": 9,
+      "dtz": 6
+     },
+     "sf": {
+      "mate": 5,
+      "cp": null,
+      "depth": 30,
+      "ms": 183
+     },
+     "selfPlay": {
+      "ok": true,
+      "moves": 5,
+      "why": ""
+     }
+    }
+   ]
+  }
+ ],
+ "kpk": [
+  {
+   "fen": "8/8/8/8/3K4/8/3P4/7k w - - 0 1",
+   "task": "promote",
+   "expect": "win",
+   "tb": {
+    "fen": "8/8/8/8/3K4/8/3P4/7k w - - 0 1",
+    "expect": "win",
+    "category": "win",
+    "dtz": 1,
+    "dtm": 21,
+    "startOK": true
+   },
+   "sf": {
+    "cp": null,
+    "mate": 12,
+    "depth": 30,
+    "ms": 988
+   },
+   "sfLabel": "win",
+   "consistent": true,
+   "selfPlay": {
+    "ok": true,
+    "moves": 6,
+    "why": "",
+    "promotionEval": {
+     "cp": null,
+     "mate": -5
+    }
+   },
+   "shortest": 6,
+   "cap": 17
+  },
+  {
+   "fen": "4k3/8/4K3/4P3/8/8/8/8 w - - 0 1",
+   "task": "promote",
+   "expect": "win",
+   "tb": {
+    "fen": "4k3/8/4K3/4P3/8/8/8/8 w - - 0 1",
+    "expect": "win",
+    "category": "win",
+    "dtz": 3,
+    "dtm": 21,
+    "startOK": true
+   },
+   "sf": {
+    "cp": null,
+    "mate": 14,
+    "depth": 30,
+    "ms": 2058
+   },
+   "sfLabel": "win",
+   "consistent": true,
+   "selfPlay": {
+    "ok": true,
+    "moves": 5,
+    "why": "",
+    "promotionEval": {
+     "cp": -642,
+     "mate": null
+    }
+   },
+   "shortest": 5,
+   "cap": 15
+  },
+  {
+   "fen": "7k/8/8/8/8/8/P7/K7 w - - 0 1",
+   "task": "promote",
+   "expect": "win",
+   "tb": {
+    "fen": "7k/8/8/8/8/8/P7/K7 w - - 0 1",
+    "expect": "win",
+    "category": "win",
+    "dtz": 1,
+    "dtm": 27,
+    "startOK": true
+   },
+   "sf": {
+    "cp": null,
+    "mate": 16,
+    "depth": 30,
+    "ms": 2982
+   },
+   "sfLabel": "win",
+   "consistent": true,
+   "selfPlay": {
+    "ok": true,
+    "moves": 5,
+    "why": "",
+    "promotionEval": {
+     "cp": -619,
+     "mate": null
+    }
+   },
+   "shortest": 5,
+   "cap": 15
+  },
+  {
+   "fen": "5k2/8/5K2/5P2/8/8/8/8 w - - 0 1",
+   "task": "promote",
+   "expect": "win",
+   "tb": {
+    "fen": "5k2/8/5K2/5P2/8/8/8/8 w - - 0 1",
+    "expect": "win",
+    "category": "win",
+    "dtz": 3,
+    "dtm": 19,
+    "startOK": true
+   },
+   "sf": {
+    "cp": null,
+    "mate": 10,
+    "depth": 30,
+    "ms": 724
+   },
+   "sfLabel": "win",
+   "consistent": true,
+   "selfPlay": {
+    "ok": true,
+    "moves": 5,
+    "why": "",
+    "promotionEval": {
+     "cp": null,
+     "mate": -8
+    }
+   },
+   "shortest": 5,
+   "cap": 15
+  },
+  {
+   "fen": "k7/8/K7/P7/8/8/8/8 w - - 0 1",
+   "task": "judge",
+   "expect": "draw",
+   "tb": {
+    "fen": "k7/8/K7/P7/8/8/8/8 w - - 0 1",
+    "expect": "draw",
+    "category": "draw",
+    "dtz": 0,
+    "dtm": 0,
+    "startOK": true
+   },
+   "sf": {
+    "cp": 0,
+    "mate": null,
+    "depth": 30,
+    "ms": 192
+   },
+   "sfLabel": "draw",
+   "consistent": true
+  },
+  {
+   "fen": "8/8/k7/2P5/2K5/8/8/8 w - - 0 1",
+   "task": "judge",
+   "expect": "win",
+   "tb": {
+    "fen": "8/8/k7/2P5/2K5/8/8/8 w - - 0 1",
+    "expect": "win",
+    "category": "win",
+    "dtz": 9,
+    "dtm": 29,
+    "startOK": true
+   },
+   "sf": {
+    "cp": 626,
+    "mate": null,
+    "depth": 30,
+    "ms": 1049
+   },
+   "sfLabel": "win",
+   "consistent": true
+  },
+  {
+   "fen": "8/8/8/4k3/4P3/4K3/8/8 w - - 0 1",
+   "task": "judge",
+   "expect": "draw",
+   "tb": {
+    "fen": "8/8/8/4k3/4P3/4K3/8/8 w - - 0 1",
+    "expect": "draw",
+    "category": "draw",
+    "dtz": 0,
+    "dtm": 0,
+    "startOK": true
+   },
+   "sf": {
+    "cp": 0,
+    "mate": null,
+    "depth": 30,
+    "ms": 177
+   },
+   "sfLabel": "draw",
+   "consistent": true
+  },
+  {
+   "fen": "4k3/8/8/4K3/4P3/8/8/8 w - - 0 1",
+   "task": "judge",
+   "expect": "win",
+   "tb": {
+    "fen": "4k3/8/8/4K3/4P3/8/8/8 w - - 0 1",
+    "expect": "win",
+    "category": "win",
+    "dtz": 3,
+    "dtm": 25,
+    "startOK": true
+   },
+   "sf": {
+    "cp": null,
+    "mate": 14,
+    "depth": 30,
+    "ms": 2591
+   },
+   "sfLabel": "win",
+   "consistent": true
+  }
+ ]
+}
