@@ -76,6 +76,7 @@ function play(n) {
     cg.set({ movable: { color: undefined, dests: new Map() } });
     const best = moves <= level.par;
     const s = CO.State.recordResult(CO.State.loadState(), "maze", n);
+    CO.Activity.log("mini");
     CO.Feedback.show(fb, { ok: true, title: best ? "完美！用了最少步數" : "過關！", text: "用了 " + moves + " 步（最少 " + level.par + " 步）。" + (best ? "" : "再試一次，看看能否減少步數。") + "已通關到第 " + s.records.maze.best + " 關。" });
     wrap.classList.remove("fb-ok"); CO.Feedback.flash(wrap, true);
     nextBtn.classList.remove("hidden");

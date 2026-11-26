@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>家長週報</title>
+<link rel="stylesheet" href="css/theme.css">
+<style>
+  .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 10px; }
+  .wcell { text-align: center; padding: 8px 2px; border-radius: 12px; background: var(--surface2); border: 2px solid transparent; }
+  .wcell.today { border-color: var(--accent); }
+  .wcell .wd { font-size: 14px; font-weight: 800; }
+  .wcell .md { font-size: 13px; color: var(--muted); }
+  .wcell .mark { font-size: 22px; font-weight: 800; margin: 4px 0; min-height: 30px; }
+  .wcell.done .mark { color: var(--accent); }
+  .wcell .min { font-size: 13px; color: var(--muted); }
+  .stat { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 16px; }
+  .stat:last-child { border-bottom: 0; }
+  .stat b { text-align: right; }
+  .summary { font-size: 18px; font-weight: 700; line-height: 1.6; }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="topbar"><a class="btn-back" href="./">‹ 返回</a><h1>家長週報<small>最近 7 日</small></h1></div>
+  <div id="report"></div>
+</main>
+<script src="js/util.js"></script>
+<script src="js/state.js"></script>
+<script src="js/config.js"></script>
+<script src="js/daily.js"></script>
+<script src="js/report-logic.js"></script>
+<script src="js/endgames-logic.js"></script>
+<script src="data/endgames.js"></script>
+<script src="js/report.js"></script>
+</body>
+</html>

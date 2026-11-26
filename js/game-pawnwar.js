@@ -84,6 +84,7 @@ async function start() {
     board.feedback(ok);
     if (mode === "computer") {
       const s = CO.State.recordResult(CO.State.loadState(), "pawnwar", st.winner === "w" ? level : 0);
+      CO.Activity.log("mini");
       text += "（最高打贏第 " + s.records.pawnwar.best + " 級）";
       CO.Feedback.show(fb, { ok, title, text });
     }

@@ -281,6 +281,7 @@ function startGame(init) {
       s.play.recent = s.play.recent.slice(0, CFG.PLAY.recentGames);
       if (prog.levelUp) s.playLevel = prog.newLevel;
     });
+    CO.Activity.log("play", { result: outcome });
     refresh(); board.feedback(outcome === "win");
     CO.Feedback.show(fb, { ok: outcome === "win", title: outcome === "win" ? "你贏了！" : outcome === "loss" ? "你輸了" : "和棋", text: endDetail(end, outcome, clean) });
     endBox.textContent = "";

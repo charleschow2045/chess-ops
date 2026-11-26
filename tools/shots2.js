@@ -63,7 +63,7 @@ async function solve(page) {
 
   console.log("首頁（戰術謎題入口已開放，顯示謎題分）");
   await go("index.html");
-  ok(await page.locator("a.mod").count() === 6, "首頁有 6 個可進入的模組");
+  ok(await page.locator("a.mod").count() === 7, "首頁有 7 個可進入的模組");
   ok((await text(page, "a.mod[href='puzzles.html']")).includes("謎題分 700"), "首頁顯示真實謎題分 700");
   await shot(page, "01-home");
 

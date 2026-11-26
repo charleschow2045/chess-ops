@@ -94,6 +94,7 @@ function play(level) {
 
   function result() {
     const s = CO.State.recordResult(CO.State.loadState(), "mate1-" + level, score);
+    CO.Activity.log("mini");
     const rec = s.records["mate1-" + level];
     stage.textContent = "";
     stage.append(

@@ -11,6 +11,6 @@
     { h: 4, icon: "robot",  name: "對電腦下棋",       sub: "選擇級別，練習完整對局", href: "play.html", dynamicSub: "playLevel" },
     { h: 5, icon: "book",   name: "開局 Openings",    sub: "常見開局的走法和想法", href: "openings.html", dynamicSub: "openings" },
     { h: 6, icon: "flag",   name: "殘局 Endgames",    sub: "王兵殘局、基本將死", href: "endgames.html", dynamicSub: "endgames" },
-    { h: 7, icon: "log",    name: "我的對局 My Games", sub: "匯入 chess.com 棋譜，找出送子的位置", wide: true }
+    { h: 7, icon: "log",    name: "我的對局 My Games", sub: "匯入 chess.com 棋譜，找出送子的位置", href: "mygames.html", dynamicSub: "mygames", wide: true }
   ];
 });

@@ -129,6 +129,7 @@ function summary(results) {
   const s = CO.State.loadState();
   s.three.plays += 1; s.three.asked += total; s.three.correct += correct;
   CO.State.saveState(s);
+  CO.Activity.log("mini");
   const three = CO.State.loadState().three;
   const names = { hangingPiece: "送子", fork: "捉雙", pin: "牽制", mateIn1: "一步殺", mateThreat: "將死威脅" };
   stage.textContent = "";
