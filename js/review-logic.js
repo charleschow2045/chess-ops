@@ -12,8 +12,8 @@
  * 原因：只有喺能夠確定時先寫，按以下次序判斷，只標第一個符合嘅（對大錯同錯著）：
  *   1 mated       被將死：走完之後對手有將死
  *   2 missedMate  漏殺：走之前引擎話 3 步內有將死，但玩家冇走將死嘅步
- *   3 hang        送子：走完之後對手可以白吃一枚子（白吃定義見 js/tactics.js）
- *   4 missedCapture 漏吃：引擎最佳步係吃子，而且淨得益 >= 2 分，但玩家冇走
+ *   3 hang        送子：走完之後對手可以白吃一枚子（淨得益 >= config.TACTICS.REVIEW_MIN_GAIN，白吃定義見 js/tactics.js）
+ *   4 missedCapture 漏吃：引擎最佳步係吃子，而且淨得益 >= config.TACTICS.REVIEW_MIN_GAIN，但玩家冇走
  * 判斷唔到就唔寫原因（只講數目），唔亂作。
  */
 (function (root, factory) {
@@ -29,7 +29,7 @@
     hang: "沒有注意到對方可以吃子",
     missedCapture: "錯過了白吃對方棋子的機會"
   };
-  var MIN_MISSED_CAPTURE_GAIN = 2;       // 漏吃：最佳步嘅「白吃」淨得益至少 2 分
+  var MIN_GAIN = CFG.TACTICS.REVIEW_MIN_GAIN;   // 送子／漏吃：「白吃」淨得益門檻（config.TACTICS.REVIEW_MIN_GAIN，預設 2）
   var MAX_MATE_PLIES = 3;                // 漏殺：3 步內有將死
 
   function clamp(n) { return Math.max(-R.MATE_CP, Math.min(R.MATE_CP, n)); }
@@ -77,12 +77,12 @@
     // 2. 漏殺：走之前 3 步內有將死，但玩家冇將死（走完之後唔係將死）
     if (before.mate !== null && before.mate !== undefined && before.mate >= 1 && before.mate <= MAX_MATE_PLIES && !g.isCheckmate()) return "missedMate";
     // 3. 送子：走完之後對手可以白吃一枚（玩家嘅）子
-    if (!g.isGameOver() && T.freeCaptures(Chess, g, 1).length) return "hang";
+    if (!g.isGameOver() && T.freeCaptures(Chess, g, MIN_GAIN).length) return "hang";
     // 4. 漏吃：引擎最佳步係吃子，白吃淨得益 >= 2，但玩家冇走
     if (before.best && before.best !== ctx.uci) {
       var gb = new Chess(ctx.fenBefore);
       var bm = gb.moves({ verbose: true }).filter(function (m) { return T.uci(m) === before.best; })[0];
-      if (bm && bm.captured && T.captureGain(Chess, gb, bm) >= MIN_MISSED_CAPTURE_GAIN) return "missedCapture";
+      if (bm && bm.captured && T.captureGain(Chess, gb, bm) >= MIN_GAIN) return "missedCapture";
     }
     return null;
   }

@@ -42,7 +42,7 @@
       if (!m.captured) return;
       var c = new Chess(game.fen());
       c.move({ from: m.from, to: m.to, promotion: m.promotion });
-      var recapturable = c.isAttacked(m.to, c.turn());
+      var recapturable = c.moves({ verbose: true }).some(function (x) { return x.to === m.to && !!x.captured; });   // 合法吃返
       var gain = VALUE[m.captured] - (recapturable ? VALUE[m.piece] : 0);
       if (gain < 1) return;
       if (gain > best) { best = gain; picks = [m]; } else if (gain === best) picks.push(m);

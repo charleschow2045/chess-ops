@@ -33,6 +33,19 @@
     /* ---------- 電腦出棋前嘅停頓（毫秒）：令玩家睇得清電腦嘅棋 ---------- */
     THINK_PAUSE: { minMs: 400, maxMs: 800 },
 
+    /* ---------- 「白吃」門檻（淨得益，見 js/tactics.js）：走棋前三問用 1；賽後檢討嘅「送子」「漏吃」原因用 2 ---------- */
+    TACTICS: { THREE_MIN_GAIN: 1, REVIEW_MIN_GAIN: 2 },
+
+    /* ---------- 殘局訓練（js/endgames-logic.js、js/endgames.js） ---------- */
+    ENDGAME: {
+      CAP_MULT: 2, CAP_ADD: 5, CAP_MAX: 50,   // 殺王課題步數上限 = 引擎最短將死步數 × 2 + 5（最多 50 步）
+      STAR3_EXTRA: 3,                         // 3 星：不用提示，而且步數 <= 引擎最短 + 3
+      HINT_LIMIT: 3,                          // 每次練習最多提示次數
+      DEFENDER: { depth: 14 },                // 黑方（電腦）防守：Stockfish 全力（不降低強度），搜尋深度
+      HINT: { depth: 14 },                    // 提示：Stockfish 為白方建議嘅搜尋深度
+      WIN_CP: 300                             // 兵升變為后之後，Stockfish 分數（白方角度）>= 呢個數值先當「仍然贏」
+    },
+
     /* ---------- 引擎穩定（js/engine-manager.js）：載入、搜尋逾時，出錯自動重新載入並重試 ---------- */
     ENGINE: {
       initTimeoutMs: 30000,   // 首次載入（下載 + 編譯 wasm）上限；iPad 慢嘅話要加大

@@ -18,6 +18,7 @@ const SRC = require("./openings-source.js");
 const BASE = process.env.BASE || "http://localhost:8123/";
 const DEPTH = 14;
 const MAX_DROP = 0.1, MIN_MARGIN = 0.05, QUIZ_N = 10;
+const ALT_MAX_DROP = 0.03, ALT_MAX = 2;       // 「也可以」走法：勝率跌幅 < 0.03，每步最多 2 個
 
 const uciOf = m => m.from + m.to + (m.promotion || "");
 function mulberry32(a) { return function () { a |= 0; a = (a + 0x6D2B79F5) | 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
@@ -32,7 +33,21 @@ function legalLine(sans) {
   // 1. 合法性（Node 端）
   const routeIn = SRC.ROUTES.map(r => {
     if (r.notes.length !== r.moves.length) throw new Error(r.id + " 解釋數目同步數不一致");
-    return Object.assign({}, r, legalLine(r.moves));
+    const line = legalLine(r.moves);
+    // 「也可以」候選：學習者某一步嘅其他走法（合法、唔同主線）；跌幅用同一個局面嘅引擎最佳分數做基準
+    const altIn = Object.keys(r.altCandidates || {}).map(k => {
+      const ply = Number(k), g = new Chess();
+      r.moves.slice(0, ply).forEach(s => g.move(s));
+      const cands = [];
+      for (const san of r.altCandidates[k]) {
+        const g2 = new Chess(g.fen());
+        let m; try { m = g2.move(san); } catch (e) { console.warn("略過不合法候選：" + r.id + " 第 " + (ply + 1) + " 步 " + san); continue; }
+        if (uciOf(m) === line.ucis[ply]) continue;
+        cands.push({ san: m.san, uci: uciOf(m), fenAfter: g2.fen() });
+      }
+      return { ply, cands };
+    });
+    return Object.assign({}, r, line, { altIn });
   });
   const quizIn = SRC.QUIZ_CANDIDATES.map((c, i) => {
     const g = new Chess(); c.prefix.forEach(s => g.move(s));
@@ -53,7 +68,17 @@ function legalLine(sans) {
     const out = { routes: [], quiz: [] };
     for (const r of routeIn) {
       const rv = await RV.reviewGame(Chess, r.ucis, r.side, analyze, {});
-      out.routes.push({ id: r.id, moves: rv.moves.map(m => ({ ply: m.ply, san: m.san, drop: m.drop, cls: m.cls, bestSan: m.bestSan, evalBefore: m.evalBefore, evalAfter: m.evalAfter })) });
+      const alts = [];
+      for (const grp of r.altIn) {
+        const base = rv.moves.find(m => m.ply === grp.ply + 1);
+        if (!base) continue;
+        for (const c of grp.cands) {
+          const a = await analyze(c.fenAfter);
+          const evalAfter = -RV.scoreToCp({ cp: a.cp, mate: a.mate });
+          alts.push({ ply: grp.ply, san: c.san, uci: c.uci, drop: RV.winDrop(base.evalBefore, evalAfter), cp: evalAfter });
+        }
+      }
+      out.routes.push({ id: r.id, alts, moves: rv.moves.map(m => ({ ply: m.ply, san: m.san, drop: m.drop, cls: m.cls, bestSan: m.bestSan, evalBefore: m.evalBefore, evalAfter: m.evalAfter })) });
     }
     for (const q of quizIn) {
       const evals = [];
@@ -70,13 +95,21 @@ function legalLine(sans) {
   await browser.close();
 
   // 3. 整理結果
-  const routes = [], routeReport = [];
+  const routes = [], routeReport = [], routeAlts = {};
   for (const r of routeIn) {
     const rr = res.routes.find(x => x.id === r.id);
     const failing = rr.moves.find(m => m.drop >= MAX_DROP);
     const keep = failing ? failing.ply - 1 : r.moves.length;       // 保留到失敗嗰步之前
     const removed = failing ? r.moves.slice(failing.ply - 1) : [];
-    routes.push({ id: r.id, side: r.side, title: r.title, desc: r.desc, moves: r.moves.slice(0, keep), notes: r.notes.slice(0, keep),
+    const altMap = {}, altReport = [];
+    (rr.alts || []).forEach(a => { altReport.push({ ply: a.ply, san: a.san, drop: Math.round(a.drop * 1000) / 1000, cp: a.cp, kept: false }); });
+    Object.keys(r.altCandidates || {}).map(Number).filter(p => p < keep).forEach(p => {
+      const good = (rr.alts || []).filter(a => a.ply === p && a.drop < ALT_MAX_DROP).sort((a, b) => a.drop - b.drop).slice(0, ALT_MAX);
+      if (good.length) altMap[p] = good.map(a => ({ san: a.san, uci: a.uci, drop: Math.round(a.drop * 1000) / 1000, cp: a.cp }));
+      good.forEach(a => { const rep = altReport.find(x => x.ply === p && x.san === a.san); if (rep) rep.kept = true; });
+    });
+    routeAlts[r.id] = altReport;
+    routes.push({ id: r.id, side: r.side, title: r.title, desc: r.desc, moves: r.moves.slice(0, keep), notes: r.notes.slice(0, keep), alts: altMap,
       verify: { depth: DEPTH, maxDrop: Math.max(0, ...rr.moves.filter(m => !failing || m.ply < failing.ply).map(m => m.drop)), moves: rr.moves.filter(m => !failing || m.ply < failing.ply).map(m => ({ ply: m.ply, san: m.san, drop: Math.round(m.drop * 1000) / 1000, best: m.bestSan })) } });
     routeReport.push({ id: r.id, original: r.moves.join(" "), kept: r.moves.slice(0, keep).join(" "), removed: removed, failing: failing || null, drops: rr.moves.map(m => ({ ply: m.ply, san: m.san, drop: Math.round(m.drop * 1000) / 1000, best: m.bestSan })) });
   }
@@ -114,8 +147,9 @@ function legalLine(sans) {
   };
 });
 `);
-  fs.writeFileSync(path.join(ROOT, "docs/stage4-openings-verify.json"), JSON.stringify({ depth: DEPTH, maxDrop: MAX_DROP, minMargin: MIN_MARGIN, routes: routeReport, quizAll }, null, 1) + "\n");
+  fs.writeFileSync(path.join(ROOT, "docs/stage4-openings-verify.json"), JSON.stringify({ depth: DEPTH, maxDrop: MAX_DROP, minMargin: MIN_MARGIN, altMaxDrop: ALT_MAX_DROP, routes: routeReport, alts: routeAlts, quizAll }, null, 1) + "\n");
   console.log("路線：" + routes.map(r => r.id + " " + (r.moves.length) + "/" + routeIn.find(x => x.id === r.id).moves.length + " 步，最大跌幅 " + r.verify.maxDrop.toFixed(3)).join("；"));
+  console.log("「也可以」走法：" + routes.map(r => r.id + " " + Object.values(r.alts).reduce((a, l) => a + l.length, 0) + " 個").join("；"));
   console.log("小測候選 " + quizAll.length + " 題，合格 " + quizAll.filter(q => q.pass).length + "，選用 " + chosen.length);
   quizAll.filter(q => !q.pass).forEach(q => console.log("  不合格：" + q.prefix.join(" ") + " → " + q.evals.map(e => e.san + " " + e.wc).join(" / ") + "（差 " + q.margin + "）"));
   routeReport.filter(r => r.failing).forEach(r => console.log("  路線被截短：" + r.id + "，不合格步 " + r.failing.san + "（跌幅 " + r.failing.drop + "，較好：" + r.failing.bestSan + "）"));

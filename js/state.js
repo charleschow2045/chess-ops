@@ -40,6 +40,10 @@
     "mate1-1", "mate1-2", "mate1-3", "mate1-4", "check-find", "maze", "pawnwar"];
 
   var OPENING_ROUTE_IDS = ["w-italian", "w-two-knights", "w-philidor", "b-italian", "b-scholar", "b-bishop"];
+  /* 殘局局面 id：課題 id + "-" + 序號（1–8）。課題：后殺王 kqk、車殺王 krk、雙車 k2rk、王兵對王 kpk */
+  var ENDGAME_IDS = [];
+  ["kqk", "krk", "k2rk", "kpk"].forEach(function (t) { for (var i = 1; i <= 8; i++) ENDGAME_IDS.push(t + "-" + i); });
+
   var PUZZLE_THEMES = ["hangingPiece", "mateIn1", "fork", "pin", "mateIn2", "skewer", "discoveredAttack"];
 
   /* 白名單：欄位名 → { def: 預設值（函數，每次新建）, clean: 檢查／清洗函數 } */
@@ -180,6 +184,25 @@
         return { routes: routes, quiz: { plays: int(q.plays, 0, 1000000, 0), best: int(q.best, 0, 10, 0) } };
       }
     },
+    /*
+     * 殘局訓練（第 5 階段）：pos 各局面紀錄（只存有紀錄嘅局面；id 必須喺 ENDGAME_IDS 入面，其他刪走）
+     *   { stars 最佳星數（0–3）, wins 成功次數, runs 嘗試次數, best 最少步數（0 = 未成功；判斷題冇步數） }
+     */
+    endgames: {
+      def: function () { return { pos: {} }; },
+      clean: function (v) {
+        v = isObj(v) ? v : {};
+        var src = isObj(v.pos) ? v.pos : {}, pos = {};
+        ENDGAME_IDS.forEach(function (id) {
+          if (!isObj(src[id])) return;
+          var e = src[id];
+          var r = { stars: int(e.stars, 0, 3, 0), wins: int(e.wins, 0, 1000000, 0), runs: int(e.runs, 0, 1000000, 0), best: int(e.best, 0, 100000, 0) };
+          r.runs = Math.max(r.runs, r.wins);
+          pos[id] = r;
+        });
+        return { pos: pos };
+      }
+    },
     // 對電腦下棋：目前選擇嘅級別（1–8）
     playLevel: {
       def: function () { return 3; },
@@ -244,7 +267,7 @@
   }
 
   return {
-    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, PUZZLE_THEMES: PUZZLE_THEMES, OPENING_ROUTE_IDS: OPENING_ROUTE_IDS, recordResult: recordResult,
+    KEYS: KEYS, SCHEMA_VERSION: SCHEMA_VERSION, STATE_FIELDS: STATE_FIELDS, RECORD_IDS: RECORD_IDS, PUZZLE_THEMES: PUZZLE_THEMES, OPENING_ROUTE_IDS: OPENING_ROUTE_IDS, ENDGAME_IDS: ENDGAME_IDS, recordResult: recordResult,
     defaultState: defaultState, normalizeState: normalizeState,
     loadState: loadState, saveState: saveState, exportBackup: exportBackup, parseBackup: parseBackup
   };

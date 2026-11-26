@@ -10,18 +10,18 @@ const THREE = require(path.join(ROOT, "data/three.js"));
 const OPEN = require(path.join(ROOT, "data/openings.js"));
 const verify = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/stage4-openings-verify.json"), "utf8"));
 const esc = s => String(s).replace(/\|/g, "\\|");
-const THEME = { hangingPiece: "送子", fork: "捉雙", pin: "牽制", mateIn1: "一步殺" };
+const THEME = { hangingPiece: "送子", fork: "捉雙", pin: "牽制", mateIn1: "一步殺", mateThreat: "對方威脅將死" };
 const ans = q => q.kind === "squares" ? "點出 " + q.squares.join("、") : q.kind === "mate" ? "選「將死」類選項" : "選「沒有」類選項";
 
 const L = ["# 第 4 階段內容清單（供逐題核對）", "",
   "由 `node tools/gen-stage4-content.js` 自動產生。FEN 可以貼到 lichess.org/editor 核對；Lichess 連結格式 `https://lichess.org/training/<id>`。", ""];
 
-L.push("## 一、走棋前三問（60 題）", "",
-  "局面＝Lichess 謎題「對手第一步走完」之後（輪到玩家）。三條問題的答案全部由程式用 chess.js 計出（見 `js/three-logic.js`）：",
+L.push("## 一、走棋前三問（" + THREE.length + " 題；第 5 階段已修正「白吃」判斷並加入 10 題「對方威脅將死」，見 stage5-content.md）", "",
+  "局面＝Lichess 謎題「對手第一步走完」之後（輪到玩家）；主題「對方威脅將死」嘅局面係謎題 FEN 本身（對手第一步之前）。三條問題的答案全部由程式用 chess.js 計出（見 `js/three-logic.js`）：",
   "- Q1「對方上一步想做甚麼？」：假如輪到對方走（交換走棋方 FEN，清走吃過路兵格；玩家被將軍的局面不用）：對方可以白吃嘅己方棋子／對方可以一步將死／沒有直接威脅。",
   "- Q2「我有沒有機會？」：玩家可以白吃嘅對方棋子／可以一步將死／沒有。",
   "- Q3「這一步安全嗎？」：3 個候選步（1 個會送子或被將死，2 個安全；候選步不含謎題答案）。",
-  "- 「白吃」＝被吃子價值 −（吃完之後會被吃返 ? 自己嗰枚子價值 : 0）≥ 1；兵 1、馬象 3、車 5、后 9。", "",
+  "- 「白吃」＝被吃子價值 −（吃完之後會被吃返 ? 自己嗰枚子價值 : 0）≥ 1（三問；賽後檢討用 ≥ 2），而且「吃返」要係合法嘅吃子步（王唔可以吃返有保護嘅子、被牽制嘅子唔可以吃返）；兵 1、馬象 3、車 5、后 9。", "",
   "| # | Lichess | 分數 | 主題 | 走棋方 | FEN | Q1 答案 | Q2 答案 | Q3 三個候選步（✅＝會送子／被將死） |", "|---|---|---|---|---|---|---|---|---|");
 for (const q of THREE) {
   const side = q.fen.split(" ")[1] === "w" ? "白" : "黑";

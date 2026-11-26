@@ -11,11 +11,12 @@
  *  白吃定義見 js/tactics.js。mate 同 squares 同時存在會令答案有歧義，所以呢類局面唔用（invalid）。
  */
 (function (root, factory) {
-  if (typeof module === "object" && module.exports) module.exports = factory(require("./tactics.js"));
-  else { root.ChessOps = root.ChessOps || {}; root.ChessOps.ThreeLogic = factory(root.ChessOps.Tactics); }
-})(typeof self !== "undefined" ? self : this, function (T) {
+  if (typeof module === "object" && module.exports) module.exports = factory(require("./tactics.js"), require("./config.js"));
+  else { root.ChessOps = root.ChessOps || {}; root.ChessOps.ThreeLogic = factory(root.ChessOps.Tactics, root.ChessOps.Config); }
+})(typeof self !== "undefined" ? self : this, function (T, CFG) {
   "use strict";
   var N = T.NAME_ZH;
+  var MIN_GAIN = CFG.TACTICS.THREE_MIN_GAIN;       // 走棋前三問嘅「白吃」門檻（config.TACTICS.THREE_MIN_GAIN，預設 1）
 
   /* 被吃子所在格（吃過路兵嘅被吃兵喺 to 嘅檔、from 嘅橫行） */
   function targetSquare(m) { return m.flags.indexOf("e") >= 0 ? m.to[0] + m.from[1] : m.to; }
@@ -29,7 +30,7 @@
 
   /* 一個局面（走棋方 = game.turn()）嘅「白吃／將死」摘要 */
   function threats(Chess, game, who) {
-    var mates = T.mateMoves(Chess, game), caps = T.freeCaptures(Chess, game, 1);
+    var mates = T.mateMoves(Chess, game), caps = T.freeCaptures(Chess, game, MIN_GAIN);
     if (mates.length) {
       if (caps.length) return null;                        // 同時有將死同白吃 → 答案有歧義 → 唔用
       return { kind: "mate", moves: mates.map(function (m) { return m.san; }), squares: [] };
@@ -73,7 +74,7 @@
     if (c.isGameOver()) return null;
     var mates = T.mateMoves(Chess, c);
     if (mates.length) return { kind: "mate", san: mates[0].san, text: "走 " + m.san + " 之後，對方走 " + mates[0].san + " 就可以將死你。" };
-    var caps = T.freeCaptures(Chess, c, 1);
+    var caps = T.freeCaptures(Chess, c, MIN_GAIN);
     if (caps.length) return { kind: "capture", san: caps[0].move.san, text: "走 " + m.san + " 之後，" + capText(caps[0], "對方") + "。" };
     return null;
   }

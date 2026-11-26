@@ -488,10 +488,10 @@ test("已刪除「自己寫」棋盤；Stockfish 已升級到 19（18 檔案不�
     ok(!/board-custom|CustomBoard|stockfish-18/.test(src), path.relative(ROOT, f) + " 仍有舊引用");
   }
 });
-test("首頁：7 個模組，其中 5 個有連結（規則快測、走棋前三問、戰術謎題、對電腦下棋、開局），其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
+test("首頁：7 個模組，其中 6 個有連結（規則快測、走棋前三問、戰術謎題、對電腦下棋、開局、殘局），其餘「即將推出」；首頁沒有假數字（稱號／任務／連續日數）", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
   eq(mods.length, 7);
-  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "走棋前三問", "戰術謎題 Tactics", "對電腦下棋", "開局 Openings"]);
+  eq(mods.filter(m => m.href).map(m => m.name), ["規則快測與小遊戲", "走棋前三問", "戰術謎題 Tactics", "對電腦下棋", "開局 Openings", "殘局 Endgames"]);
   eq(new Set(mods.map(m => m.icon)).size, 7, "7 個模組要用 7 個不同圖示");
   const html = fs.readFileSync(path.join(ROOT, "index.html"), "utf8") + fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(!/稱號|連續|今日任務|經驗/.test(html), "首頁不應有稱號卡／任務／連續日數");
@@ -684,11 +684,11 @@ test("謎題儲存：done 最多 2,000（保留最近）、history 最多 50、�
   const s = State.normalizeState({ puzzles: { rating: 815, rated: 12, done: ["aaaaa", "bbbbb"], wrong: [{ id: "ccccc", r: 1000, streak: 1 }], history: [{ id: "aaaaa", ok: true, hint: true, rated: false, theme: "pin", delta: 0 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
   eq(State.defaultState().puzzles, { rating: 700, rated: 0, done: [], wrong: [], history: [] });
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("首頁：「戰術謎題」入口已開放並顯示真實謎題分；puzzles.html 引用嘅檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.puzzles.rating"), "首頁要用儲存嘅謎題分");
   ok(!/經驗|稱號|連續日數/.test(home));
@@ -1074,7 +1074,7 @@ test("儲存（play 欄位）：白名單清洗、最近 20 局、不存分析�
   eq(n.recent[0].blunders, null); eq(n.recent[1].blunders, 2); eq(n.recent[1].reason, "draw", "不明原因會被清洗");
   const s = State.normalizeState({ playLevel: 5, play: { levels: { 5: { w: 3, d: 0, l: 1, streak: 2, lstreak: 0 } }, current: { level: 5, color: "b", moves: ["e2e4"], undos: 1, hints: 2, usedUndo: true, usedHint: true }, recent: [{ date: "2026-11-14", level: 5, color: "b", result: "loss", reason: "resign", pgn: "1. e4 *", blunders: 3, plies: 1 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("進行中對局：保存（localStorage）→ 恢復 → 重播出同一個局面；中途離開後可以繼續", () => {
   const store = {};
@@ -1170,7 +1170,7 @@ test("對電腦下棋：用 App 內對話框（唔用 alert／confirm／prompt�
 });
 test("首頁：「對電腦下棋」已開放，顯示目前級別（真實數字）；play.html 引用檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.playLevel") && home.includes("目前第 "));
   const html = fs.readFileSync(path.join(ROOT, "play.html"), "utf8");
@@ -1232,13 +1232,14 @@ test("三問：Q3 候選步——1 個不安全（送子或被將死）、2 個�
 });
 
 /* ---------- 走棋前三問：題庫（60 題）逐題重新計算 ---------- */
-test("三問題庫：60 題、四個主題各 15 題、分數 400–1100、Lichess id；局面係「對手第一步走完」之後", () => {
-  eq(THREE.length, 60);
-  const themes = {}; THREE.forEach(q => { themes[q.theme] = (themes[q.theme] || 0) + 1; });
+test("三問題庫：60 題原有主題（四個主題各 15 題）、分數 400–1100、Lichess id；局面係「對手第一步走完」之後（另外 10 題「對方威脅將死」見第 5 階段測試）", () => {
+  const T60 = THREE.filter(q => q.theme !== "mateThreat");
+  eq(T60.length, 60);
+  const themes = {}; T60.forEach(q => { themes[q.theme] = (themes[q.theme] || 0) + 1; });
   eq([themes.hangingPiece, themes.fork, themes.pin, themes.mateIn1], [15, 15, 15, 15]); eq(Object.keys(themes).length, 4);
-  eq(new Set(THREE.map(q => q.id)).size, 60);
+  eq(new Set(THREE.map(q => q.id)).size, THREE.length);
   const byId = {}; PUZZLES.forEach(p => { byId[p.id] = p; });
-  for (const q of THREE) {
+  for (const q of T60) {
     const p = byId[q.id];
     ok(p, q.id + " 應該係 data/puzzles 內嘅 Lichess 謎題");
     ok(q.rating === p.rating && q.rating >= 400 && q.rating <= 1100, q.id + " 分數");
@@ -1263,7 +1264,7 @@ test("三問題庫：每一題 Q1／Q2／Q3 答案都用程式重新計算並核
     q.q1.squares.forEach(s => ok(g.get(s) && g.get(s).color === side, q.id + " Q1 格 " + s + " 應該係己方棋子"));
     if (q.q2.kind === "mate") ok(TAC.mateMoves(Chess, g).length >= 1, q.id + " Q2 要有一步將死");
     const p = PUZZLES.find(x => x.id === q.id);
-    ok(!q.q3.options.some(o => o.uci === p.moves[1]), q.id + " Q3 候選步唔含謎題答案");
+    if (q.theme !== "mateThreat") ok(!q.q3.options.some(o => o.uci === p.moves[1]), q.id + " Q3 候選步唔含謎題答案");
     eq(new Set(q.q3.options.map(o => o.uci)).size, 3);
     kinds.q1[q.q1.kind] = (kinds.q1[q.q1.kind] || 0) + 1; kinds.q2[q.q2.kind] = (kinds.q2[q.q2.kind] || 0) + 1;
   }
@@ -1352,17 +1353,285 @@ test("儲存（three、openings 欄位）：白名單清洗、備份往返；首
   eq(o.routes["w-italian"], { streak: 2, mastered: true, runs: 5 }); eq(o.quiz, { plays: 3, best: 10 });
   const s = State.normalizeState({ three: { plays: 4, asked: 60, correct: 51 }, openings: { routes: { "b-scholar": { streak: 1, mastered: false, runs: 2 } }, quiz: { plays: 1, best: 8 } } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.three.plays") && home.includes("homeState.openings.routes"), "首頁用儲存嘅真數字");
   const mods = require(path.join(ROOT, "js/modules.js"));
-  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html"]);
+  eq(mods.filter(m => m.href).map(m => m.href), ["rules.html", "three.html", "puzzles.html", "play.html", "openings.html", "endgames.html"]);
 });
 test("頁面：three.html／openings.html 引用嘅檔案齊全；play.html 有載入 tactics.js", () => {
   const th = fs.readFileSync(path.join(ROOT, "three.html"), "utf8"), oh = fs.readFileSync(path.join(ROOT, "openings.html"), "utf8");
   for (const f of ["data/three.js", "js/three.js", "js/state.js"]) ok(th.includes(f), "three.html 應引用 " + f);
   for (const f of ["data/openings.js", "js/openings.js", "js/openings-logic.js"]) ok(oh.includes(f), "openings.html 應引用 " + f);
   ok(fs.readFileSync(path.join(ROOT, "play.html"), "utf8").indexOf("js/tactics.js") < fs.readFileSync(path.join(ROOT, "play.html"), "utf8").indexOf("js/review-logic.js"), "tactics.js 要喺 review-logic.js 之前");
+});
+
+/* ======================= 第 5 階段（修正第 4 階段＋殘局訓練）新增測試 ======================= */
+const EG = require(path.join(ROOT, "js/endgames-logic.js"));
+const EGD = require(path.join(ROOT, "data/endgames.js"));
+const EG_TOPICS = EGD.TOPICS;
+const THREE_CHANGES = JSON.parse(fs.readFileSync(path.join(ROOT, "docs/stage5-three-changes.json"), "utf8"));
+
+/* ---------- A1：「白吃」要檢查吃返係咪合法 ---------- */
+test("白吃（淨得益）：王唔可以吃返有後援保護嘅棋子（Qxf7+ 有 Bc4 保護，黑王吃唔返，得益 = 1）", () => {
+  const g = new Chess("4k3/5p2/8/8/2B5/5Q2/8/4K3 w - - 0 1");
+  const m = g.moves({ verbose: true }).find(x => x.san === "Qxf7+");
+  eq(TAC.captureGain(Chess, g, m), 1, "黑王吃返 f7 唔合法（f7 有象保護）");
+  // 對比：冇象保護，黑王吃得返 → 淨得益 = 1 − 9
+  const g2 = new Chess("4k3/5p2/8/8/8/5Q2/8/4K3 w - - 0 1");
+  eq(TAC.captureGain(Chess, g2, g2.moves({ verbose: true }).find(x => x.san === "Qxf7+")), 1 - 9, "冇保護：黑王可以吃返后");
+});
+test("白吃（淨得益）：被牽制嘅棋子唔可以吃返（Bd6 被 Rd1 牽制住 Kd8，Nxe5 之後 Bxe5 唔合法，得益 = 1）", () => {
+  const g = new Chess("3k4/8/3b4/4p3/8/5N2/8/3R2K1 w - - 0 1");
+  const m = g.moves({ verbose: true }).find(x => x.san === "Nxe5");
+  eq(TAC.captureGain(Chess, g, m), 1, "象被牽制，吃返不合法");
+  const g2 = new Chess("4k3/8/3b4/4p3/8/5N2/8/3R2K1 w - - 0 1");       // 黑王唔喺 d8，象冇被牽制
+  eq(TAC.captureGain(Chess, g2, g2.moves({ verbose: true }).find(x => x.san === "Nxe5")), 1 - 3, "冇牽制：象吃得返");
+});
+test("白吃：真實謎題 WSU09、CxYbj（修正前判斷錯誤）重新計算：WSU09 Q1 包括 f7 兵；吃返不合法嘅吃子步淨得益正確", () => {
+  const byId = {}; PUZZLES.forEach(p => { byId[p.id] = p; });
+  const pos = id => { const p = byId[id], g = new Chess(p.fen), u = p.moves[0]; g.move({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] }); return g.fen(); };
+  const w = TL.analyzeQ12(Chess, pos("WSU09"));
+  eq(w.q1.kind, "squares"); eq(w.q1.squares, ["b8", "f7"], "對方嘅后可以白吃 b8 車同 f7 兵（黑王吃返 f7 唔合法，因為 f1 嘅車保護）");
+  eq(w.q2.kind, "mate");
+  const c = TL.analyzeQ12(Chess, pos("CxYbj"));
+  eq([c.q1.kind, c.q1.squares], ["squares", ["c5"]]); eq([c.q2.kind, c.q2.squares], ["squares", ["a4"]]);
+  // 受影響嘅題目已經從題庫換走
+  ["SB6PX", "EGXZl", "FYJaI", "QlYYC", "CxYbj", "WSU09", "0VOtI", "22FAH", "2cpHp"].forEach(id => ok(THREE_CHANGES.changed.some(x => x.id === id), id + " 應記錄為已更換"));
+  THREE_CHANGES.changed.forEach(x => ok(!THREE.some(q => q.id === x.id), x.id + " 已從題庫換走"));
+  eq(THREE_CHANGES.total, 70);
+  eq(THREE_CHANGES.changed.length, THREE_CHANGES.replacedBy.length, "換走多少題就補返多少題");
+});
+
+/* ---------- A2：門檻放 config ---------- */
+test("白吃門檻：三問用 1、賽後檢討嘅「送子」「漏吃」用 2，兩個數字都喺 config.js，程式冇寫死", () => {
+  eq(CFG.TACTICS, { THREE_MIN_GAIN: 1, REVIEW_MIN_GAIN: 2 });
+  const three = fs.readFileSync(path.join(ROOT, "js/three-logic.js"), "utf8"), rv = fs.readFileSync(path.join(ROOT, "js/review-logic.js"), "utf8");
+  ok(three.includes("CFG.TACTICS.THREE_MIN_GAIN") && rv.includes("CFG.TACTICS.REVIEW_MIN_GAIN"));
+  // 行為：白吃一隻兵（得益 1）：三問當有威脅；檢討唔當「送子」
+  const g = new Chess("4k3/8/8/3p4/4P3/8/8/4K3 b - - 0 1");            // 黑方可以吃 e4 兵？e4 兵有冇保護：冇 → 得益 1
+  ok(TAC.freeCaptures(Chess, g, CFG.TACTICS.THREE_MIN_GAIN).length === 1, "門檻 1：吃兵算白吃");
+  eq(TAC.freeCaptures(Chess, g, CFG.TACTICS.REVIEW_MIN_GAIN).length, 0, "門檻 2：吃兵唔算「送子」");
+  const q = TL.analyzeQ12(Chess, "4k3/8/8/3p4/4P3/8/8/4K3 w - - 0 1");
+  eq(q.q1.kind, "squares", "三問：對方可以白吃我嘅兵");
+});
+
+/* ---------- A5：三問 70 題 ---------- */
+test("三問題庫：70 題＝60 題原有主題（送子、捉雙、牽制、一步殺各 15）＋10 題「對方威脅將死」（謎題 FEN 本身）；條件全部重新驗證", () => {
+  eq(THREE.length, 70);
+  const themes = {}; THREE.forEach(q => { themes[q.theme] = (themes[q.theme] || 0) + 1; });
+  eq([themes.hangingPiece, themes.fork, themes.pin, themes.mateIn1, themes.mateThreat], [15, 15, 15, 15, 10]);
+  eq(new Set(THREE.map(q => q.id)).size, 70);
+  const byId = {}; PUZZLES.forEach(p => { byId[p.id] = p; });
+  for (const q of THREE.filter(x => x.theme === "mateThreat")) {
+    const p = byId[q.id];
+    ok(p && p.themes.includes("mateIn1"), q.id + " 應該係 Lichess mateIn1 謎題");
+    eq(q.fen, p.fen, q.id + " 用謎題 FEN 本身（對手第一步之前）");
+    const g = new Chess(q.fen);
+    ok(!g.inCheck(), q.id + " 走棋方冇被將軍");
+    const sw = TAC.swapTurn(Chess, q.fen);
+    ok(sw, q.id + " 交換走棋方之後局面合法");
+    ok(TAC.mateMoves(Chess, new Chess(sw)).length >= 1, q.id + " 交換走棋方之後有一步將死");
+    eq(q.q1.kind, "mate", q.id + " Q1 答案係「對方威脅將死」");
+    ok(q.q1.text.includes("將死你"), q.id + " Q1 解釋");
+    ok(TL.checkQ3(Chess, q.fen, q.q3), q.id + " Q3 成立");
+  }
+  for (const q of THREE.filter(x => x.theme !== "mateThreat")) {
+    const p = byId[q.id], g = new Chess(p.fen); g.move({ from: p.moves[0].slice(0, 2), to: p.moves[0].slice(2, 4), promotion: p.moves[0][4] });
+    eq(q.fen, g.fen(), q.id + " 局面係對手第一步走完之後");
+  }
+});
+
+/* ---------- A3：開局措辭修正 ---------- */
+test("開局措辭修正：指定嘅句子已改，舊句子唔再出現（路線解釋同小測）", () => {
+  const all = JSON.stringify(OPEN);
+  for (const s of ["保護 e5 兵，但這樣會限制自己 f8 的象", "出馬擋住白后對 f7 的攻擊，同時出子，防守完成", "為日後推進 d4 做準備，爭取更多中心空間", "用馬吃回兵，馬同時佔據中心", "用馬吃回 d4 的兵，馬同時佔據中心", "急著"]) ok(all.includes(s), "應有：" + s);
+  for (const s of ["限制自己 c8 的象", "出馬保護 f7，同時出子", "準備下一步 d4", "出子的同時奪回兵", "出子並奪回兵", "急着"]) ok(!all.includes(s), "不應再有：" + s);
+  const italian = OPEN.ROUTES.filter(r => r.id.endsWith("italian"));
+  eq(italian.length, 2);
+  italian.forEach(r => ok(r.notes[r.moves.indexOf("c3")].includes("為日後推進 d4 做準備，爭取更多中心空間"), r.id + " 4.c3 句子"));
+});
+
+/* ---------- A4：「也可以」走法 ---------- */
+test("開局「也可以」走法：每步最多 2 個；合法、唔係主線、係學習者嗰一步；Stockfish depth 14 勝率跌幅 < 0.03（儲存嘅驗證數字）", () => {
+  let total = 0;
+  for (const r of OPEN.ROUTES) {
+    for (const k of Object.keys(r.alts || {})) {
+      const ply = Number(k), list = r.alts[k];
+      ok(ply < r.moves.length && (ply % 2 === 0) === (r.side === "w"), r.id + " 第 " + (ply + 1) + " 個半步要係學習者嘅一步");
+      ok(list.length >= 1 && list.length <= 2, r.id + " 每步最多 2 個「也可以」");
+      const g = new Chess(); r.moves.slice(0, ply).forEach(s => g.move(s));
+      const main = uciOf(new Chess(g.fen()).move(r.moves[ply])), legal = new Set(g.moves({ verbose: true }).map(uciOf));
+      list.forEach(a => {
+        ok(legal.has(a.uci) && a.uci !== main, r.id + " 第 " + (ply + 1) + " 步 " + a.san + " 要合法而且唔係主線");
+        eq(new Chess(g.fen()).move(a.uci.length === 5 ? { from: a.uci.slice(0, 2), to: a.uci.slice(2, 4), promotion: a.uci[4] } : { from: a.uci.slice(0, 2), to: a.uci.slice(2, 4) }).san, a.san);
+        ok(a.drop < 0.03 && a.drop >= 0, r.id + " " + a.san + " 跌幅 " + a.drop);
+        total++;
+      });
+    }
+  }
+  ok(total >= 20, "「也可以」走法總數：" + total);
+  const src = fs.readFileSync(path.join(ROOT, "js/openings.js"), "utf8");
+  ok(src.includes("也可以！") && src.includes("不過這條路線練習的是 ") && src.includes("請再走一次。"), "提示文字");
+  const a0 = src.indexOf("else if (((route.alts"), a1 = src.indexOf("} else {", a0);
+  ok(a0 > 0 && a1 > a0 && !src.slice(a0, a1).includes("mistakes++") && src.slice(a1).includes("mistakes++"), "「也可以」分支喺「走錯」之前判斷，內裡冇 mistakes++");
+});
+
+/* ---------- B：殘局資料 ---------- */
+const blackToMove = fen => fen.replace(" w ", " b ");
+function hangsAtStart(fen) {
+  const gb = new Chess(blackToMove(fen));
+  return gb.moves({ verbose: true }).some(m => { if (!(m.captured && m.piece === "k")) return false; const g2 = new Chess(blackToMove(fen)); g2.move(m); return !g2.isAttacked(m.to, "w"); });
+}
+function mateWithin(g, n) {
+  for (const m of g.moves({ verbose: true })) {
+    const c = new Chess(g.fen()); c.move(m);
+    if (c.isCheckmate()) return true;
+    if (n > 1 && !c.isGameOver() && c.moves({ verbose: true }).every(r => { const d = new Chess(c.fen()); d.move(r); return mateWithin(d, n - 1); })) return true;
+  }
+  return false;
+}
+test("殘局資料：4 個課題（后殺王、車殺王、雙車梯形殺、王兵對王），每個課題 6–8 題，3–5 步說明（書面語、完整句子），id 在儲存白名單內", () => {
+  eq(EG_TOPICS.map(t => t.id), ["kqk", "krk", "k2rk", "kpk"]);
+  eq(EG_TOPICS.map(t => t.title), ["后殺王", "車殺王", "雙車梯形殺", "王兵對王"]);
+  for (const t of EG_TOPICS) {
+    ok(t.positions.length >= 6 && t.positions.length <= 8, t.id + " 題數 " + t.positions.length);
+    ok(t.steps.length >= 3 && t.steps.length <= 5, t.id + " 說明步數 " + t.steps.length);
+    t.steps.forEach(s => ok(s.length > 10 && /[。？]$/.test(s), t.id + " 說明要係完整句子：" + s));
+    t.positions.forEach((p, i) => { eq(p.id, t.id + "-" + (i + 1)); ok(State.ENDGAME_IDS.includes(p.id), p.id + " 要喺白名單"); });
+  }
+  eq(State.ENDGAME_IDS.length, 32);
+});
+test("殘局資料：每個局面合法、白先走、黑王冇被將軍、黑方有棋走（唔係一開始就逼和）、冇白子一開始就俾黑王白吃", () => {
+  for (const t of EG_TOPICS) for (const p of t.positions) {
+    const g = new Chess(p.fen);
+    eq(g.turn(), "w", p.id + " 白先走");
+    const bk = g.board().flat().find(x => x && x.type === "k" && x.color === "b");
+    ok(!g.isAttacked(bk.square, "w"), p.id + " 黑王冇被將軍");
+    ok(new Chess(blackToMove(p.fen)).moves().length > 0, p.id + " 黑方有棋走（冇一開始就逼和）");
+    ok(!hangsAtStart(p.fen), p.id + " 冇白子一開始就俾黑王白吃");
+    ok(g.moves().length > 0 && !g.isGameOver());
+    const wp = g.board().flat().filter(x => x && x.color === "w" && x.type !== "k").map(x => x.type).sort().join("");
+    const bp = g.board().flat().filter(x => x && x.color === "b" && x.type !== "k").length;
+    eq(bp, 0, p.id + " 黑方只有王");
+    eq(wp, t.id === "kqk" ? "q" : t.id === "krk" ? "r" : t.id === "k2rk" ? "rr" : "p", p.id + " 白方子力");
+  }
+});
+test("殘局資料：殺王課題 shortest = 殘局庫將死步數 = Stockfish 將死步數；上限 = 2N + 5（最多 50）；由易到難（N 不減）；N ≤ 2 用 chess.js 窮舉重新驗證", () => {
+  for (const t of EG_TOPICS.filter(x => x.task === "mate")) {
+    let prev = 0;
+    for (const p of t.positions) {
+      eq(p.task, "mate"); eq(p.expect, "mate");
+      eq(p.tb.category, "win"); eq(Math.ceil(p.tb.dtm / 2), p.shortest, p.id + " 殘局庫 DTM 同 N 一致");
+      eq(p.sf.mate, p.shortest, p.id + " Stockfish 將死步數同 N 一致"); ok(p.sf.depth >= 20 || p.sf.ms >= 3000, p.id + " Stockfish 深度／時間 " + p.sf.depth + "／" + p.sf.ms);
+      eq(p.cap, Math.min(50, p.shortest * 2 + 5), p.id + " 上限");
+      ok(p.shortest >= prev, p.id + " 由易到難"); prev = p.shortest;
+      ok(p.selfPlayMoves <= p.cap, p.id + " 自我對弈（提示線）步數 " + p.selfPlayMoves + " 喺上限內");
+      if (p.shortest <= 2) {
+        const g = new Chess(p.fen);
+        ok(mateWithin(g, p.shortest), p.id + " 用 chess.js 窮舉：" + p.shortest + " 步內有將死");
+        if (p.shortest === 2) ok(!mateWithin(g, 1), p.id + " 唔會一步將死");
+      }
+    }
+  }
+});
+test("殘局資料：王兵對王——「贏」課題同「判斷」課題；預期結果同殘局庫、Stockfish 一致；兩種答案（能贏／和棋）都有", () => {
+  const t = EG_TOPICS.find(x => x.id === "kpk");
+  const kinds = {};
+  for (const p of t.positions) {
+    ok(["promote", "judge"].includes(p.task), p.id + " 課題");
+    ok(["win", "draw"].includes(p.expect));
+    eq(p.tb.category, p.expect, p.id + " 殘局庫結果同預期一致");
+    if (p.expect === "win") ok(p.sf.mate > 0 || p.sf.cp >= CFG.ENDGAME.WIN_CP, p.id + " Stockfish 判斷白方贏：" + JSON.stringify(p.sf));
+    else ok(p.sf.mate === null && Math.abs(p.sf.cp) <= 50, p.id + " Stockfish 判斷和棋：" + JSON.stringify(p.sf));
+    if (p.task === "promote") { eq(p.expect, "win"); ok(p.shortest >= 1 && p.cap === Math.min(50, p.shortest * 2 + 5) && p.tip, p.id + " 升變步數／上限／提示"); }
+    else ok(p.explain && p.explain.length > 10, p.id + " 判斷題要有解釋");
+    kinds[p.task + ":" + p.expect] = (kinds[p.task + ":" + p.expect] || 0) + 1;
+  }
+  ok(kinds["promote:win"] >= 3 && kinds["judge:win"] >= 1 && kinds["judge:draw"] >= 1, "題型：" + JSON.stringify(kinds));
+});
+
+/* ---------- B：完成／失敗判斷、星星 ---------- */
+const egCtx = (over) => Object.assign({ task: "mate", moves: 1, cap: 7, startMaterial: 1, sideJustMoved: "w", promoted: false }, over);
+test("殘局判斷：將死＝成功；逼和＝失敗並顯示「逼和了！對方沒有棋可走，變成和棋。」；棋子被吃＝失敗；重複局面＝失敗", () => {
+  const mate = new Chess("7k/6Q1/5K2/8/8/8/8/8 b - - 0 1");
+  eq(mate.isCheckmate(), true); eq(EG.judge(mate, egCtx()).status, "success");
+  const stale = new Chess("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1");
+  eq(stale.isStalemate(), true);
+  eq(EG.judge(stale, egCtx()), { status: "fail", reason: "stalemate", text: "逼和了！對方沒有棋可走，變成和棋。" });
+  const lost = new Chess("8/8/8/8/8/8/8/K1k5 w - - 0 1");
+  const j = EG.judge(lost, egCtx({ sideJustMoved: "b" }));
+  eq([j.status, j.reason, j.text], ["fail", "lost", "棋子被對方的王吃掉了，變成和棋。"]);
+  eq(EG.judge(lost, egCtx({ sideJustMoved: "b", task: "promote" })).text, "兵被對方的王吃掉了，變成和棋。");
+  const rep = new Chess("7k/8/5K2/8/8/8/8/6Q1 w - - 0 1");
+  ["Qg2", "Kh7", "Qg1", "Kh8", "Qg2", "Kh7", "Qg1", "Kh8"].forEach(s => rep.move(s));
+  eq(EG.judge(rep, egCtx({ sideJustMoved: "b" })).reason, "repeat");
+});
+test("殘局判斷：步數上限（超過就失敗，顯示步數）；未到上限繼續；升變交俾引擎判斷", () => {
+  const g = new Chess("7k/8/5K2/8/8/8/8/6Q1 b - - 0 1");
+  eq(EG.judge(g, egCtx({ moves: 7, cap: 7, sideJustMoved: "b" })), { status: "fail", reason: "cap", text: "超過步數上限（7 步），這次沒有成功。" });
+  eq(EG.judge(g, egCtx({ moves: 6, cap: 7, sideJustMoved: "b" })).status, "continue");
+  eq(EG.judge(g, egCtx({ moves: 7, cap: 7, sideJustMoved: "w" })).status, "continue", "白方剛走完第 7 步，要等黑方回應先判斷（可能剛好將死）");
+  eq(EG.judge(g, egCtx({ task: "promote", promoted: true })).status, "promoted");
+});
+test("王兵對王升變判斷：升變後仍然贏＝成功；后即刻俾吃＝失敗（說明原因）；仍然和棋＝失敗", () => {
+  const safe = new Chess("8/3Q4/8/3K4/8/8/8/k7 b - - 0 1");                     // 后有保護，黑王遠
+  eq(EG.promotionVerdict(safe, { cp: -900, mate: null }), { win: true });
+  eq(EG.promotionVerdict(safe, { cp: null, mate: -5 }), { win: true });
+  eq(EG.promotionVerdict(safe, { cp: -299, mate: null }).win, false, "門檻 300");
+  eq(EG.promotionVerdict(safe, { cp: -300, mate: null }).win, true);
+  const hang = new Chess("1k6/1Q6/8/8/8/8/8/K7 b - - 0 1");                       // 后喺 b7，黑王 b8 可以吃，冇保護
+  eq(EG.promotionVerdict(hang, { cp: 0, mate: null }), { win: false, text: "升變之後，后馬上被對方的王吃掉了，變成和棋。" });
+  eq(EG.promotionVerdict(safe, { cp: 0, mate: null }), { win: false, text: "升變之後，局面仍然只是和棋。" });
+  eq(EG.promotionVerdict(safe, { cp: null, mate: 3 }).win, false);
+});
+test("殘局星星：3 星＝冇用提示而且步數 <= 最短 + 3；2 星＝冇用提示、喺上限內完成；1 星＝用過提示完成；失敗 0 星", () => {
+  const s = (hints, moves, shortest) => EG.stars({ success: true, hints, moves, shortest });
+  eq(s(0, 2, 2), 3); eq(s(0, 5, 2), 3, "最短 + 3 仍然 3 星"); eq(s(0, 6, 2), 2); eq(s(1, 2, 2), 1); eq(s(3, 20, 2), 1);
+  eq(EG.stars({ success: false, hints: 0, moves: 3, shortest: 3 }), 0);
+  eq(EG.moveCap(1), 7); eq(EG.moveCap(10), 25); eq(EG.moveCap(15), 35); eq(EG.moveCap(24), 50); eq(EG.moveCap(40), 50, "上限最多 50");
+  eq(CFG.ENDGAME, { CAP_MULT: 2, CAP_ADD: 5, CAP_MAX: 50, STAR3_EXTRA: 3, HINT_LIMIT: 3, DEFENDER: { depth: 14 }, HINT: { depth: 14 }, WIN_CP: 300 });
+  ok(!("skill" in CFG.ENDGAME.DEFENDER) && !("elo" in CFG.ENDGAME.DEFENDER), "黑方用 Stockfish 全力（唔降低強度）");
+});
+test("殘局紀錄：applyRun 記錄嘗試／成功次數、最佳星數、最少步數；失敗唔會洗走最佳；totals 計星數", () => {
+  let e = EG.applyRun(undefined, { success: true, stars: 2, moves: 9 });
+  eq(e, { stars: 2, wins: 1, runs: 1, best: 9 });
+  e = EG.applyRun(e, { success: false, stars: 0, moves: 0 }); eq(e, { stars: 2, wins: 1, runs: 2, best: 9 });
+  e = EG.applyRun(e, { success: true, stars: 3, moves: 6 }); eq(e, { stars: 3, wins: 2, runs: 3, best: 6 });
+  e = EG.applyRun(e, { success: true, stars: 1, moves: 12 }); eq(e, { stars: 3, wins: 3, runs: 4, best: 6 }, "較差成績唔會降低最佳");
+  const t = EG.totals(EG_TOPICS, { pos: { "kqk-1": { stars: 3 }, "krk-2": { stars: 1 }, "kpk-1": { stars: 2 } } });
+  eq(t.got, 6); eq(t.all, EG_TOPICS.reduce((a, x) => a + x.positions.length * 3, 0));
+  eq(EG.totals(EG_TOPICS, { pos: {} }).got, 0);
+});
+
+/* ---------- C：儲存 ---------- */
+test("儲存（endgames 欄位）：預設、白名單清洗（未知 id、多餘欄位刪走、夾範圍）、備份往返、冪等", () => {
+  eq(State.defaultState().endgames, { pos: {} });
+  const n = State.normalizeState({ endgames: { pos: { "kqk-1": { stars: 9, wins: 3, runs: 1, best: 12, junk: 1 }, "kqk-9": { stars: 1 }, "xxx-1": { stars: 3 }, "kpk-2": { stars: -2, wins: "a", runs: 5, best: 7 } }, extra: 1 }, evil: 1 }).endgames;
+  eq(Object.keys(n), ["pos"]);
+  eq(n.pos["kqk-1"], { stars: 3, wins: 3, runs: 3, best: 12 }, "星數夾到 3；runs 不少於 wins");
+  eq(n.pos["kpk-2"], { stars: 0, wins: 0, runs: 5, best: 7 });
+  ok(!("kqk-9" in n.pos) && !("xxx-1" in n.pos), "未登記 id 刪走");
+  eq(State.normalizeState({ endgames: "x" }).endgames, { pos: {} });
+  eq(State.normalizeState({ endgames: { pos: [] } }).endgames, { pos: {} });
+  const s = State.normalizeState({ endgames: { pos: { "k2rk-3": { stars: 2, wins: 4, runs: 6, best: 5 }, "kpk-1": { stars: 3, wins: 1, runs: 1, best: 0 } } } });
+  eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
+  eq(State.normalizeState(s), s, "冪等");
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["endgames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+});
+test("殘局頁面：endgames.html 引用檔案齊全（config、logic、data 次序正確）；首頁「殘局」入口顯示真實星數；殘局資料 id 全部可儲存", () => {
+  const h = fs.readFileSync(path.join(ROOT, "endgames.html"), "utf8");
+  for (const f of ["js/config.js", "js/engine.js", "js/engine-manager.js", "js/endgames-logic.js", "data/endgames.js", "js/endgames.js", "js/state.js"]) ok(h.includes(f), "endgames.html 應引用 " + f);
+  ok(h.indexOf("js/config.js") < h.indexOf("js/endgames-logic.js"), "config.js 要喺 endgames-logic.js 之前");
+  const idx = fs.readFileSync(path.join(ROOT, "index.html"), "utf8");
+  for (const f of ["js/config.js", "data/endgames.js", "js/endgames-logic.js"]) ok(idx.includes(f), "index.html 應引用 " + f);
+  const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
+  ok(home.includes("EndgamesLogic.totals") && home.includes("已取得 ") && home.includes(" 星"), "首頁用真實星數");
+  const mods = require(path.join(ROOT, "js/modules.js"));
+  eq(mods.find(m => m.name.startsWith("殘局")).href, "endgames.html");
+  const js = fs.readFileSync(path.join(ROOT, "js/endgames.js"), "utf8");
+  ok(js.includes("CFG.HINT_LIMIT") && js.includes("CFG.DEFENDER") && js.includes("CFG.HINT"), "引擎設定來自 config.ENDGAME");
+  ok(js.includes("白方能贏") && js.includes("只能和棋") && js.includes("判斷：這局面能贏嗎？") && js.includes("白方贏：把兵升變為后"), "王兵對王兩種課題文字");
 });
 
 /* ---------- 執行 ---------- */
