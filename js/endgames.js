@@ -51,7 +51,7 @@ function home() {
     el("div", { class: "card score-box" }, [
       el("div", { class: "muted", text: "已取得的星星" }),
       el("div", { class: "big", id: "star-total", text: tot.got + " / " + tot.all + " ★" }),
-      el("p", { class: "muted", text: "先看說明，再練習。黑方是全力防守的 Stockfish，不會讓你輕易將死。" })]),
+      el("p", { class: "muted", id: "eg-note", text: tot.got === 0 ? "還沒有取得星星。建議先從「后殺王」開始：先看說明，再練習。黑方是全力防守的 Stockfish，不會讓你輕易將死。" : "先看說明，再練習。黑方是全力防守的 Stockfish，不會讓你輕易將死。" })]),
     el("h2", { class: "section-title", text: "選擇課題" }),
     el("div", { class: "tile-grid" }, DATA.map(t => el("button", { class: "tile", type: "button", "data-topic": t.id, style: "text-align:left;color:inherit;font:inherit;cursor:pointer", onclick: () => topic(t) }, [
       el("b", { text: t.title }), el("span", { text: t.sub }),

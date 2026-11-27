@@ -8,7 +8,7 @@ const TYPES = {
   ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8", ".wasm": "application/wasm",
-  ".svg": "image/svg+xml", ".png": "image/png", ".md": "text/plain; charset=utf-8",
+  ".svg": "image/svg+xml", ".png": "image/png", ".md": "text/plain; charset=utf-8", ".webmanifest": "application/manifest+json",
 };
 http.createServer((req, res) => {
   let p = decodeURIComponent(req.url.split("?")[0]);

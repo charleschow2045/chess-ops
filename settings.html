@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="棋 Ops">
+<meta name="theme-color" content="#262522">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>設定</title>
 <link rel="stylesheet" href="css/theme.css">
@@ -21,7 +28,7 @@
   .speed-btns button { min-height: 56px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface2); color: var(--text); font-size: 18px; font-weight: 800; cursor: pointer; }
   .speed-btns button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-fg); }
   .msg { margin: 10px 0 0; font-size: 15px; font-weight: 700; }
-  .msg.bad { color: var(--danger); }
+  .msg.bad { color: var(--danger-fg); }
   .msg.good { color: var(--accent); }
 </style>
 </head>
@@ -46,9 +53,23 @@
     </div>
   </div>
   <p class="muted" id="saved" aria-live="polite"></p>
+  <h2 class="section-title">加到主畫面與離線使用</h2>
+  <div class="card" id="about-card">
+    <p style="margin:0 0 6px">App 版本：<b id="app-version">—</b></p>
+    <p style="margin:0 0 10px" id="offline-status">離線使用：檢查中…</p>
+    <b style="font-size:17px">如何加到主畫面</b>
+    <ol class="howto" style="margin:6px 0 0;padding-left:22px;line-height:1.7">
+      <li>用 Safari 打開這個 App 的網址。</li>
+      <li>點按 Safari 的「分享」按鈕（方框加向上箭頭）。</li>
+      <li>向下捲動，選擇「加入主畫面」，再點按「加入」。</li>
+      <li>之後從主畫面的圖示打開，就是全螢幕的 App。</li>
+    </ol>
+    <p class="muted" style="margin:10px 0 0">注意：主畫面版和 Safari 網頁版的紀錄是分開儲存的，請固定使用其中一個，並定期匯出備份。</p>
+  </div>
   <h2 class="section-title">備份與還原</h2>
   <div class="card bk">
     <p style="margin:0 0 6px">目前資料大約佔用 <b id="data-size">—</b>（只儲存在這部裝置的瀏覽器內）。</p>
+    <p style="margin:0 0 6px"><b id="last-backup">上次備份：—</b></p>
     <p class="muted" style="margin:0 0 10px">iPad 的瀏覽器可能會清除很久沒有使用的網站資料，建議定期匯出備份。下載後可在「檔案」App 的「下載項目」找到；如果無法下載，請用「複製備份文字」。</p>
     <div class="btn-row">
       <button class="btn primary" id="export" type="button">匯出備份</button>
@@ -63,7 +84,12 @@
 </main>
 <script src="js/util.js"></script>
 <script src="js/state.js"></script>
+<script src="js/config.js"></script>
+<script src="js/daily.js"></script>
+<script src="js/version.js"></script>
 <script src="js/dialog.js"></script>
 <script src="js/settings.js"></script>
+<script src="js/version.js"></script>
+<script src="js/pwa.js"></script>
 </body>
 </html>

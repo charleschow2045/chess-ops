@@ -684,7 +684,7 @@ test("謎題儲存：done 最多 2,000（保留最近）、history 最多 50、�
   const s = State.normalizeState({ puzzles: { rating: 815, rated: 12, done: ["aaaaa", "bbbbb"], wrong: [{ id: "ccccc", r: 1000, streak: 1 }], history: [{ id: "aaaaa", ok: true, hint: true, rated: false, theme: "pin", delta: 0 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
   eq(State.defaultState().puzzles, { rating: 700, rated: 0, done: [], wrong: [], history: [] });
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["backup", "daily", "endgames", "mygames", "onboarding", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("首頁：「戰術謎題」入口已開放並顯示真實謎題分；puzzles.html 引用嘅檔案齊全", () => {
   const mods = require(path.join(ROOT, "js/modules.js"));
@@ -1074,7 +1074,7 @@ test("儲存（play 欄位）：白名單清洗、最近 20 局、不存分析�
   eq(n.recent[0].blunders, null); eq(n.recent[1].blunders, 2); eq(n.recent[1].reason, "draw", "不明原因會被清洗");
   const s = State.normalizeState({ playLevel: 5, play: { levels: { 5: { w: 3, d: 0, l: 1, streak: 2, lstreak: 0 } }, current: { level: 5, color: "b", moves: ["e2e4"], undos: 1, hints: 2, usedUndo: true, usedHint: true }, recent: [{ date: "2026-11-14", level: 5, color: "b", result: "loss", reason: "resign", pgn: "1. e4 *", blunders: 3, plies: 1 }] } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["backup", "daily", "endgames", "mygames", "onboarding", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("進行中對局：保存（localStorage）→ 恢復 → 重播出同一個局面；中途離開後可以繼續", () => {
   const store = {};
@@ -1353,7 +1353,7 @@ test("儲存（three、openings 欄位）：白名單清洗、備份往返；首
   eq(o.routes["w-italian"], { streak: 2, mastered: true, runs: 5 }); eq(o.quiz, { plays: 3, best: 10 });
   const s = State.normalizeState({ three: { plays: 4, asked: 60, correct: 51 }, openings: { routes: { "b-scholar": { streak: 1, mastered: false, runs: 2 } }, quiz: { plays: 1, best: 8 } } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["backup", "daily", "endgames", "mygames", "onboarding", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
   const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
   ok(home.includes("homeState.three.plays") && home.includes("homeState.openings.routes"), "首頁用儲存嘅真數字");
   const mods = require(path.join(ROOT, "js/modules.js"));
@@ -1617,7 +1617,7 @@ test("儲存（endgames 欄位）：預設、白名單清洗（未知 id、多�
   const s = State.normalizeState({ endgames: { pos: { "k2rk-3": { stars: 2, wins: 4, runs: 6, best: 5 }, "kpk-1": { stars: 3, wins: 1, runs: 1, best: 0 } } } });
   eq(State.parseBackup(State.exportBackup(s)), s, "備份往返");
   eq(State.normalizeState(s), s, "冪等");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["backup", "daily", "endgames", "mygames", "onboarding", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("殘局頁面：endgames.html 引用檔案齊全（config、logic、data 次序正確）；首頁「殘局」入口顯示真實星數；殘局資料 id 全部可儲存", () => {
   const h = fs.readFileSync(path.join(ROOT, "endgames.html"), "utf8");
@@ -1951,7 +1951,7 @@ test("儲存（mygames 欄位）：用戶名、我的謎題（最多 50、id／F
   eq(new Set(n.puzzles.map(p => p.id)).size, 50); ok(!n.puzzles.some(p => p.id === "bad"));
   eq(State.normalizeState({ mygames: { user: "a b" } }).mygames.user, "", "無效用戶名清走"); eq(State.normalizeState({ mygames: "x" }).mygames, { user: "", puzzles: [], recent: [] });
   eq(State.normalizeState(State.normalizeState(raw)), State.normalizeState(raw), "冪等"); eq(State.parseBackup(State.exportBackup(State.normalizeState(raw))), State.normalizeState(raw), "備份往返");
-  eq(Object.keys(State.STATE_FIELDS).sort(), ["daily", "endgames", "mygames", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
+  eq(Object.keys(State.STATE_FIELDS).sort(), ["backup", "daily", "endgames", "mygames", "onboarding", "openings", "play", "playLevel", "puzzles", "rank", "records", "settings", "streak", "three", "version"]);
 });
 test("我的對局頁面：引用檔案齊全；用同一套檢討（RV.reviewGame）；只分析自己嘅步；大錯先可加入我的謎題；謎題頁有「我的謎題」；首頁入口開放", () => {
   const h = fs.readFileSync(path.join(ROOT, "mygames.html"), "utf8");
@@ -2056,6 +2056,154 @@ test("電腦出棋速度：所有有電腦／自動對手步嘅頁面都用設�
   const css = rd("css/board.css");
   ok(/cg-board square\.last-move \{[^}]*rgba\(250, 196, 20, \.72\)[^}]*box-shadow: inset 0 0 0 4px/.test(css), "最後一步高亮：較深黃底＋橙褐色內框（淺色同深色格都睇得清）");
   ok(/\.status-line \{[^}]*height: 28px[^}]*white-space: nowrap/.test(css), "狀態行仍然固定高度單行（文字變長唔會推動棋盤）");
+});
+
+
+/* ======================= 第 7 階段（整體修飾：小練習、PWA、離線、備份提示、歡迎卡） ======================= */
+const BUILD_SW = require(path.join(ROOT, "tools/build-sw.js"));
+const APP_VERSION = require(path.join(ROOT, "js/version.js"));
+const pngSize = file => { const b = fs.readFileSync(path.join(ROOT, file)); eq(b.slice(1, 4).toString(), "PNG", file + " 係 PNG"); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+
+test("規則快測完成一組（5 題）計入每日任務「小練習」；每日紀錄正確累計", () => {
+  const q = fs.readFileSync(path.join(ROOT, "js/quiz.js"), "utf8"), i = q.indexOf("function showResult()");
+  ok(i > 0 && q.indexOf('CO.Activity.log("mini")', i) > i && q.indexOf('CO.Activity.log("mini")', i) < q.indexOf("document.getElementById(\"bar\")", i), "quiz.js 喺完成一組（showResult）時記錄「小練習」");
+  ok(fs.readFileSync(path.join(ROOT, "quiz.html"), "utf8").includes("js/activity.js"), "quiz.html 載入 activity.js");
+  const st = State.defaultState(), tue = new Date(2026, 10, 24, 12);
+  for (let k = 0; k < 5; k++) DAILY.apply(st, "puzzle", { ok: true, delta: 0 }, tue);
+  eq(DAILY.status(st, tue).done, false);
+  eq(DAILY.apply(st, "mini", {}, tue).newlyDone, true, "謎題 5 題 + 規則快測一組（星期二）= 當日完成");
+  ok(fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8").includes("規則快測一組"), "首頁任務說明包括規則快測");
+});
+
+test("備份提示：「上次備份：X 日前」；超過 7 日冇備份先提示；關閉後 3 日內唔再顯示；重新備份就清走", () => {
+  eq(CFG.APP, { BACKUP_WARN_DAYS: 7, BACKUP_SNOOZE_DAYS: 3 });
+  const d = n => new Date(2026, 10, 10 + n, 12), key = DAILY.dateKey;
+  const mk = o => State.normalizeState({ backup: o });
+  // 上次備份文字
+  eq(DAILY.backupLabel(mk({}), d(0)), "上次備份：尚未備份"); eq(DAILY.backupLabel(mk({ last: key(d(0)) }), d(0)), "上次備份：今日");
+  eq(DAILY.backupLabel(mk({ last: key(d(0)) }), d(3)), "上次備份：3 日前"); eq(DAILY.backupLabel(mk({ last: key(d(0)) }), d(40)), "上次備份：40 日前");
+  // 7 日門檻（有備份：由上次備份起計；未備份：由第一次打開首頁起計）
+  eq(DAILY.backupNotice(mk({ last: key(d(0)) }), d(6)), null, "6 日：未到"); eq(DAILY.backupNotice(mk({ last: key(d(0)) }), d(7)), { days: 7 }, "7 日：提示"); eq(DAILY.backupNotice(mk({ last: key(d(0)) }), d(12)), { days: 12 });
+  eq(DAILY.backupNotice(mk({ since: key(d(0)) }), d(6)), null); eq(DAILY.backupNotice(mk({ since: key(d(0)) }), d(9)), { days: 9 }, "從未備份：由第一次使用起計");
+  eq(DAILY.backupNotice(mk({}), d(30)), null, "冇任何日期（未有 since）：唔提示");
+  eq(DAILY.backupNotice(mk({ last: key(d(0)), since: key(d(-50)) }), d(5)), null, "有備份就唔睇 since");
+  // 關閉後 3 日內唔再顯示
+  const st = mk({ last: key(d(0)) });
+  DAILY.snoozeBackup(st, d(8));
+  eq(st.backup.snooze, key(d(11)));
+  eq(DAILY.backupNotice(st, d(8)), null, "當日關閉"); eq(DAILY.backupNotice(st, d(9)), null); eq(DAILY.backupNotice(st, d(10)), null, "關閉後第 2 日仍然唔顯示");
+  eq(DAILY.backupNotice(st, d(11)), { days: 11 }, "滿 3 日再顯示");
+  // 重新備份：清走提示同關閉紀錄
+  DAILY.markBackup(st, d(12)); eq([st.backup.last, st.backup.snooze], [key(d(12)), ""]); eq(DAILY.backupNotice(st, d(15)), null); eq(DAILY.backupLabel(st, d(14)), "上次備份：2 日前");
+  // since 只設一次
+  const s0 = State.defaultState(); eq(DAILY.touchSince(s0, d(0)), true); eq(DAILY.touchSince(s0, d(5)), false); eq(s0.backup.since, key(d(0)));
+  // 儲存白名單
+  eq(State.defaultState().backup, { last: "", since: "", snooze: "" });
+  eq(State.normalizeState({ backup: { last: "2026-11-01", since: "壞", snooze: "2026-13", junk: 1 } }).backup, { last: "2026-11-01", since: "", snooze: "" });
+  eq(State.normalizeState({ backup: "x" }).backup, { last: "", since: "", snooze: "" });
+  const b = State.normalizeState({ backup: { last: "2026-11-01", since: "2026-10-01", snooze: "2026-11-20" }, onboarding: { welcomed: true } });
+  eq(State.parseBackup(State.exportBackup(b)), b, "備份往返（backup、onboarding）");
+  // 首頁提示唔令內容跳動：固定高度，關閉時保留位置
+  const css = fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8"), home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
+  ok(/\.notice \{[^}]*height: 44px/.test(css) && home.includes('visibility = "hidden"') && !/backup-notice[\s\S]{0,400}\.remove\(\)/.test(home), "備份提示：固定高度 44px；關閉只係隱藏，位置保留");
+  ok(home.includes("已經 ") && home.includes(" 天沒有備份，建議到設定頁匯出備份"), "提示文字");
+  const set = fs.readFileSync(path.join(ROOT, "js/settings.js"), "utf8") + fs.readFileSync(path.join(ROOT, "settings.html"), "utf8");
+  ok(set.includes("backupLabel") && set.includes("markBackedUp()") && set.includes('id="last-backup"'), "設定頁顯示上次備份，匯出／複製成功後更新");
+});
+
+test("第一次使用歡迎卡：預設未歡迎；撳「開始」後記低，唔再出現（備份往返、白名單）；3 點內容", () => {
+  eq(State.defaultState().onboarding, { welcomed: false });
+  eq(State.normalizeState({ onboarding: { welcomed: "yes" } }).onboarding, { welcomed: false }, "只接受 true");
+  eq(State.normalizeState({ onboarding: { welcomed: true, x: 1 } }).onboarding, { welcomed: true });
+  eq(State.parseBackup(State.exportBackup(State.normalizeState({ onboarding: { welcomed: true } }))).onboarding, { welcomed: true });
+  const home = fs.readFileSync(path.join(ROOT, "js/home.js"), "utf8");
+  ok(home.includes("if (!homeState.onboarding.welcomed)") && home.includes("s.onboarding.welcomed = true") && home.includes('id: "welcome-start"') && home.includes('text: "開始"'), "歡迎卡只喺未歡迎時出現；撳「開始」寫入並移除");
+  for (const t of ["每日任務：", "稱號：", "從哪裡開始："]) ok(home.includes(t), "歡迎卡要點：" + t);
+  eq((home.match(/class: "welcome-list"/g) || []).length, 1);
+});
+
+test("manifest：名稱、短名、standalone、直向、主題色用設計 A；圖示 180／192／512；所有頁面有 PWA meta（含 safe-area）", () => {
+  const m = JSON.parse(fs.readFileSync(path.join(ROOT, "manifest.webmanifest"), "utf8"));
+  eq([m.name, m.short_name, m.display, m.orientation, m.lang], ["國際象棋 Ops", "棋 Ops", "standalone", "portrait", "zh-Hant"]);
+  const theme = fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8"), bg = theme.match(/--bg:\s*(#[0-9a-f]{6})/i)[1].toLowerCase();
+  eq([m.theme_color.toLowerCase(), m.background_color.toLowerCase()], [bg, bg], "主題色＝設計 A 背景 " + bg);
+  const sizes = m.icons.map(i => i.sizes).sort(); eq(sizes, ["192x192", "512x512"]);
+  for (const i of m.icons) { const [w, h] = pngSize(i.src); eq(i.sizes, w + "x" + h, i.src + " 實際尺寸"); }
+  eq(pngSize("icons/apple-touch-icon.png"), [180, 180]);
+  ok(fs.readFileSync(path.join(ROOT, "icons/icon.svg"), "utf8").includes("原創圖示"), "原創圖示（冇用品牌圖案）");
+  ok(fs.existsSync(path.join(ROOT, m.start_url.replace("./", ""))), "start_url 存在");
+  for (const p of BUILD_SW.userPages()) {
+    const h = fs.readFileSync(path.join(ROOT, p), "utf8");
+    for (const need of ['rel="manifest" href="manifest.webmanifest"', 'rel="apple-touch-icon" href="icons/apple-touch-icon.png"', 'name="apple-mobile-web-app-capable" content="yes"', 'name="apple-mobile-web-app-status-bar-style" content="black-translucent"', 'name="apple-mobile-web-app-title" content="棋 Ops"', 'name="theme-color" content="' + bg + '"', "viewport-fit=cover", 'src="js/version.js"', 'src="js/pwa.js"']) ok(h.includes(need), p + " 有 " + need);
+  }
+  ok(/body \{ padding: env\(safe-area-inset-top\) env\(safe-area-inset-right\) env\(safe-area-inset-bottom\) env\(safe-area-inset-left\)/.test(theme), "全螢幕：safe-area 內邊距（頂部唔被狀態列遮住）");
+});
+
+test("service worker 檔案清單：掃描所有頁面引用嘅檔案（script／link／連結／模組 import／Stockfish／資料）全部喺清單入面；清單檔案都存在；雜湊同 sw.js 一致", () => {
+  const list = BUILD_SW.precacheList(), set = new Set(list), need = new Map();
+  const addNeed = (f, why) => { if (!need.has(f)) need.set(f, why); };
+  const local = u => u && !/^(https?:|data:|mailto:|#|\/\/)/.test(u);
+  const pages = BUILD_SW.userPages();
+  ok(pages.length >= 15, "使用者頁面數目 " + pages.length);
+  for (const p of pages) {
+    addNeed(p, "頁面");
+    const h = fs.readFileSync(path.join(ROOT, p), "utf8");
+    for (const m of h.matchAll(/(?:src|href)="([^"]+)"/g)) { const u = m[1].split("#")[0].split("?")[0]; if (local(m[1]) && u && !/^(dev.html|test-|design-preview)/.test(u)) addNeed(u, p + " 引用"); }   // 開發者頁面（dev.html、測試頁、設計預覽）只係有網絡時用，唔快取
+  }
+  // 模組 import（遞歸）
+  const seen = new Set();
+  (function walk(f) {
+    if (seen.has(f) || !f.endsWith(".js") || !fs.existsSync(path.join(ROOT, f))) return; seen.add(f);
+    const src = fs.readFileSync(path.join(ROOT, f), "utf8");
+    for (const m of src.matchAll(/import\s+(?:[^"']*?from\s+)?["'](\.[^"']+)["']/g)) { const t = path.posix.normalize(path.posix.join(path.posix.dirname(f), m[1])); addNeed(t, f + " import"); walk(t); }
+    for (const m of src.matchAll(/["']((?:vendor|data)\/[A-Za-z0-9_\/.\-]+\.(?:js|json|wasm|css))["']/g)) addNeed(m[1], f + " 字串引用");
+  })("js/__root__");
+  for (const f of [...need.keys()].filter(k => k.endsWith(".js"))) if (!seen.has(f)) { seen.add(f); const src = fs.readFileSync(path.join(ROOT, f), "utf8");
+    for (const m of src.matchAll(/import\s+(?:[^"']*?from\s+)?["'](\.[^"']+)["']/g)) addNeed(path.posix.normalize(path.posix.join(path.posix.dirname(f), m[1])), f + " import");
+    for (const m of src.matchAll(/["']((?:vendor|data)\/[A-Za-z0-9_\/.\-]+\.(?:js|json|wasm|css))["']/g)) addNeed(m[1], f + " 字串引用"); }
+  for (const [f, why] of need) { ok(fs.existsSync(path.join(ROOT, f)), f + " 存在（" + why + "）"); ok(set.has(f), f + " 喺 precache 清單（" + why + "）"); }
+  // 動態載入：謎題分段檔、Stockfish、資料
+  for (const f of fs.readdirSync(path.join(ROOT, "data/puzzles"))) ok(set.has("data/puzzles/" + f), "data/puzzles/" + f);
+  ok(set.has("vendor/stockfish/stockfish-19-lite-single.js") && set.has("vendor/stockfish/stockfish-19-lite-single.wasm"), "Stockfish .js 同 .wasm");
+  for (const f of ["./", "manifest.webmanifest", "favicon.svg", "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png", "data/endgames.js", "data/three.js", "data/openings.js", "data/rules-quiz.js", "vendor/chessground/chessground.min.js", "vendor/chess.js/chess.esm.js"]) ok(set.has(f), f + " 喺清單");
+  for (const f of list) if (f !== "./") ok(fs.existsSync(path.join(ROOT, f)), "清單檔案存在：" + f);
+  ok(!list.some(f => /^(test-|dev\.html|design-preview|docs|tools|tests)/.test(f)), "開發用檔案唔放入清單");
+  // sw.js：清單、雜湊、版本一致
+  const sw = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8");
+  const listInSw = JSON.parse(sw.match(/var PRECACHE = (\[[\s\S]*?\n\]);/)[1].replace(/\n\s*/g, ""));
+  eq(listInSw, list, "sw.js 內嘅清單同目前檔案一致（改過檔案要重新跑 node tools/build-sw.js）");
+  eq(sw.match(/var HASH = "([0-9a-f]{8})"/)[1], BUILD_SW.contentHash(list), "sw.js 內容雜湊同目前檔案一致（改過檔案要重新跑 node tools/build-sw.js）");
+  ok(sw.includes('importScripts("js/version.js")') && sw.includes('var CACHE = "chessops-v" + VERSION + "-" + HASH;'), "快取名稱用 App 版本號");
+  ok(/^\d+\.\d+\.\d+$/.test(APP_VERSION), "App 版本號 " + APP_VERSION);
+});
+
+test("service worker／更新機制：新版本安裝後唔自動刷新，要用戶撳「有新版本，按此更新」；第一次安裝即刻啟用；舊快取會刪走；外部網絡（chess.com）唔經快取", () => {
+  const sw = fs.readFileSync(path.join(ROOT, "sw.js"), "utf8"), pwa = fs.readFileSync(path.join(ROOT, "js/pwa.js"), "utf8");
+  ok(/if \(!self\.registration\.active\) return self\.skipWaiting\(\)/.test(sw), "只有第一次安裝先自動 skipWaiting");
+  eq((sw.match(/skipWaiting\(\)/g) || []).length, 2, "skipWaiting 只出現喺「第一次安裝」同「收到 SKIP_WAITING 訊息」");
+  ok(sw.includes('d.type === "SKIP_WAITING"') && sw.includes("caches.delete(k)") && sw.includes("clients.claim()"), "訊息啟用、刪舊快取、claim");
+  ok(sw.includes("url.origin !== self.location.origin") && sw.includes("ignoreSearch: true") && sw.includes("{ cache: \"reload\" }"), "只快取同源；ignoreSearch；安裝時繞過 HTTP 快取");
+  ok(pwa.includes("有新版本，按此更新") && pwa.includes('postMessage({ type: "SKIP_WAITING" })') && pwa.includes("if (asked) location.reload()"), "用戶撳咗先重新載入");
+  ok(!/controllerchange[\s\S]{0,80}location\.reload\(\)/.test(pwa.replace(/if \(asked\) location\.reload\(\)/, "")), "唔會自動強制刷新");
+  ok(fs.readFileSync(path.join(ROOT, "index.html"), "utf8").includes('id="update-bar"') && /\.update-bar \{[^}]*position: fixed/.test(fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8")), "首頁頁底更新列（固定位置，唔推動內容）");
+});
+
+test("設定頁：顯示 App 版本號、離線狀態、「如何加到主畫面」說明（Safari 分享掣 → 加入主畫面）；我的對局離線訊息", () => {
+  const h = fs.readFileSync(path.join(ROOT, "settings.html"), "utf8"), js = fs.readFileSync(path.join(ROOT, "js/settings.js"), "utf8");
+  ok(h.includes('id="app-version"') && js.includes("CHESSOPS_VERSION") && h.includes("js/version.js"), "版本號");
+  for (const t of ["如何加到主畫面", "Safari", "分享", "加入主畫面"]) ok(h.includes(t), "說明包括 " + t);
+  ok(h.indexOf("js/config.js") < h.indexOf("js/daily.js") && h.indexOf("js/daily.js") < h.indexOf("js/settings.js"), "settings.html 載入次序");
+  ok(fs.readFileSync(path.join(ROOT, "js/mygames.js"), "utf8").includes("需要網絡才能讀取對局，可以改用貼上 PGN。"), "離線時讀取對局：顯示指定訊息");
+});
+
+test("對比度（程式計算）：主要文字／背景顏色組合 >= 4.5:1（細字）；危險色文字用 --danger-fg；字體同觸控範圍 CSS", () => {
+  const css = fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8"), v = n => css.match(new RegExp("--" + n + ":\\s*(#[0-9a-fA-F]{6})"))[1];
+  const lum = hex => { const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(x => x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+  const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+  const pairs = [["text", "bg"], ["text", "surface"], ["text", "surface2"], ["muted", "bg"], ["muted", "surface"], ["muted", "surface2"], ["accent", "bg"], ["accent", "surface"], ["accent-fg", "accent"], ["gold", "bg"], ["gold", "surface"], ["danger-fg", "bg"], ["danger-fg", "surface"], ["danger-fg", "surface2"]];
+  for (const [a, b] of pairs) { const r = ratio(v(a), v(b)); ok(r >= 4.5, "--" + a + " 對 --" + b + " 對比度 " + r.toFixed(2) + " >= 4.5"); }
+  ok(/\.btn \{[^}]*min-height: 4[4-9]px|\.btn \{[^}]*min-height: [5-9]\d px/.test(css) || /\.btn \{[^}]*min-height:\s*(4[4-9]|[5-9]\d)px/.test(css), ".btn 觸控高度 >= 44px");
+  ok(/\.btn-back \{[^}]*(min-)?(height|width):\s*(4[4-9]|[5-9]\d)px/.test(css), "返回掣 >= 44px");
 });
 
 /* ---------- 執行 ---------- */

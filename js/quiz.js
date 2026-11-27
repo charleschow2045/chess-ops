@@ -92,6 +92,7 @@ function showQuestion() {
 
 function showResult() {
   const next = CO.State.recordResult(CO.State.loadState(), "quiz-" + group.id, score);
+  CO.Activity.log("mini");                                  // 規則快測完成一組（5 題）都計「小練習」
   const rec = next.records["quiz-" + group.id];
   document.getElementById("bar").style.width = "100%";
   document.getElementById("prog").textContent = "完成";

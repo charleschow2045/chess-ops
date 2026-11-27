@@ -30,10 +30,10 @@ const topic = id => EGD.TOPICS.find(t => t.id === id);
 
 /* 電腦出棋速度：測試預設用「快」（避免等太耐）；SPEED=slow／medium／fast 可以覆蓋。預設值「慢」由 tests/run-all.js 同 tools/shots7.js 另外驗證 */
 const SPEED = process.env.SPEED || "fast";
-const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); return s; };
+const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); s.onboarding = { welcomed: true }; return s; };
 async function scenario(browser, name, init, fn, routes) {
   console.log(name);
-  const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({ serviceWorkers: "block", viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
   await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, forceSpeed(init));
   const page = await ctx.newPage();
   if (routes) await routes(page);

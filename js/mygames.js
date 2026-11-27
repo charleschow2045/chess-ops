@@ -36,7 +36,7 @@ async function getJson(url) {
   const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 20000);
   let res;
   try { res = await fetch(url, { headers: { Accept: "application/json" }, signal: ctl.signal }); }
-  catch (e) { throw new Error("無法連接 chess.com（網絡問題，或者瀏覽器阻擋了連線）。"); }
+  catch (e) { throw new Error(navigator.onLine === false ? "需要網絡才能讀取對局，可以改用貼上 PGN。" : "無法連接 chess.com（網絡問題，或者瀏覽器阻擋了連線）。"); }
   finally { clearTimeout(timer); }
   if (res.status === 404) throw new Error("找不到這個用戶名，請檢查拼寫。");
   if (res.status === 429) throw new Error("chess.com 暫時限制了請求次數，請稍後再試。");
@@ -113,7 +113,7 @@ function home(note) {
     el("h2", { class: "section-title", text: "最近分析過的對局（最多 " + CFG.MYGAMES.RECENT + " 局）" }),
     s.recent.length ? el("div", { class: "card", id: "recent" }, s.recent.map(g => el("div", { class: "meta-row" }, [
       el("span", { text: (g.date || "—") + "・" + TC[g.tc] + "・執" + (g.color === "w" ? "白" : "黑") + "・對 " + (g.opp || "—") + "・" + RES[g.result] }),
-      el("span", { class: "muted", text: "大錯 " + g.blunders + "・錯著 " + g.mistakes + "・疑問手 " + g.inaccuracies })]))) : el("p", { class: "muted", text: "分析過的對局摘要會顯示在這裡。" }));
+      el("span", { class: "muted", text: "大錯 " + g.blunders + "・錯著 " + g.mistakes + "・疑問手 " + g.inaccuracies })]))) : el("p", { class: "muted", text: "還沒有分析過的對局。先輸入用戶名讀取對局，或者貼上 PGN，選擇一局分析。" }));
 }
 
 /* 一局嘅清單列：已知顏色就一個「分析」鍵；未知（貼上 PGN 又對唔到用戶名）就俾用戶揀執白／執黑 */

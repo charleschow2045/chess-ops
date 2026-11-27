@@ -1,0 +1,16 @@
+{
+  "name": "國際象棋 Ops",
+  "short_name": "棋 Ops",
+  "description": "給小學生用 iPad 練習國際象棋：每日任務、戰術謎題、對電腦下棋、開局、殘局。",
+  "lang": "zh-Hant",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#262522",
+  "theme_color": "#262522",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}

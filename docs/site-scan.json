@@ -1,0 +1,1096 @@
+{
+ "viewports": [
+  "820x1180",
+  "1180x820"
+ ],
+ "results": [
+  {
+   "name": "首頁",
+   "url": "index.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": false,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測與小遊戲",
+   "url": "rules.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測",
+   "url": "quiz.html?g=castling",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "一步將死選級",
+   "url": "game-mate1.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "一步將死",
+   "url": "game-mate1.html?level=1",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "找出將軍",
+   "url": "game-check.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "騎士迷宮選關",
+   "url": "game-maze.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "騎士迷宮",
+   "url": "game-maze.html?level=1",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "兵仗",
+   "url": "game-pawnwar.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "戰術謎題",
+   "url": "puzzles.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "對電腦下棋",
+   "url": "play.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "走棋前三問",
+   "url": "three.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "開局訓練",
+   "url": "openings.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局訓練",
+   "url": "endgames.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "我的對局",
+   "url": "mygames.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "家長週報",
+   "url": "report.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "設定",
+   "url": "settings.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "首頁（第一次使用：歡迎卡）",
+   "url": "index.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": false,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "首頁（備份提示）",
+   "url": "index.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": false,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "戰術謎題（練習中）",
+   "url": "puzzles.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "對電腦下棋（對局中）",
+   "url": "play.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "走棋前三問（題目）",
+   "url": "three.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "開局（路線練習）",
+   "url": "openings.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "開局（小測）",
+   "url": "openings.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局（課題說明）",
+   "url": "endgames.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局（練習）",
+   "url": "endgames.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測（答錯）",
+   "url": "quiz.html?g=castling",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "對電腦下棋（認輸確認對話框）",
+   "url": "play.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "設定（匯入確認對話框）",
+   "url": "settings.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "設定（匯入錯誤訊息）",
+   "url": "settings.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "戰術謎題（提示）",
+   "url": "puzzles.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "走棋前三問（回饋）",
+   "url": "three.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局（判斷題答錯）",
+   "url": "endgames.html",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測（答題後）",
+   "url": "quiz.html?g=castling",
+   "viewport": "820x1180",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    820,
+    820
+   ],
+   "errors": []
+  },
+  {
+   "name": "首頁",
+   "url": "index.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": false,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測與小遊戲",
+   "url": "rules.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測",
+   "url": "quiz.html?g=castling",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "一步將死選級",
+   "url": "game-mate1.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "一步將死",
+   "url": "game-mate1.html?level=1",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "找出將軍",
+   "url": "game-check.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "騎士迷宮選關",
+   "url": "game-maze.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "騎士迷宮",
+   "url": "game-maze.html?level=1",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "兵仗",
+   "url": "game-pawnwar.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "戰術謎題",
+   "url": "puzzles.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "對電腦下棋",
+   "url": "play.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "走棋前三問",
+   "url": "three.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "開局訓練",
+   "url": "openings.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局訓練",
+   "url": "endgames.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "我的對局",
+   "url": "mygames.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "家長週報",
+   "url": "report.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "設定",
+   "url": "settings.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "首頁（第一次使用：歡迎卡）",
+   "url": "index.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": false,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "首頁（備份提示）",
+   "url": "index.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": false,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "戰術謎題（練習中）",
+   "url": "puzzles.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "對電腦下棋（對局中）",
+   "url": "play.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "走棋前三問（題目）",
+   "url": "three.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "開局（路線練習）",
+   "url": "openings.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "開局（小測）",
+   "url": "openings.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局（課題說明）",
+   "url": "endgames.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局（練習）",
+   "url": "endgames.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測（答錯）",
+   "url": "quiz.html?g=castling",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "對電腦下棋（認輸確認對話框）",
+   "url": "play.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "設定（匯入確認對話框）",
+   "url": "settings.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "設定（匯入錯誤訊息）",
+   "url": "settings.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "戰術謎題（提示）",
+   "url": "puzzles.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "走棋前三問（回饋）",
+   "url": "three.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "殘局（判斷題答錯）",
+   "url": "endgames.html",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  },
+  {
+   "name": "規則快測（答題後）",
+   "url": "quiz.html?g=castling",
+   "viewport": "1180x820",
+   "small": [],
+   "targets": [],
+   "contrast": [],
+   "canto": [],
+   "hscroll": false,
+   "topbar": true,
+   "hscrollDetail": [
+    1180,
+    1180
+   ],
+   "errors": []
+  }
+ ]
+}

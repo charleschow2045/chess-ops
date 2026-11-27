@@ -43,8 +43,8 @@ async function fresh(ctx, url) {
 
 (async () => {
   const browser = await chromium.launch({ channel: process.env.BROWSER === "chrome" ? "chrome" : "msedge" });
-  const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1, hasTouch: false });
-  await ctx.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("chessops_state", JSON.stringify({ settings: { computerSpeed: "fast" } })); } catch (e) { /* 忽略 */ } });
+  const ctx = await browser.newContext({ serviceWorkers: "block", viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1, hasTouch: false });
+  await ctx.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("chessops_state", JSON.stringify({ settings: { computerSpeed: "fast" }, onboarding: { welcomed: true } })); } catch (e) { /* 忽略 */ } });
 
   console.log("首頁");
   let page = await fresh(ctx, "index.html");

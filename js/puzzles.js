@@ -68,7 +68,7 @@ function home() {
       el("div", { class: "muted", text: "我的謎題分" }),
       el("div", { class: "big", id: "rating", text: String(s.rating) }),
       el("p", { class: "muted", text: s.rated ? "已計分 " + s.rated + " 題" : "起始分數 700，每答一題會升降" }),
-      recent.length ? el("div", { class: "found-list", style: "justify-content:center" }, recent) : ""].filter(Boolean)),
+      recent.length ? el("div", { class: "found-list", style: "justify-content:center" }, recent) : el("p", { class: "muted", id: "puz-empty", text: "還沒有答題紀錄。按下面的「推薦練習」開始第一輪。" })].filter(Boolean)),
     el("div", { class: "btn-row" }, [el("button", { class: "btn primary", type: "button", id: "go-rec", text: "推薦練習（5 題）", onclick: () => round({ mode: "recommended" }) })]),
     el("p", { class: "muted", text: "推薦練習會輪流出送子、一步殺、捉雙、牽制四種題目。" }),
     el("h2", { class: "section-title", text: "按主題練習" }),
@@ -81,7 +81,7 @@ function home() {
     el("h2", { class: "section-title", text: "錯題本" }),
     el("button", { class: "tile", type: "button", id: "book", disabled: !s.wrong.length, style: "width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;" + (s.wrong.length ? "" : "opacity:.5"), onclick: () => round({ mode: "book" }) }, [
       el("b", { text: "錯題本（" + s.wrong.length + " 題）" }),
-      el("span", { text: s.wrong.length ? "重做答錯的題目，連續答對 2 次就移出錯題本（不計謎題分）" : "答錯的題目會自動加入這裡" })]));
+      el("span", { text: s.wrong.length ? "重做答錯的題目，連續答對 2 次就移出錯題本（不計謎題分）" : "還沒有錯題。答錯的題目會自動加入這裡，先做一輪推薦練習吧。" })]));
 }
 
 /* ---------- 一輪 ---------- */

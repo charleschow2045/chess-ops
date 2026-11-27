@@ -3,12 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="棋 Ops">
+<meta name="theme-color" content="#262522">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <title>國際象棋 Ops</title>
 <link rel="stylesheet" href="css/theme.css">
 </head>
 <body>
 <main class="page">
+  <div class="notice-slot" id="notice-slot"></div>
+  <div id="welcome-slot"></div>
   <div class="brand" id="brand"></div>
   <section class="card" id="title-card" aria-label="稱號"></section>
   <section class="card" id="daily-card" aria-label="今日任務" style="margin-top:12px"></section>
@@ -16,6 +25,7 @@
   <div class="modules" id="modules"></div>
   <p class="foot"><a href="report.html">家長週報</a><a href="settings.html">設定</a><a href="dev.html">開發者</a></p>
 </main>
+<div id="update-bar" class="update-bar"></div>
 <script src="js/icons.js"></script>
 <script src="js/util.js"></script>
 <script src="js/state.js"></script>
@@ -26,5 +36,7 @@
 <script src="js/dialog.js"></script>
 <script src="js/modules.js"></script>
 <script src="js/home.js"></script>
+<script src="js/version.js"></script>
+<script src="js/pwa.js"></script>
 </body>
 </html>
