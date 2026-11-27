@@ -1978,6 +1978,24 @@ test("頁面引用：所有練習頁面載入 config → daily → activity；�
   ok(idx.indexOf("js/config.js") < idx.indexOf("js/daily.js") && idx.includes("js/dialog.js"));
 });
 
+
+/* ======================= 修正：棋盤唔可以移位（第 6 階段之後嘅緊急修正） ======================= */
+test("棋盤唔移位（原始碼檢查；真正量度見 tools/layout-check.js）：提醒行永遠佔位只係變淡、狀態行固定單行、引擎提示浮動、題目文字固定高度", () => {
+  const css = fs.readFileSync(path.join(ROOT, "css/board.css"), "utf8"), play = fs.readFileSync(path.join(ROOT, "js/play.js"), "utf8");
+  ok(/\.status-line \{[^}]*height: 28px[^}]*white-space: nowrap[^}]*text-overflow: ellipsis/.test(css), "狀態行：固定高度、單行、省略號");
+  ok(/\.reminder \{[^}]*height: 58px/.test(css) && /\.reminder\.dim \{ opacity: \.4/.test(css), "提醒行：固定高度；電腦思考時只係變淡（opacity .4）");
+  ok(/\.player-row \{[^}]*height: 40px/.test(css), "玩家列：固定高度");
+  const capRule = (css.match(/\.cap-row \{[^}]*\}/) || [""])[0];
+  ok(capRule.includes("height: 26px") && capRule.includes("flex-wrap: nowrap") && capRule.includes("overflow: hidden"), "被吃棋子列：固定高度、唔換行");
+  for (const p of ["play", "endgames", "mygames"]) { const h = fs.readFileSync(path.join(ROOT, p + ".html"), "utf8"); ok(h.indexOf('id="stage"') < h.indexOf('id="engine-box"'), p + ".html：引擎提示放喺內容下面，唔推動棋盤"); }
+  ok(!/reminder\.classList\.toggle\("hidden"/.test(play) && play.includes('reminder.classList.toggle("dim"') && play.includes("useReminder"), "play.js：唔再用 hidden 收起提醒；設定關閉就由開局起唔出現");
+  ok(!/class: "reminder hidden"/.test(play));
+  for (const f2 of ["js/three.js", "js/quiz.js"]) ok(fs.readFileSync(path.join(ROOT, f2), "utf8").includes("CO.Util.fixTextHeight("), f2 + " 用固定題目文字高度");
+  const util = require(path.join(ROOT, "js/util.js")); ok(typeof util.fixTextHeight === "function");
+  const lc = fs.readFileSync(path.join(ROOT, "tools/layout-check.js"), "utf8");
+  ok(lc.includes("820x1180") && lc.includes("1180x820") && lc.includes("const TOL = 1;") && lc.includes("requestAnimationFrame"), "量度工具：兩個視窗大細、容許 1px、連續取樣");
+});
+
 /* ---------- 執行 ---------- */
 (async () => {
   let pass = 0, fail = 0;

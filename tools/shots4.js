@@ -166,7 +166,7 @@ async function scenario(browser, name, init, fn) {
     await page.goto(BASE + "play.html"); await page.waitForTimeout(500);
     await page.locator("button[data-level='1']").click(); await page.locator("button[data-color='w']").click();
     await page.locator("#start").click(); await page.waitForSelector("cg-board");
-    ok(await page.locator("#reminder:not(.hidden)").count() === 1, "輪到玩家時顯示三問提醒");
+    ok(await page.locator("#reminder:not(.dim)").count() === 1, "輪到玩家時三問提醒清晰顯示（唔變淡）");
     ok((await page.locator("#reminder").textContent()).includes("先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？"), "提醒文字正確");
     await shot(page, "11-play-reminder");
     await page.locator("#rem-toggle").click();
@@ -174,7 +174,7 @@ async function scenario(browser, name, init, fn) {
     await page.locator("#rem-toggle").click();
     await move(page, "e2", "e4");
     await page.waitForFunction(() => /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 20000 });
-    ok(await page.locator("#reminder:not(.hidden)").count() === 1, "電腦走完，再輪到玩家時又顯示");
+    ok(await page.locator("#reminder:not(.dim)").count() === 1 && await page.locator("#reminder.hidden").count() === 0, "電腦走完，再輪到玩家時回復清晰（電腦思考時只係變淡，唔收起）");
     await page.goto(BASE + "settings.html"); await page.waitForTimeout(300);
     ok(await page.locator("#three-reminder").isChecked(), "設定「對局中顯示三問提醒」預設開");
     await page.locator("#three-reminder").uncheck();
@@ -182,7 +182,7 @@ async function scenario(browser, name, init, fn) {
     await shot(page, "12-settings");
     await page.goto(BASE + "play.html"); await page.waitForTimeout(400);
     await page.locator("#resume").click(); await page.waitForSelector("cg-board");
-    ok(await page.locator("#reminder.hidden").count() === 1, "關閉設定後唔顯示提醒");
+    ok(await page.locator("#reminder").count() === 0, "關閉設定後完全唔出現提醒（由開局起唔佔位）");
   });
 
   // 新檢討：真 Stockfish 分析一局漏殺（黑方錯過 Qh4#）
