@@ -14,6 +14,12 @@
   .switch { width: 64px; height: 36px; flex: none; accent-color: var(--accent); }
   .bk textarea { width: 100%; min-height: 110px; font-size: 14px; border-radius: 10px; padding: 8px; background: var(--surface2); color: var(--text); border: 1px solid var(--line); box-sizing: border-box; }
   .bk input[type=file] { width: 100%; font-size: 15px; margin: 8px 0; }
+  .speed-row { padding: 14px 18px; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); margin-top: 12px; }
+  .speed-row b { display: block; font-size: 18px; }
+  .speed-row .desc { display: block; font-size: 14px; color: var(--muted); margin: 2px 0 10px; }
+  .speed-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .speed-btns button { min-height: 56px; border-radius: 12px; border: 2px solid var(--line); background: var(--surface2); color: var(--text); font-size: 18px; font-weight: 800; cursor: pointer; }
+  .speed-btns button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-fg); }
   .msg { margin: 10px 0 0; font-size: 15px; font-weight: 700; }
   .msg.bad { color: var(--danger); }
   .msg.good { color: var(--accent); }
@@ -30,6 +36,15 @@
     <span class="txt"><b>對局中顯示三問提醒</b><span class="desc">輪到你走棋時，棋盤上方顯示一行提示：先想三問（對方想做甚麼？我有機會嗎？這步安全嗎？）。只是提醒，不會替你判斷。預設開啟。</span></span>
     <input class="switch" type="checkbox" id="three-reminder" role="switch">
   </label>
+  <div class="speed-row">
+    <b>電腦出棋速度</b>
+    <span class="desc">電腦（以及戰術謎題、開局、殘局的對手步）走棋前的停頓同棋子移動速度。慢：停 1.2–1.8 秒；中：0.8–1.2 秒；快：0.4–0.8 秒。你自己走棋的速度不受影響。預設：慢。</span>
+    <div class="speed-btns" role="group" aria-label="電腦出棋速度">
+      <button type="button" data-speed="slow">慢</button>
+      <button type="button" data-speed="medium">中</button>
+      <button type="button" data-speed="fast">快</button>
+    </div>
+  </div>
   <p class="muted" id="saved" aria-live="polite"></p>
   <h2 class="section-title">備份與還原</h2>
   <div class="card bk">

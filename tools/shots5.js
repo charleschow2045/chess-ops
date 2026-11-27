@@ -28,10 +28,13 @@ const stateOf = page => page.evaluate(() => JSON.parse(localStorage.getItem("che
 const stateWith = fn => { const s = State.defaultState(); fn(s); return State.normalizeState(s); };
 const topic = id => EGD.TOPICS.find(t => t.id === id);
 
+/* 電腦出棋速度：測試預設用「快」（避免等太耐）；SPEED=slow／medium／fast 可以覆蓋。預設值「慢」由 tests/run-all.js 同 tools/shots7.js 另外驗證 */
+const SPEED = process.env.SPEED || "fast";
+const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); return s; };
 async function scenario(browser, name, init, fn, routes) {
   console.log(name);
   const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
-  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, init);
+  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, forceSpeed(init));
   const page = await ctx.newPage();
   if (routes) await routes(page);
   page.on("console", m => { if (m.type() === "error") errors.push(name + " → " + m.text()); });
@@ -43,7 +46,7 @@ async function scenario(browser, name, init, fn, routes) {
 /* 用引擎建議嘅步（同 App 提示一樣嘅設定），用真滑鼠走到完結（成功或失敗） */
 async function playWithEngine(page, maxMoves) {
   for (let i = 0; i < maxMoves; i++) {
-    await page.waitForFunction(() => document.querySelector("#result") || document.querySelector("#fb .feedback.bad") || /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 60000 });
+    await page.waitForFunction(() => document.querySelector("#result") || document.querySelector("#fb .feedback.bad") || document.querySelector("#status").dataset.turn === "me", null, { timeout: 60000 });
     if (await page.locator("#end-box .btn-row").count()) return;
     const fen = await page.evaluate(() => window.__chessopsEg.board().game.fen());
     const uci = await page.evaluate(f => window.__chessopsMgr.run(f, { depth: 14 }).then(r => r.uci), fen);
@@ -168,7 +171,7 @@ async function playWithEngine(page, maxMoves) {
   await scenario(browser, "開局：走「也可以」嘅走法（唔當錯、還原棋步、再走主線）", null, async page => {
     await page.goto(BASE + "openings.html"); await page.waitForSelector("[data-route]");
     await page.locator("[data-route='" + rt.id + "']").click(); await page.waitForSelector("cg-board");
-    await page.waitForFunction(() => /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelector("#status").dataset.turn === "me", null, { timeout: 15000 });
     await move(page, alt.uci.slice(0, 2), alt.uci.slice(2, 4));
     const fbText = await page.locator("#fb").textContent();
     ok(fbText.includes("也可以！") && fbText.includes("不過這條路線練習的是 " + rt.moves[0] + "，請再走一次。"), "顯示「也可以！不過這條路線練習的是 " + rt.moves[0] + "，請再走一次。」");

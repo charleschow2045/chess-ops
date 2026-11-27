@@ -141,7 +141,13 @@ function runPuzzle(p, ctx) {
           board.clearShapes(); hintLevel = 0;
           if (mate || idx >= moves.length) return solved();
           board.setInteractive(false); hintBtn.disabled = true;
-          setTimeout(() => { auto = true; board.play(parse(moves[idx])); idx++; auto = false; board.setInteractive(playerColor); hintBtn.disabled = false; }, 500);
+          const spd = CO.Speed.current();
+          status.textContent = "對手回應中…"; status.dataset.turn = "opp";
+          setTimeout(() => {
+            auto = true; const om = board.play(parse(moves[idx]), { duration: spd.anim }); idx++; auto = false;
+            board.setInteractive(playerColor); hintBtn.disabled = false;
+            status.textContent = CO.Speed.describeMove(om, "對手"); status.dataset.turn = "me";
+          }, CO.Speed.pauseMs(spd));
         } else wrongMove();
       }
     });
@@ -150,12 +156,14 @@ function runPuzzle(p, ctx) {
       auto = true; idx = 0; finished = false;
       board.load(p.fen); board.setInteractive(false); hintLevel = 0;
       retryBtn.classList.add("hidden"); nextBtn.classList.add("hidden"); hintBtn.disabled = true; CO.Feedback.clear(fb);
-      status.textContent = "對手先走一步…";
+      status.textContent = "對手先走一步…"; status.dataset.turn = "opp";
+      const spd = CO.Speed.current();
+      // 棋盤顯示咗原本局面之後，先停一陣（跟電腦出棋速度設定）先走對手第一步，等玩家睇到原本局面
       setTimeout(() => {
-        board.play(parse(moves[0])); idx = 1; auto = false;
+        const om = board.play(parse(moves[0]), { duration: spd.anim }); idx = 1; auto = false;
         board.setInteractive(playerColor); hintBtn.disabled = false;
-        status.textContent = (playerColor === "white" ? "白方" : "黑方") + "走棋：找出最好的一步";
-      }, 500);
+        status.textContent = CO.Speed.describeMove(om, "對手"); status.dataset.turn = "me";
+      }, CO.Speed.pauseMs(spd));
     }
 
     function record(won) {

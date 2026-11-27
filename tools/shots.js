@@ -44,7 +44,7 @@ async function fresh(ctx, url) {
 (async () => {
   const browser = await chromium.launch({ channel: process.env.BROWSER === "chrome" ? "chrome" : "msedge" });
   const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1, hasTouch: false });
-  await ctx.addInitScript(() => { try { localStorage.clear(); } catch (e) { /* 忽略 */ } });
+  await ctx.addInitScript(() => { try { localStorage.clear(); localStorage.setItem("chessops_state", JSON.stringify({ settings: { computerSpeed: "fast" } })); } catch (e) { /* 忽略 */ } });
 
   console.log("首頁");
   let page = await fresh(ctx, "index.html");
@@ -75,7 +75,7 @@ async function fresh(ctx, url) {
   console.log("一步將死");
   page = await fresh(ctx, "game-mate1.html?level=1");
   const m1 = await page.evaluate(() => window.ChessOps.Mate1.filter(p => p.level === 1)[0]);
-  await page.waitForTimeout(900);                                  // 對手先自動走第 1 步
+  await page.waitForFunction(() => { const s = document.querySelector(".status-line"); return s && s.dataset.turn === "me"; }, null, { timeout: 20000 });                                  // 對手先自動走第 1 步（等到輪到玩家）
   const mu = m1.moves.split(" ")[1];
   await move(page, mu.slice(0, 2), mu.slice(2, 4));
   ok(await page.locator(".feedback.ok").count() === 1, "第 1 題用正確的將死步，顯示答對");
@@ -110,7 +110,7 @@ async function fresh(ctx, url) {
   await page.waitForFunction(() => document.querySelector("cg-board") !== null, null, { timeout: 30000 });
   await page.waitForTimeout(800);
   await move(page, "e2", "e4");
-  await page.waitForFunction(() => document.querySelectorAll("cg-board piece.black").length > 0 && /輪到你/.test(document.querySelector(".status-line").textContent), null, { timeout: 20000 });
+  await page.waitForFunction(() => document.querySelectorAll("cg-board piece.black").length > 0 && document.querySelector(".status-line").dataset.turn === "me", null, { timeout: 20000 });
   ok(/1\. e4 \S+/.test(await page.locator(".moves").textContent()), "我方走 e4 後電腦有回應");
   await shot(page, "10-pawnwar-playing");
   await page.close();
@@ -155,7 +155,7 @@ async function fresh(ctx, url) {
   page = await fresh(ctx, "game-mate1.html?level=1");
   const m1all = await page.evaluate(() => window.ChessOps.Mate1.filter(p => p.level === 1));
   for (const p of m1all) {
-    await page.waitForTimeout(900);
+    await page.waitForFunction(() => { const s = document.querySelector(".status-line"); return s && s.dataset.turn === "me"; }, null, { timeout: 20000 });
     const mv = p.moves.split(" ")[1];
     await move(page, mv.slice(0, 2), mv.slice(2, 4));
     await page.waitForTimeout(250);

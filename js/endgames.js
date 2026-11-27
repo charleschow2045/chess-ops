@@ -85,7 +85,7 @@ function practice(t, p) {
   mgr.ensure().catch(() => {});
   stage.textContent = "";
   const idx = t.positions.indexOf(p);
-  const G = { moves: 0, hints: 0, over: false, busy: false, token: 0 };
+  const G = { moves: 0, hints: 0, over: false, busy: false, token: 0, lastText: null };
   cur = G;
   const startMaterial = EL.whiteMaterial(new Chess(p.fen));
   const wrap = el("div", { id: "board" }), fb = el("div", { id: "fb", "aria-live": "polite" }), endBox = el("div", { id: "end-box" });
@@ -106,7 +106,8 @@ function practice(t, p) {
   function refresh() {
     info.textContent = "";
     info.append(el("span", { class: "chip", id: "moves", text: "步數 " + G.moves + " / " + p.cap }), el("span", { class: "chip gold", id: "hints", text: "提示 " + G.hints + " / " + CFG.HINT_LIMIT }));
-    status.textContent = G.over ? "練習結束" : G.busy ? "電腦思考中…" : "輪到你（白方）";
+    status.textContent = G.over ? "練習結束" : G.busy ? "電腦思考中…" : (G.lastText || "輪到你（白方）");
+    status.dataset.turn = G.over ? "over" : G.busy ? "opp" : "me";
     hintBtn.textContent = G.busy ? "計算中…" : "提示（剩 " + (CFG.HINT_LIMIT - G.hints) + "）";
     hintBtn.disabled = G.over || G.busy || G.hints >= CFG.HINT_LIMIT;
   }
@@ -137,6 +138,7 @@ function practice(t, p) {
     board.clearShapes();
     const game = board.game;
     if (move.color === "w") G.moves++;
+    G.lastText = move.color === "b" ? CO.Speed.describeMove(move, "電腦") : null;          // 黑方上一步，直到你走下一步先換回「輪到你」
     const j = EL.judge(game, { task: p.task, moves: G.moves, cap: p.cap, startMaterial, sideJustMoved: move.color, promoted: !!move.promotion });
     if (j.status === "success") return end(true, "將死了！", "你用了 " + G.moves + " 步完成。", G.moves);
     if (j.status === "fail") return end(false, j.reason === "stalemate" ? "逼和了" : "這次沒有成功", j.text, 0);
@@ -164,12 +166,12 @@ function practice(t, p) {
     const t0 = performance.now();
     let r = null;
     try { r = await mgr.run(board.game.fen(), CFG.DEFENDER); } catch (e) { r = null; }
-    const tp = CO.Config.THINK_PAUSE, rest = tp.minMs + Math.random() * (tp.maxMs - tp.minMs) - (performance.now() - t0);
+    const spd = CO.Speed.current(), rest = CO.Speed.pauseMs(spd) - (performance.now() - t0);          // 電腦出棋速度（設定）
     if (rest > 0) await delay(rest);
     if (G.over || my !== G.token) return;
     G.busy = false; board.unlock();
     if (!r) { G.over = true; board.setInteractive(false); refresh(); CO.Feedback.show(fb, { ok: false, title: "引擎暫時無法使用", text: "黑方無法走棋，這次不會記錄。請按「重新載入引擎」後再試一次。" }); return; }
-    board.play({ from: r.uci.slice(0, 2), to: r.uci.slice(2, 4), promotion: r.uci[4] });
+    board.play({ from: r.uci.slice(0, 2), to: r.uci.slice(2, 4), promotion: r.uci[4] }, { duration: spd.anim });
   }
 
   async function doHint() {

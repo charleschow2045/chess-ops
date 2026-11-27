@@ -115,7 +115,7 @@ function reviewFromPgn(g, idx) {
 /* ======================= 對局 ======================= */
 function startGame(init) {
   const G = Object.assign({ level: 3, color: "w", moves: [], undos: 0, hints: 0, usedUndo: false, usedHint: false }, init);
-  G.over = false; G.thinking = false; G.busy = false; G.token = 0;
+  G.over = false; G.thinking = false; G.busy = false; G.token = 0; G.lastText = null;   // lastText＝電腦上一步嘅文字（「電腦走了 Nf6（g8 → f6）」），玩家走下一步先清走
   update(s => { s.playLevel = G.level; });
   backLink.href = "play.html"; backLink.textContent = "‹ 離開";
   stage.textContent = "";
@@ -146,7 +146,7 @@ function startGame(init) {
 
   const board = createBoard(wrap, {
     orientation: G.color === "w" ? "white" : "black", interactive: G.color === "w" ? "white" : "black", promotion: "ask",
-    onMove() { afterMove(); }
+    onMove(move) { afterMove(move); }
   });
   if (G.moves.length && !board.loadMoves(G.moves)) {
     update(s => { s.play.current = null; });
@@ -193,7 +193,9 @@ function startGame(init) {
     reminder.classList.toggle("dim", G.over || G.thinking || g.turn() !== G.color);
     remText.textContent = remCollapsed ? "三問提醒" : "先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？";
     remBtn.textContent = remCollapsed ? "展開" : "收起";
-    status.textContent = G.over ? "對局結束" : G.thinking ? "電腦思考中…" : g.turn() === G.color ? "輪到你（" + sideName(G.color) + "）" + (g.inCheck() ? "：你被將軍！" : "") : "輪到電腦";
+    const myTurn = !G.over && !G.thinking && g.turn() === G.color;
+    status.textContent = G.over ? "對局結束" : G.thinking ? "電腦思考中…" : myTurn ? (G.lastText || "輪到你（" + sideName(G.color) + "）" + (g.inCheck() ? "：你被將軍！" : "")) : "輪到電腦";
+    status.dataset.turn = G.over ? "over" : myTurn ? "me" : "opp";       // 供自動測試判斷（狀態行文字會顯示電腦上一步，唔再固定係「輪到你」）
     undoBtn.textContent = "悔棋（剩 " + (CFG.PLAY.undoLimit - G.undos) + "）";
     hintBtn.textContent = G.busy ? "計算中…" : "提示（剩 " + (CFG.PLAY.hintLimit - G.hints) + "）";
     undoBtn.disabled = G.over || G.thinking || G.busy || !PLG.canUndo(g, G.color, G.undos);
@@ -201,8 +203,9 @@ function startGame(init) {
     resignBtn.disabled = G.over;
   }
 
-  function afterMove() {
+  function afterMove(move) {
     if (G.over) return;
+    G.lastText = move && move.color !== G.color ? CO.Speed.describeMove(move, "電腦") : null;
     board.clearShapes();
     const end = PLG.endState(board.game);
     if (end.over) { refresh(); finishGame(end); return; }
@@ -217,20 +220,20 @@ function startGame(init) {
     const t0 = performance.now();
     let r = null;
     try { r = await CO.PickMove.pickMove(G.level, board.game, { Chess, engine: mgr }); } catch (e) { r = null; }
-    const tp = CFG.THINK_PAUSE, pause = tp.minMs + Math.random() * (tp.maxMs - tp.minMs);
+    const spd = CO.Speed.current(), pause = CO.Speed.pauseMs(spd);          // 電腦出棋速度（設定：慢／中／快）
     const rest = pause - (performance.now() - t0);
     if (rest > 0) await delay(rest);
     if (G.over || my !== G.token) return;
     G.thinking = false; board.unlock();
     if (r && r.source === "fallback") CO.Feedback.show(fb, { ok: false, title: "引擎暫時無法使用", text: "電腦這一步用了隨機的合法走法。" });
-    if (r) board.play(r.move); else refresh();
+    if (r) board.play(r.move, { duration: spd.anim }); else refresh();
   }
 
   function doUndo() {
     if (!PLG.canUndo(board.game, G.color, G.undos)) return;
     G.token++;
     board.undo(); board.undo();
-    G.undos++; G.usedUndo = true;
+    G.undos++; G.usedUndo = true; G.lastText = null;
     board.clearShapes(); CO.Feedback.clear(fb);
     saveCurrent(); refresh();
   }

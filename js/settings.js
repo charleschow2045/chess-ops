@@ -22,6 +22,24 @@
     });
   });
 
+  /* ---------- 電腦出棋速度（慢／中／快，預設慢） ---------- */
+  var speedBtns = Array.prototype.slice.call(document.querySelectorAll("[data-speed]"));
+  var SPEED_TEXT = { slow: "慢", medium: "中", fast: "快" };
+  function paintSpeed() {
+    var cur = State.loadState().settings.computerSpeed;
+    speedBtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.getAttribute("data-speed") === cur)); });
+  }
+  speedBtns.forEach(function (b) {
+    b.addEventListener("click", function () {
+      var s = State.loadState();
+      s.settings.computerSpeed = b.getAttribute("data-speed");
+      State.saveState(s);
+      paintSpeed();
+      saved.textContent = "電腦出棋速度已設為「" + SPEED_TEXT[s.settings.computerSpeed] + "」。";
+    });
+  });
+  paintSpeed();
+
   /* ---------- 備份與還原 ---------- */
   var $ = function (id) { return document.getElementById(id); };
   var msg = $("backup-msg");

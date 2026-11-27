@@ -173,7 +173,7 @@ test("normalizeState：刪走白名單以外嘅欄位（包括巢狀欄位）", 
   eq(Object.keys(out).sort(), Object.keys(State.STATE_FIELDS).sort(), "頂層欄位要同白名單完全一樣");
   eq(out.rank, { index: 2, xp: 120 });
   eq(out.streak, { count: 5, lastDay: "2026-11-13" });
-  eq(out.settings, { board: "custom", design: "B", flipped: true, squareNames: false, threeReminder: true });
+  eq(out.settings, { board: "custom", design: "B", flipped: true, squareNames: false, threeReminder: true, computerSpeed: "slow" });
   eq(out.playLevel, 5);
   ok(!("hacker" in out) && !("unknownTop" in out) && !("evil" in out));
 });
@@ -533,7 +533,7 @@ test("座標：設定「顯示格名」預設關閉、屬白名單、非布林�
   eq(State.defaultState().settings.squareNames, false);
   eq(State.normalizeState({ settings: { squareNames: true } }).settings.squareNames, true);
   eq(State.normalizeState({ settings: { squareNames: "yes" } }).settings.squareNames, false);
-  eq(State.normalizeState({ settings: { squareNames: 1, evil: 1 } }).settings, { board: "chessground", design: "A", flipped: false, squareNames: false, threeReminder: true });
+  eq(State.normalizeState({ settings: { squareNames: 1, evil: 1 } }).settings, { board: "chessground", design: "A", flipped: false, squareNames: false, threeReminder: true, computerSpeed: "slow" });
   const s = State.normalizeState({ settings: { squareNames: true } });
   eq(State.parseBackup(State.exportBackup(s)).settings.squareNames, true);
 });
@@ -1165,7 +1165,7 @@ test("對電腦下棋：用 App 內對話框（唔用 alert／confirm／prompt�
   ok(play.includes("mgr.run(board.game.fen(), CFG.HINT)"), "提示用 config.HINT");
   ok(!("skill" in CFG.HINT) && !("elo" in CFG.HINT), "提示唔可以用弱化設定（Skill Level／UCI_Elo）");
   ok(CFG.HINT.depth >= CFG.PICKMOVE.BEST_SEARCH.depth, "提示深度 >= 電腦「最佳步」深度");
-  ok(play.includes("CFG.REVIEW.maxMsPerMove") && play.includes("CFG.THINK_PAUSE"), "檢討時間同出棋停頓來自 config");
+  ok(play.includes("CFG.REVIEW.maxMsPerMove") && play.includes("CO.Speed.pauseMs"), "檢討時間同出棋停頓來自 config（出棋停頓由 js/speed.js 按「電腦出棋速度」設定讀取）");
   ok(fs.readFileSync(path.join(ROOT, "css/theme.css"), "utf8").includes(".invisible"));
 });
 test("首頁：「對電腦下棋」已開放，顯示目前級別（真實數字）；play.html 引用檔案齊全", () => {
@@ -1340,7 +1340,7 @@ test("設定「對局中顯示三問提醒」：預設開；false 會保留；�
   eq(State.normalizeState({ settings: { squareNames: true } }).settings.threeReminder, true, "冇設定 → 預設開");
   eq(State.normalizeState({ settings: { threeReminder: "no" } }).settings.threeReminder, true);
   const s = State.normalizeState({ settings: { threeReminder: false, squareNames: true } });
-  eq(State.parseBackup(State.exportBackup(s)).settings, { board: "chessground", design: "A", flipped: false, squareNames: true, threeReminder: false });
+  eq(State.parseBackup(State.exportBackup(s)).settings, { board: "chessground", design: "A", flipped: false, squareNames: true, threeReminder: false, computerSpeed: "slow" });
   const src = fs.readFileSync(path.join(ROOT, "js/play.js"), "utf8");
   ok(src.includes("先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？") && src.includes("settings.threeReminder") && src.includes("收起"), "對局中提醒文字、設定同「收起」");
   ok(fs.readFileSync(path.join(ROOT, "settings.html"), "utf8").includes("對局中顯示三問提醒"));
@@ -1994,6 +1994,68 @@ test("棋盤唔移位（原始碼檢查；真正量度見 tools/layout-check.js�
   const util = require(path.join(ROOT, "js/util.js")); ok(typeof util.fixTextHeight === "function");
   const lc = fs.readFileSync(path.join(ROOT, "tools/layout-check.js"), "utf8");
   ok(lc.includes("820x1180") && lc.includes("1180x820") && lc.includes("const TOL = 1;") && lc.includes("requestAnimationFrame"), "量度工具：兩個視窗大細、容許 1px、連續取樣");
+});
+
+
+/* ======================= 電腦出棋速度（慢／中／快）＋「電腦走了…」文字 ======================= */
+const SPD = require(path.join(ROOT, "js/speed.js"));
+test("電腦出棋速度：三檔數值（慢 1.2–1.8 秒＋500ms；中 0.8–1.2 秒＋350ms；快 0.4–0.8 秒＋180ms）、預設「慢」、玩家自己走棋動畫 180ms；「快」＝原本速度", () => {
+  const S = CFG.COMPUTER_SPEED;
+  eq(S.DEFAULT, "slow"); eq(S.PLAYER_ANIM_MS, 180);
+  eq(S.LEVELS.slow, { label: "慢", pauseMin: 1200, pauseMax: 1800, anim: 500 });
+  eq(S.LEVELS.medium, { label: "中", pauseMin: 800, pauseMax: 1200, anim: 350 });
+  eq(S.LEVELS.fast, { label: "快", pauseMin: 400, pauseMax: 800, anim: 180 });
+  eq([S.LEVELS.fast.pauseMin, S.LEVELS.fast.pauseMax], [CFG.THINK_PAUSE.minMs, CFG.THINK_PAUSE.maxMs], "快 = 原本 THINK_PAUSE");
+  ok(S.LEVELS.slow.pauseMin > S.LEVELS.medium.pauseMin && S.LEVELS.medium.pauseMin > S.LEVELS.fast.pauseMin && S.LEVELS.slow.anim > S.LEVELS.medium.anim && S.LEVELS.medium.anim > S.LEVELS.fast.anim, "慢 > 中 > 快");
+  const board = fs.readFileSync(path.join(ROOT, "js/board.js"), "utf8");
+  ok(board.includes("const DEFAULT_ANIM = 180") && board.includes("duration: DEFAULT_ANIM") && board.includes("play(m, o)") && board.includes("o.duration"), "board.js：玩家動畫預設 180ms；play(m, {duration}) 只改呢一步（電腦步）嘅動畫");
+  for (const k of ["slow", "medium", "fast"]) { const L = SPD.levelOf(k); for (const r of [0, 0.5, 0.999999]) { const p = SPD.pauseMs(L, () => r); ok(p >= L.pauseMin && p <= L.pauseMax, k + " 停頓範圍"); } }
+  eq(SPD.levelOf("nonsense").key, "slow"); eq(SPD.levelOf(undefined).key, "slow"); eq(SPD.current().key, "slow", "冇儲存（Node）時用預設「慢」");
+  for (const k of ["slow", "medium", "fast"]) { const c = SPD.current(State.normalizeState({ settings: { computerSpeed: k } })); eq([c.key, c.pauseMin, c.pauseMax, c.anim], [k, CFG.COMPUTER_SPEED.LEVELS[k].pauseMin, CFG.COMPUTER_SPEED.LEVELS[k].pauseMax, CFG.COMPUTER_SPEED.LEVELS[k].anim], "按設定讀取 " + k); }
+  eq(SPD.current(State.defaultState()).key, "slow", "新用戶預設「慢」");
+});
+test("電腦出棋速度設定：預設「慢」；白名單（只接受 slow／medium／fast，其他當預設）；備份往返；其他設定唔受影響", () => {
+  eq(State.defaultState().settings.computerSpeed, "slow");
+  for (const k of ["slow", "medium", "fast"]) eq(State.normalizeState({ settings: { computerSpeed: k } }).settings.computerSpeed, k);
+  for (const bad of ["Slow", "turbo", 3, null, true, {}]) eq(State.normalizeState({ settings: { computerSpeed: bad } }).settings.computerSpeed, "slow", "無效值：" + JSON.stringify(bad));
+  eq(State.normalizeState({ settings: { squareNames: true } }).settings.computerSpeed, "slow", "舊資料冇呢個欄位 → 慢");
+  const s = State.normalizeState({ settings: { computerSpeed: "medium", squareNames: true, threeReminder: false } });
+  eq(State.parseBackup(State.exportBackup(s)).settings, { board: "chessground", design: "A", flipped: false, squareNames: true, threeReminder: false, computerSpeed: "medium" }, "備份往返");
+  eq(State.normalizeState(s), s, "冪等");
+  const html = fs.readFileSync(path.join(ROOT, "settings.html"), "utf8"), js = fs.readFileSync(path.join(ROOT, "js/settings.js"), "utf8");
+  ok(html.includes("電腦出棋速度") && ["slow", "medium", "fast"].every(k => html.includes('data-speed="' + k + '"')), "設定頁有「電腦出棋速度」慢／中／快");
+  ok(js.includes("computerSpeed") && js.includes("State.saveState"), "設定頁儲存");
+});
+test("「電腦走了…」文字：普通步、吃子、將軍、將死、升變、易位（王側／后側）、吃過路兵；書面語、格式「電腦走了 Nf6（g8 → f6）」", () => {
+  const say = (fen, san, actor) => SPD.describeMove(new Chess(fen).move(san), actor);
+  eq(say("rnbqkbnr/pppppppp/8/8/8/5N2/PPPPPPPP/RNBQKB1R b KQkq - 1 1", "Nf6"), "電腦走了 Nf6（g8 → f6）");
+  eq(say("r1bqkbnr/ppp2ppp/2n5/1B1pp3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4", "Bxc6+"), "電腦走了 Bxc6（b5 → c6），吃掉你的馬，將軍！");
+  eq(say("r1bqkbnr/ppp2ppp/2n5/1B1pp3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4", "Nxe5", "對手"), "對手走了 Nxe5（f3 → e5），吃掉你的兵");
+  eq(say("rnbqkbnr/pppp1ppp/8/4p3/2B1P3/8/PPPP1PPP/RNBQK1NR w KQkq - 0 2", "Qh5"), "電腦走了 Qh5（d1 → h5）");
+  eq(say("6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1", "Ra8#"), "電腦走了 Ra8（a1 → a8），將死！");
+  eq(say("4k3/3P4/8/8/8/8/8/4K3 w - - 0 1", "d8=Q+"), "電腦走了 d8=Q（d7 → d8），升變為后，將軍！");
+  eq(say("3r3k/4P3/8/8/8/8/8/4K3 w - - 0 1", "exd8=N"), "電腦走了 exd8=N（e7 → d8），升變為馬，吃掉你的車");
+  eq(say("r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4", "O-O"), "電腦走了 O-O（e1 → g1），王側易位");
+  eq(say("r3k2r/8/8/8/8/8/8/R3K2R b KQkq - 0 1", "O-O-O"), "電腦走了 O-O-O（e8 → c8），后側易位");
+  eq(say("rnbqkbnr/ppp1pppp/8/8/3pP3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 3", "dxe3"), "電腦走了 dxe3（d4 → e3），吃掉你的兵", "吃過路兵");
+  const CANTO = /[嘅咗唔佢喺俾啲嘢冇哋嚟嗰咁乜咩啱睇揀攞嘥畀係諗仲晒呢哩囉喇喎撳搵揸咀隻]/;
+  for (const t of ["電腦走了 Bxc6（b5 → c6），吃掉你的馬，將軍！", "電腦走了 O-O（e1 → g1），王側易位"]) ok(!CANTO.test(t));
+});
+test("電腦出棋速度：所有有電腦／自動對手步嘅頁面都用設定（停頓＋動畫），狀態行顯示對手上一步直到玩家走下一步；謎題第一步先停一陣", () => {
+  const rd = f2 => fs.readFileSync(path.join(ROOT, f2), "utf8");
+  for (const [file, html] of [["js/play.js", "play.html"], ["js/endgames.js", "endgames.html"], ["js/puzzles.js", "puzzles.html"], ["js/openings.js", "openings.html"], ["js/game-pawnwar.js", "game-pawnwar.html"], ["js/game-mate1.js", "game-mate1.html"]]) {
+    const js = rd(file), h = rd(html);
+    ok(js.includes("CO.Speed.pauseMs(") && js.includes("duration: spd.anim") && js.includes("CO.Speed.describeMove("), file + " 用速度設定同「走了…」文字");
+    ok(h.indexOf("js/config.js") < h.indexOf("js/speed.js") && h.includes("js/speed.js"), html + " 載入 speed.js（config 之後）");
+    ok(js.includes('dataset.turn'), file + " 狀態行有 data-turn（自動測試用）");
+    ok(!/THINK_PAUSE/.test(js), file + " 唔再直接用寫死嘅 THINK_PAUSE（改用速度設定）");
+  }
+  const pz = rd("js/puzzles.js");
+  ok(pz.includes("先停一陣") && pz.indexOf("CO.Speed.pauseMs(spd)") > pz.indexOf("對手先走一步…"), "謎題：棋盤顯示咗原本局面，停一陣（跟速度設定）先走對手第一步");
+  ok(rd("js/play.js").includes("G.lastText = move && move.color !== G.color"), "對電腦下棋：電腦上一步文字");
+  const css = rd("css/board.css");
+  ok(/cg-board square\.last-move \{[^}]*rgba\(250, 196, 20, \.72\)[^}]*box-shadow: inset 0 0 0 4px/.test(css), "最後一步高亮：較深黃底＋橙褐色內框（淺色同深色格都睇得清）");
+  ok(/\.status-line \{[^}]*height: 28px[^}]*white-space: nowrap/.test(css), "狀態行仍然固定高度單行（文字變長唔會推動棋盤）");
 });
 
 /* ---------- 執行 ---------- */

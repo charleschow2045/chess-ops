@@ -9,7 +9,7 @@ const PW = CO.PawnWar;
 const stage = document.getElementById("stage");
 
 let mode = "computer", level = 2, autoFlip = false;
-let engine = null, board = null, over = false, thinking = false;
+let engine = null, board = null, over = false, thinking = false, lastText = null;
 
 function setup() {
   stage.textContent = "";
@@ -45,7 +45,7 @@ function setup() {
 }
 
 async function start() {
-  over = false; thinking = false;
+  over = false; thinking = false; lastText = null;
   stage.textContent = "";
   const status = el("div", { class: "status-line" });
   const fb = el("div", { "aria-live": "polite" });
@@ -59,7 +59,9 @@ async function start() {
 
   function paintStatus() {
     const turn = board.game.turn() === "w" ? "白方" : "黑方";
-    status.textContent = over ? "對局結束" : thinking ? "電腦思考中…" : (mode === "computer" ? (board.game.turn() === "w" ? "輪到你（白方）" : "輪到電腦（黑方）") : "輪到" + turn);
+    const myTurn = !over && !thinking && (mode !== "computer" || board.game.turn() === "w");
+    status.textContent = over ? "對局結束" : thinking ? "電腦思考中…" : (mode === "computer" ? (board.game.turn() === "w" ? (lastText || "輪到你（白方）") : "輪到電腦（黑方）") : "輪到" + turn);
+    status.dataset.turn = over ? "over" : myTurn ? "me" : "opp";
     log.textContent = CO.UI.movesText(board.game.history());
   }
 
@@ -97,19 +99,20 @@ async function start() {
     const t0 = performance.now();
     let r = null;
     try { r = await CO.PickMove.pickMove(level, board.game, { Chess, engine }); } catch (e) { r = null; }
-    const tp = CO.Config.THINK_PAUSE, pause = tp.minMs + Math.random() * (tp.maxMs - tp.minMs);   // 出棋前停頓（js/config.js）
+    const spd = CO.Speed.current(), pause = CO.Speed.pauseMs(spd);   // 出棋前停頓（電腦出棋速度設定，js/config.js）
     const wait = Math.max(0, pause - (performance.now() - t0));      // 最少停 0.5 秒，避免電腦走得太突然
     await new Promise(res => setTimeout(res, wait));
     if (board !== mine) return;
     thinking = false; board.unlock();
     if (over) return;
-    if (r) board.play(r.move);
+    if (r) board.play(r.move, { duration: spd.anim });
   }
 
   board = createBoard(wrap, {
     fen: PW.START_FEN, orientation: "white", interactive: mode === "computer" ? "white" : "turn", promotion: "q",
     onMove(move) {
       const st = PW.status(board.game, move);
+      lastText = mode === "computer" && move.color === "b" ? CO.Speed.describeMove(move, "電腦") : null;
       paintStatus();
       if (st.over) { end(st); return; }
       if (mode === "computer") { if (move.color === "w") computerTurn(); }

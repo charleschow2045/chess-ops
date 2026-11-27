@@ -72,7 +72,7 @@
     },
     // 設定
     settings: {
-      def: function () { return { board: "chessground", design: "A", flipped: false, squareNames: false, threeReminder: true }; },
+      def: function () { return { board: "chessground", design: "A", flipped: false, squareNames: false, threeReminder: true, computerSpeed: "slow" }; },
       clean: function (v) {
         v = isObj(v) ? v : {};
         return {
@@ -80,7 +80,8 @@
           design: oneOf(["A", "B", "C"], "A")(v.design),
           flipped: v.flipped === true,
           squareNames: v.squareNames === true,
-          threeReminder: v.threeReminder !== false
+          threeReminder: v.threeReminder !== false,
+          computerSpeed: oneOf(["slow", "medium", "fast"], "slow")(v.computerSpeed)
         };
       }
     },

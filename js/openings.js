@@ -59,7 +59,7 @@ function routeTile(r) {
 function practice(route) {
   const ucis = routeUcis(route);
   const mine = route.side;                                   // 學習者顏色
-  let idx = 0, mistakes = 0, auto = true, done = false;
+  let idx = 0, mistakes = 0, auto = true, done = false, lastText = null;
   stage.textContent = "";
   const wrap = el("div", { id: "board" }), fb = el("div", { id: "fb", "aria-live": "polite" });
   const log = el("div", { class: "movelist-box", id: "route-log", style: "max-height:220px" });
@@ -86,23 +86,25 @@ function practice(route) {
   async function playOpponentUntilMine() {
     auto = true; board.setInteractive(false);
     while (idx < ucis.length && side(idx) !== mine) {
-      status.textContent = "對方走棋…";
-      await delay(500);
+      status.textContent = "對手思考中…"; status.dataset.turn = "opp";
+      const spd = CO.Speed.current();
+      await delay(CO.Speed.pauseMs(spd));                   // 電腦出棋速度（設定）
       const u = ucis[idx];
-      const m = board.play({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] });
+      const m = board.play({ from: u.slice(0, 2), to: u.slice(2, 4), promotion: u[4] }, { duration: spd.anim });
       addLog(idx, m.san); idx++;
+      lastText = CO.Speed.describeMove(m, "對手");
     }
     auto = false;
     if (idx >= ucis.length) return finish();
     board.setInteractive(mine === "w" ? "white" : "black");
-    status.textContent = "輪到你：走出這條路線的下一步";
+    status.textContent = lastText || "輪到你：走出這條路線的下一步"; status.dataset.turn = "me";
   }
 
   function onLearnerMove(move) {
     const u = uciOf(move);
     if (u === ucis[idx]) {
       CO.Feedback.show(fb, { ok: true, title: "走對了！", text: note(idx) });
-      addLog(idx, move.san); idx++; board.clearShapes();
+      addLog(idx, move.san); idx++; board.clearShapes(); lastText = null;
       board.feedback(true);
       if (idx >= ucis.length) return finish();
       playOpponentUntilMine();
@@ -122,7 +124,7 @@ function practice(route) {
       retry.classList.remove("hidden");
     }
   }
-  retry.addEventListener("click", () => { retry.classList.add("hidden"); CO.Feedback.clear(fb); board.clearShapes(); board.setInteractive(mine === "w" ? "white" : "black"); status.textContent = "輪到你：走出這條路線的下一步"; });
+  retry.addEventListener("click", () => { retry.classList.add("hidden"); CO.Feedback.clear(fb); board.clearShapes(); board.setInteractive(mine === "w" ? "white" : "black"); status.textContent = lastText || "輪到你：走出這條路線的下一步"; });
 
   function finish() {
     done = true; board.setInteractive(false);
