@@ -31,10 +31,10 @@ const keyAgo = n => Daily.dateKey(Daily.addDays(today, -n));
 
 /* 電腦出棋速度：測試預設用「快」（避免等太耐）；SPEED=slow／medium／fast 可以覆蓋。預設值「慢」由 tests/run-all.js 同 tools/shots7.js 另外驗證 */
 const SPEED = process.env.SPEED || "fast";
-const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); return s; };
+const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); s.onboarding = { welcomed: true }; return s; };
 async function scenario(browser, name, init, fn, opts) {
   console.log(name);
-  const ctx = await browser.newContext(Object.assign({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1, acceptDownloads: true }, opts || {}));
+  const ctx = await browser.newContext(Object.assign({ serviceWorkers: "block", viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1, acceptDownloads: true }, opts || {}));
   await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, forceSpeed(init));
   const page = await ctx.newPage();
   // 故意查詢不存在嘅 chess.com 用戶，瀏覽器會記一個 404 資源錯誤（預期，唔係程式錯誤）

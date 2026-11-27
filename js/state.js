@@ -253,6 +253,19 @@
         return { user: user, puzzles: puzzles, recent: recent };
       }
     },
+    /*
+     * 備份提醒（第 7 階段）：last 上次成功匯出／複製備份嘅日期；since 第一次打開首頁嘅日期（未備份過就由呢日起計）；
+     * snooze 關閉首頁提示之後，呢個日期之前唔再顯示（YYYY-MM-DD，空字串 = 冇）
+     */
+    backup: {
+      def: function () { return { last: "", since: "", snooze: "" }; },
+      clean: function (v) { v = isObj(v) ? v : {}; return { last: dateStr(v.last), since: dateStr(v.since), snooze: dateStr(v.snooze) }; }
+    },
+    // 第一次使用：歡迎卡撳「開始」之後唔再出現
+    onboarding: {
+      def: function () { return { welcomed: false }; },
+      clean: function (v) { v = isObj(v) ? v : {}; return { welcomed: v.welcomed === true }; }
+    },
     // 對電腦下棋：目前選擇嘅級別（1–8）
     playLevel: {
       def: function () { return 3; },

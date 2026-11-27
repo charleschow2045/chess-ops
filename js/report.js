@@ -10,8 +10,11 @@
   function stat(label, value, id) { return el("div", { class: "stat" }, [el("span", { text: label }), el("b", Object.assign({ text: value }, id ? { id: id } : {}))]); }
   var blText = function (b) { return b.avg === null ? "—" : b.avg + "（" + b.games + " 局）"; };
 
+  const empty = r.doneDays === 0 && r.minutesTotal === 0 && r.puzzles.count === 0 && r.play.w + r.play.d + r.play.l === 0 && r.endgames.gained === 0;
   box.append(
-    el("div", { class: "card" }, [el("div", { class: "summary", id: "summary", text: r.summary })]),
+    el("div", { class: "card" }, [el("div", { class: "summary", id: "summary", text: r.summary }),
+      empty ? el("p", { class: "muted", id: "empty-note", style: "margin:8px 0 0", text: "最近 7 日還沒有練習紀錄。建議先回首頁完成今日任務，之後這裡會顯示每日情況。" }) : null,
+      empty ? el("div", { class: "btn-row" }, [el("a", { class: "btn primary", href: "./", text: "回首頁開始練習" })]) : null].filter(Boolean)),
     el("h2", { class: "section-title", text: "每日任務與練習時間" }),
     el("div", { class: "card" }, [
       el("div", { class: "week", id: "week" }, r.days.map(function (d) {

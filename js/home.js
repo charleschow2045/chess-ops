@@ -46,7 +46,37 @@
     });
     if (!st.play) box.appendChild(el("p", { class: "muted", text: "今天不用對電腦下棋（只在星期一、三、五、日要求）。" }));
     if (st.done) box.appendChild(el("p", { class: "daily-done", id: "daily-done", text: "今日任務全部完成！連續 " + st.streak + " 日。" }));
-    else box.appendChild(el("p", { class: "muted", text: "完成後會自動打勾。小練習：走棋前三問一輪、小遊戲、殘局一題或開局路線一次。" }));
+    else box.appendChild(el("p", { class: "muted", text: "完成後會自動打勾。小練習：走棋前三問一輪、小遊戲、規則快測一組、殘局一題或開局路線一次。" }));
+  }
+
+  /* ---------- 第一次使用：歡迎卡（撳「開始」後唔再出現） ---------- */
+  if (!homeState.onboarding.welcomed) {
+    var wc = el("section", { class: "card welcome", id: "welcome-card", "aria-label": "歡迎" }, [
+      el("h2", { text: "歡迎使用國際象棋 Ops" }),
+      el("ol", { class: "welcome-list" }, [
+        el("li", {}, [el("b", { text: "每日任務：" }), "每天做 5 題謎題和 1 個小練習，完成就會增加連續日數。"]),
+        el("li", {}, [el("b", { text: "稱號：" }), "練習越多，稱號越高，由「入門棋手」一直到「特級大師」。"]),
+        el("li", {}, [el("b", { text: "從哪裡開始：" }), "先做「戰術謎題」，再試「對電腦下棋」。"])]),
+      el("button", { class: "btn primary", id: "welcome-start", type: "button", text: "開始", onclick: function () {
+        var s = CO.State.loadState(); s.onboarding.welcomed = true; CO.State.saveState(s);
+        wc.remove();
+      } })]);
+    document.getElementById("welcome-slot").appendChild(wc);
+  }
+
+  /* ---------- 備份提示（超過 7 日冇備份；關閉後 3 日內唔再顯示）：固定高度嘅位置，關閉後位置保留，內容唔會跳 ---------- */
+  var sinceNew = Daily.touchSince(homeState, now);
+  if (sinceNew) CO.State.saveState(homeState);
+  var notice = Daily.backupNotice(homeState, now);
+  if (notice) {
+    var slot = document.getElementById("notice-slot");
+    var row = el("div", { class: "notice", id: "backup-notice", role: "status" }, [
+      el("span", { class: "notice-text", text: "已經 " + notice.days + " 天沒有備份，建議到設定頁匯出備份" }),
+      el("button", { class: "notice-x", id: "backup-notice-close", type: "button", "aria-label": "關閉提示", text: "×", onclick: function () {
+        var s = CO.State.loadState(); Daily.snoozeBackup(s, new Date()); CO.State.saveState(s);
+        row.style.visibility = "hidden";                 // 保留位置（唔係移除），所以下面嘅內容唔會跳動
+      } })]);
+    slot.appendChild(row);
   }
 
   var info = Daily.titleInfo(homeState, { stars: egTotals.got });

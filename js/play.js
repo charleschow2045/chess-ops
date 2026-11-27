@@ -91,7 +91,7 @@ function showSetup() {
 
   const recent = s.play.recent;
   stage.append(el("h2", { class: "section-title", text: "最近的對局（最多 " + CFG.PLAY.recentGames + " 局）" }));
-  if (!recent.length) stage.append(el("p", { class: "muted", text: "完成的對局會顯示在這裡，可以複製 PGN 或賽後檢討。" }));
+  if (!recent.length) stage.append(el("p", { class: "muted", text: "還沒有完成的對局。選擇級別後按「開始對局」；完成的對局會顯示在這裡，可以複製 PGN 或賽後檢討。" }));
   recent.forEach((g, i) => {
     const res = g.result === "win" ? "勝" : g.result === "loss" ? "負" : "和";
     stage.append(el("div", { class: "recent-row", "data-i": i }, [

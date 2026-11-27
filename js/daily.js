@@ -105,6 +105,31 @@
   /* 標記已恭喜（只升不降） */
   function markCongratulated(state, index) { state.rank = state.rank || { index: 0, xp: 0 }; if (index > state.rank.index) state.rank.index = index; }
 
+  /* ---------- 備份提醒（config.APP） ---------- */
+  function daysBetween(fromKey, toKey) { return Math.round((parseKey(toKey) - parseKey(fromKey)) / 86400000); }
+  /* 距離上次備份幾多日（未備份過就由第一次打開首頁起計；兩者都冇就 null） */
+  function backupAge(state, today) {
+    var b = state.backup || {}, base = b.last || b.since;
+    if (!base) return null;
+    return Math.max(0, daysBetween(base, dateKey(today)));
+  }
+  function backupLabel(state, today) {
+    var b = state.backup || {};
+    if (!b.last) return "上次備份：尚未備份";
+    var d = Math.max(0, daysBetween(b.last, dateKey(today)));
+    return "上次備份：" + (d === 0 ? "今日" : d + " 日前");
+  }
+  /* 首頁頂部提示：超過 BACKUP_WARN_DAYS 日冇備份，而且冇喺關閉後嘅 BACKUP_SNOOZE_DAYS 日內 → { days }，否則 null */
+  function backupNotice(state, today) {
+    var d = backupAge(state, today), b = state.backup || {};
+    if (d === null || d < CFG.APP.BACKUP_WARN_DAYS) return null;
+    if (b.snooze && dateKey(today) < b.snooze) return null;
+    return { days: d };
+  }
+  function snoozeBackup(state, today) { state.backup = state.backup || {}; state.backup.snooze = dateKey(addDays(today, CFG.APP.BACKUP_SNOOZE_DAYS)); }
+  function markBackup(state, today) { state.backup = state.backup || {}; state.backup.last = dateKey(today); state.backup.snooze = ""; }
+  function touchSince(state, today) { state.backup = state.backup || {}; if (!state.backup.since) { state.backup.since = dateKey(today); return true; } return false; }
+
   /* ---------- 練習時間：只計前景而且有操作 ---------- */
   function createTracker(idleMs) {
     var s = { until: -1, last: null, visible: true, ms: 0 };
@@ -125,6 +150,7 @@
     dateKey: dateKey, addDays: addDays, parseKey: parseKey, requiresPlay: requiresPlay, emptyDay: emptyDay, dayRec: dayRec,
     status: status, streakNow: streakNow, apply: apply,
     COND_LABEL: COND_LABEL, metrics: metrics, titleInfo: titleInfo, titleCongrats: titleCongrats, markCongratulated: markCongratulated,
-    createTracker: createTracker
+    createTracker: createTracker,
+    daysBetween: daysBetween, backupAge: backupAge, backupLabel: backupLabel, backupNotice: backupNotice, snoozeBackup: snoozeBackup, markBackup: markBackup, touchSince: touchSince
   };
 });

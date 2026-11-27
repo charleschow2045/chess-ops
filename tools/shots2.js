@@ -54,8 +54,8 @@ async function solve(page) {
 
 (async () => {
   const browser = await chromium.launch({ channel: process.env.BROWSER === "chrome" ? "chrome" : "msedge" });
-  const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
-  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem("chessops_test_cleared")) { localStorage.clear(); localStorage.setItem("chessops_state", JSON.stringify({ settings: { computerSpeed: "fast" } })); sessionStorage.setItem("chessops_test_cleared", "1"); } } catch (e) { /* 忽略 */ } });
+  const ctx = await browser.newContext({ serviceWorkers: "block", viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
+  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem("chessops_test_cleared")) { localStorage.clear(); localStorage.setItem("chessops_state", JSON.stringify({ settings: { computerSpeed: "fast" }, onboarding: { welcomed: true } })); sessionStorage.setItem("chessops_test_cleared", "1"); } } catch (e) { /* 忽略 */ } });
   const page = await ctx.newPage();
   page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
   page.on("pageerror", e => errors.push(e.message));

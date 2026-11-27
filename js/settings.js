@@ -42,6 +42,20 @@
 
   /* ---------- 備份與還原 ---------- */
   var $ = function (id) { return document.getElementById(id); };
+  var Daily = CO.Daily;
+  function paintBackup() { $("last-backup").textContent = Daily.backupLabel(State.loadState(), new Date()); }
+  function markBackedUp() { var s = State.loadState(); Daily.markBackup(s, new Date()); State.saveState(s); paintBackup(); }
+  paintBackup();
+
+  /* ---------- 版本同離線狀態 ---------- */
+  $("app-version").textContent = window.CHESSOPS_VERSION || "—";
+  (function () {
+    var el = $("offline-status");
+    if (!("serviceWorker" in navigator) || !/^https?:$/.test(location.protocol)) { el.textContent = "離線使用：這個瀏覽器或開啟方式不支援。"; return; }
+    var done = false;
+    navigator.serviceWorker.ready.then(function () { done = true; el.textContent = "離線使用：已準備好（頁面、題目和引擎都已儲存在這部裝置，沒有網絡也可以練習；讀取 chess.com 對局需要網絡）。"; });
+    setTimeout(function () { if (!done) el.textContent = "離線使用：準備中…請保持網絡連線，等待幾秒後重新載入這一頁。"; }, 4000);
+  })();
   var msg = $("backup-msg");
   function say(text, good) { msg.textContent = text; msg.className = "msg " + (good ? "good" : "bad"); }
   function paintSize() {
@@ -58,14 +72,15 @@
       a.href = url; a.download = State.backupFileName(new Date());
       document.body.appendChild(a); a.click(); a.remove();
       setTimeout(function () { URL.revokeObjectURL(url); }, 15000);
+      markBackedUp();
       say("已匯出：" + a.download + "。如果沒有出現下載，請改用「複製備份文字」。", true);
     } catch (e) { say("無法下載檔案，請改用「複製備份文字」。", false); }
   });
 
   $("copy-backup").addEventListener("click", async function () {
     var text = State.exportBackup(State.loadState());
-    try { await navigator.clipboard.writeText(text); say("已複製備份文字，可以貼到「備忘錄」等地方保存。", true); }
-    catch (e) { await Dialog.show({ title: "請手動複製備份文字", text: "長按下面的文字全選後複製。", textarea: text, buttons: [{ key: "ok", label: "關閉", primary: true }] }); }
+    try { await navigator.clipboard.writeText(text); markBackedUp(); say("已複製備份文字，可以貼到「備忘錄」等地方保存。", true); }
+    catch (e) { await Dialog.show({ title: "請手動複製備份文字", text: "長按下面的文字全選後複製。", textarea: text, buttons: [{ key: "ok", label: "關閉", primary: true }] }); markBackedUp(); }
   });
 
   var fileText = null;
@@ -96,7 +111,7 @@
     $("import-text").value = ""; $("import-file").value = ""; fileText = null;
     var s = State.loadState();
     boxes.forEach(function (b) { $(b.id).checked = s.settings[b.key] === true; });
-    paintSize();
+    paintSize(); paintBackup();
     say("已匯入備份。", true);
   });
 })();

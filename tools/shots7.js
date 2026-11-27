@@ -33,7 +33,7 @@ async function clickSq(page, sq) { const p = await pt(page, sq); await page.mous
 async function move(page, from, to) { await clickSq(page, from); await clickSq(page, to); }
 async function shot(page, name) { await page.screenshot({ path: path.join(OUT, name + ".png") }); console.log("  📷 " + name + ".png"); }
 const stateOf = page => page.evaluate(() => JSON.parse(localStorage.getItem("chessops_state") || "{}"));
-const stateSpeed = key => { const s = State.defaultState(); if (key) s.settings.computerSpeed = key; return State.normalizeState(s); };
+const stateSpeed = key => { const s = State.defaultState(); if (key) s.settings.computerSpeed = key; s.onboarding.welcomed = true; return State.normalizeState(s); };
 const turnIs = (page, who) => page.waitForFunction(w => { const s = document.querySelector("#status") || document.querySelector(".status-line"); return s && s.dataset.turn === w; }, who, { timeout: 40000 });
 const statusText = page => page.evaluate(() => (document.querySelector("#status") || document.querySelector(".status-line")).textContent);
 
@@ -55,7 +55,7 @@ const SAMPLER = () => {
 
 async function scenario(browser, name, init, fn) {
   console.log(name);
-  const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
+  const ctx = await browser.newContext({ serviceWorkers: "block", viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
   await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, init);
   const page = await ctx.newPage();
   page.on("console", m => { if (m.type() === "error") errors.push(name + " → " + m.text()); });
