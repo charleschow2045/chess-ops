@@ -35,7 +35,7 @@ const text = (page, sel) => page.locator(sel).first().textContent().then(t => t.
 
 /* 等到輪到玩家（對手第 1 步自動走完、狀態列有「走棋」） */
 async function waitPlayerTurn(page) {
-  await page.waitForFunction(() => /走棋/.test(document.querySelector(".status-line") ? document.querySelector(".status-line").textContent : ""), null, { timeout: 8000 });
+  await page.waitForFunction(() => (document.querySelector(".status-line") ? document.querySelector(".status-line").dataset.turn === "me" : false), null, { timeout: 8000 });
   await page.waitForTimeout(150);
 }
 /* 一直走標準答案，直到出現「答對」 */
@@ -55,7 +55,7 @@ async function solve(page) {
 (async () => {
   const browser = await chromium.launch({ channel: process.env.BROWSER === "chrome" ? "chrome" : "msedge" });
   const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
-  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem("chessops_test_cleared")) { localStorage.clear(); sessionStorage.setItem("chessops_test_cleared", "1"); } } catch (e) { /* 忽略 */ } });
+  await ctx.addInitScript(() => { try { if (!sessionStorage.getItem("chessops_test_cleared")) { localStorage.clear(); localStorage.setItem("chessops_state", JSON.stringify({ settings: { computerSpeed: "fast" } })); sessionStorage.setItem("chessops_test_cleared", "1"); } } catch (e) { /* 忽略 */ } });
   const page = await ctx.newPage();
   page.on("console", m => { if (m.type() === "error") errors.push(m.text()); });
   page.on("pageerror", e => errors.push(e.message));

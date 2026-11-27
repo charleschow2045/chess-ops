@@ -79,11 +79,14 @@ async function clickSq(page, sq) { const p = await pt(page, sq); await page.mous
 async function move(page, from, to) { await clickSq(page, from); await clickSq(page, to); }
 const mvUci = async (page, u) => move(page, u.slice(0, 2), u.slice(2, 4));
 
+/* 電腦出棋速度：測試預設用「快」（避免等太耐）；SPEED=slow／medium／fast 可以覆蓋。預設值「慢」由 tests/run-all.js 同 tools/shots7.js 另外驗證 */
+const SPEED = process.env.SPEED || "slow";
+const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); return s; };
 async function scenario(browser, vp, name, init, fn) {
   if (FILTER && !name.includes(FILTER)) return;
   const ctx = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1 });
   await ctx.addInitScript(RECORDER);
-  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, init);
+  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, forceSpeed(init));
   const page = await ctx.newPage();
   const run = new Run(page, name, vp.name);
   page.on("console", m => { if (m.type() === "error") errors.push(vp.name + "｜" + name + " → " + m.text()); });
@@ -95,7 +98,7 @@ async function scenario(browser, vp, name, init, fn) {
 
 /* 揀一個合法步（優先兵步／馬步，避免送將死）用嚟「亂走」 */
 const anyMove = page => page.evaluate(() => { const g = window.__chessopsPlay.board().game; const ms = g.moves({ verbose: true }); const pick = ms.find(m => m.piece === "p") || ms[0]; return pick.from + pick.to + (pick.promotion || ""); });
-const waitPlayerTurn = page => page.waitForFunction(() => /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 30000 });
+const waitPlayerTurn = page => page.waitForFunction(() => document.querySelector("#status").dataset.turn === "me", null, { timeout: 30000 });
 
 (async () => {
   const browser = await chromium.launch({ channel: process.env.BROWSER === "chrome" ? "chrome" : "msedge" });
@@ -145,14 +148,14 @@ const waitPlayerTurn = page => page.waitForFunction(() => /輪到你/.test(docum
       await page.goto(BASE + "puzzles.html"); await page.waitForSelector("#go-rec");
       await page.locator("#go-rec").click(); await page.waitForSelector("cg-board");
       await run.mark("對手先走一步…", 100);
-      await page.waitForFunction(() => /走棋/.test(document.querySelector(".status-line").textContent), null, { timeout: 15000 });
+      await page.waitForFunction(() => document.querySelector(".status-line").dataset.turn === "me", null, { timeout: 15000 });
       await run.mark("輪到玩家");
       await page.locator("#hint").click(); await page.waitForSelector(".feedback"); await run.mark("提示 1：圈出棋子");
       await page.locator("#hint").click(); await page.waitForTimeout(150); await run.mark("提示 2：箭頭");
       const wm = await page.evaluate(() => window.__chessopsDebug.wrongMove());
       await mvUci(page, wm); await page.waitForSelector(".feedback.bad"); await run.mark("答錯回饋（綠色箭頭、再試／下一題按鈕）");
       await page.locator("#retry").click(); await run.mark("再試一次（對手重新先走）", 100);
-      await page.waitForFunction(() => /走棋/.test(document.querySelector(".status-line").textContent), null, { timeout: 15000 });
+      await page.waitForFunction(() => document.querySelector(".status-line").dataset.turn === "me", null, { timeout: 15000 });
       await run.mark("再試：輪到玩家");
       for (let k = 0; k < 6; k++) {
         const exp = await page.evaluate(() => window.__chessopsDebug.expected()); await mvUci(page, exp);
@@ -160,7 +163,7 @@ const waitPlayerTurn = page => page.waitForFunction(() => /輪到你/.test(docum
       }
       await run.mark("答對回饋");
       await page.locator("#next").click(); await run.mark("下一題：對手先走", 100);
-      await page.waitForFunction(() => /走棋/.test(document.querySelector(".status-line").textContent), null, { timeout: 15000 });
+      await page.waitForFunction(() => document.querySelector(".status-line").dataset.turn === "me", null, { timeout: 15000 });
       await run.mark("下一題：輪到玩家");
     });
 
@@ -189,7 +192,7 @@ const waitPlayerTurn = page => page.waitForFunction(() => /輪到你/.test(docum
       await run.mark("開局", 100);
       for (let i = 0; i < ucis.length; i++) {
         if (i % 2 !== 0) continue;
-        await page.waitForFunction(() => /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 15000 });
+        await page.waitForFunction(() => document.querySelector("#status").dataset.turn === "me", null, { timeout: 15000 });
         await run.mark("輪到你（第 " + (i / 2 + 1) + " 步）");
         if (i === 0) { await mvUci(page, alt.uci); await page.waitForSelector("#fb .feedback.ok"); await run.mark("「也可以！」訊息"); }
         if (i === 2) { await move(page, "a2", "a3"); await page.waitForSelector("#fb .feedback.bad"); await run.mark("走錯回饋（箭頭＋解釋）"); await page.locator("#retry").click(); await run.mark("再試一次"); }
@@ -212,7 +215,7 @@ const waitPlayerTurn = page => page.waitForFunction(() => /輪到你/.test(docum
       await page.locator("#hint").click(); await page.waitForSelector("#fb .feedback", { timeout: 30000 }); await run.mark("提示：箭頭");
       for (let i = 0; i < p.cap; i++) {
         if (await page.locator("#end-box .btn-row").count()) break;
-        await page.waitForFunction(() => document.querySelector("#end-box .btn-row") || /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 60000 });
+        await page.waitForFunction(() => document.querySelector("#end-box .btn-row") || document.querySelector("#status").dataset.turn === "me", null, { timeout: 60000 });
         if (await page.locator("#end-box .btn-row").count()) break;
         const fen = await page.evaluate(() => window.__chessopsEg.board().game.fen());
         const u = await page.evaluate(f => window.__chessopsMgr.run(f, { depth: 12 }).then(r => r.uci), fen);
@@ -231,7 +234,7 @@ const waitPlayerTurn = page => page.waitForFunction(() => /輪到你/.test(docum
     await scenario(browser, vp, "一步將死（對手先走、答錯、答對）", null, async (page, run) => {
       const M1 = require(path.join(ROOT, "data/mate1.js")), p = M1.filter(x => x.level === 1)[0], mv = p.moves.split(" ");
       await page.goto(BASE + "game-mate1.html?level=1"); await page.waitForSelector("cg-board");
-      await run.mark("對手先走一步…", 100); await page.waitForTimeout(900); await run.mark("輪到玩家");
+      await run.mark("對手先走一步…", 100); await page.waitForFunction(() => { const s = document.querySelector(".status-line"); return s && s.dataset.turn === "me"; }, null, { timeout: 20000 }); await run.mark("輪到玩家");
       const g = new Chess(p.fen); g.move({ from: mv[0].slice(0, 2), to: mv[0].slice(2, 4), promotion: mv[0][4] });
       const bad = g.moves({ verbose: true }).find(m => { const c = new Chess(g.fen()); c.move(m); return !c.isCheckmate(); });
       await mvUci(page, uciOf(bad)); await page.waitForSelector(".feedback.bad"); await run.mark("答錯回饋");
@@ -266,7 +269,7 @@ const waitPlayerTurn = page => page.waitForFunction(() => /輪到你/.test(docum
         const mv = await page.evaluate(() => { const b = document.querySelector("cg-board"); return !!b; });
         const f = ["e2e4", "d2d4"][i];
         await mvUci(page, f); await run.mark("走一步：電腦思考中", 60);
-        await page.waitForFunction(() => /輪到你/.test(document.querySelector(".status-line").textContent), null, { timeout: 20000 }); await run.mark("輪到玩家");
+        await page.waitForFunction(() => document.querySelector(".status-line").dataset.turn === "me", null, { timeout: 20000 }); await run.mark("輪到玩家");
       }
     });
 

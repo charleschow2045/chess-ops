@@ -29,10 +29,13 @@ const stateWith = fn => { const s = State.defaultState(); fn(s); return State.no
 const today = new Date(), todayKey = Daily.dateKey(today), needPlay = Daily.requiresPlay(today);
 const keyAgo = n => Daily.dateKey(Daily.addDays(today, -n));
 
+/* 電腦出棋速度：測試預設用「快」（避免等太耐）；SPEED=slow／medium／fast 可以覆蓋。預設值「慢」由 tests/run-all.js 同 tools/shots7.js 另外驗證 */
+const SPEED = process.env.SPEED || "fast";
+const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); return s; };
 async function scenario(browser, name, init, fn, opts) {
   console.log(name);
   const ctx = await browser.newContext(Object.assign({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1, acceptDownloads: true }, opts || {}));
-  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, init);
+  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, forceSpeed(init));
   const page = await ctx.newPage();
   // 故意查詢不存在嘅 chess.com 用戶，瀏覽器會記一個 404 資源錯誤（預期，唔係程式錯誤）
   page.on("console", m => { if (m.type() === "error" && !(name.includes("讀取 chess.com") && m.text().includes("status of 404"))) errors.push(name + " → " + m.text()); });
@@ -80,7 +83,7 @@ async function scenario(browser, name, init, fn, opts) {
   }), async page => {
     await page.goto(BASE + "puzzles.html"); await page.waitForSelector("#go-rec");
     await page.locator("#go-rec").click(); await page.waitForSelector("cg-board");
-    await page.waitForFunction(() => /走棋/.test(document.querySelector(".status-line").textContent), null, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelector(".status-line").dataset.turn === "me", null, { timeout: 15000 });
     for (let k = 0; k < 6; k++) {                       // 有啲謎題要走多步：逐步走，直到完成（出現完成提示）
       const exp = await page.evaluate(() => window.__chessopsDebug.expected());
       await move(page, exp.slice(0, 2), exp.slice(2, 4));

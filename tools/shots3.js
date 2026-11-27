@@ -30,17 +30,20 @@ const histUcis = sans => { const g = new Chess(); sans.forEach(s => g.move(s)); 
 
 function stateWith(fn) { const s = State.defaultState(); fn(s); return State.normalizeState(s); }
 
+/* 電腦出棋速度：測試預設用「快」（避免等太耐）；SPEED=slow／medium／fast 可以覆蓋。預設值「慢」由 tests/run-all.js 同 tools/shots7.js 另外驗證 */
+const SPEED = process.env.SPEED || "fast";
+const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); return s; };
 async function scenario(browser, name, init, fn, ctxOpts) {
   console.log(name);
   const ctx = await browser.newContext(Object.assign({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 }, ctxOpts || {}));
-  if (init) await ctx.addInitScript(st => { try { if (!localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, init);
+  await ctx.addInitScript(st => { try { if (!localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, forceSpeed(init));
   const page = await ctx.newPage();
   page.on("console", m => { if (m.type() === "error") errors.push(name + " → " + m.text()); });
   page.on("pageerror", e => errors.push(name + " → " + e.message));
   try { await fn(page, ctx); } catch (e) { failed++; console.log("  ✗ 例外：" + e.message.split("\n")[0]); }
   await ctx.close();
 }
-const waitMyTurn = (page, t) => page.waitForFunction(() => /輪到你/.test(document.querySelector("#status") ? document.querySelector("#status").textContent : ""), null, { timeout: t || 20000 });
+const waitMyTurn = (page, t) => page.waitForFunction(() => (document.querySelector("#status") ? document.querySelector("#status").dataset.turn === "me" : false), null, { timeout: t || 20000 });
 
 (async () => {
   const browser = await chromium.launch({ channel: process.env.BROWSER === "chrome" ? "chrome" : "msedge" });
@@ -64,7 +67,7 @@ const waitMyTurn = (page, t) => page.waitForFunction(() => /輪到你/.test(docu
     await waitMyTurn(page);
     ok((await page.locator("#moves").textContent()).includes("e4"), "棋譜顯示 e4（SAN 記譜）");
     ok(await page.locator("#moves .mv").count() === 2, "電腦已回應（棋譜 2 步）");
-    ok((await page.locator("#status").textContent()).includes("輪到你"), "狀態：輪到你");
+    ok((await page.locator("#status").getAttribute("data-turn")) === "me" && (await page.locator("#status").textContent()).startsWith("電腦走了 "), "狀態：顯示電腦上一步（並且輪到你）");
     // 提示：最多 3 次
     await page.locator("#hint").click();
     await page.waitForFunction(() => /提示 1 \/ 3/.test(document.querySelector("#fb").textContent), null, { timeout: 20000 });

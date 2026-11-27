@@ -71,14 +71,16 @@ function play(level) {
       }
     });
     // 對手先走第 1 步（停約 0.5 秒再走，有動畫）
+    status.dataset.turn = "opp";
+    const spd = CO.Speed.current();
     setTimeout(() => {
       auto = true;
-      board.play(parse(p.moves.split(" ")[0]));
+      const om = board.play(parse(p.moves.split(" ")[0]), { duration: spd.anim });
       auto = false;
       board.setInteractive(playerColor);
       showBtn.disabled = false;
-      status.textContent = (playerColor === "white" ? "白方" : "黑方") + "走棋：一步將死";
-    }, 500);
+      status.textContent = CO.Speed.describeMove(om, "對手"); status.dataset.turn = "me";
+    }, CO.Speed.pauseMs(spd));
 
     showBtn.addEventListener("click", () => {
       if (solved) return;

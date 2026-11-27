@@ -29,10 +29,13 @@ const stateOf = page => page.evaluate(() => JSON.parse(localStorage.getItem("che
 const stateWith = fn => { const s = State.defaultState(); fn(s); return State.normalizeState(s); };
 const routeUcis = r => { const g = new Chess(); return r.moves.map(s => uciOf(g.move(s))); };
 
+/* 電腦出棋速度：測試預設用「快」（避免等太耐）；SPEED=slow／medium／fast 可以覆蓋。預設值「慢」由 tests/run-all.js 同 tools/shots7.js 另外驗證 */
+const SPEED = process.env.SPEED || "fast";
+const forceSpeed = init => { const s = init ? JSON.parse(JSON.stringify(init)) : { settings: {} }; s.settings = Object.assign({}, s.settings, { computerSpeed: SPEED }); return s; };
 async function scenario(browser, name, init, fn) {
   console.log(name);
   const ctx = await browser.newContext({ viewport: { width: 820, height: 1180 }, deviceScaleFactor: 1 });
-  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, init);
+  await ctx.addInitScript(st => { try { if (st && !localStorage.getItem("chessops_state")) localStorage.setItem("chessops_state", JSON.stringify(st)); } catch (e) { /* 忽略 */ } }, forceSpeed(init));
   const page = await ctx.newPage();
   page.on("console", m => { if (m.type() === "error") errors.push(name + " → " + m.text()); });
   page.on("pageerror", e => errors.push(name + " → " + e.message));
@@ -99,7 +102,7 @@ async function scenario(browser, name, init, fn) {
     const playRoute = async (mistakeAt) => {
       for (let i = 0; i < ucis.length; i++) {
         if (i % 2 !== (route.side === "w" ? 0 : 1)) continue;          // 對方嘅步由 App 自動走
-        await page.waitForFunction(() => /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 15000 });
+        await page.waitForFunction(() => document.querySelector("#status").dataset.turn === "me", null, { timeout: 15000 });
         if (mistakeAt === i) {
           await move(page, "a2", "a3");                                   // 故意走錯（合法但唔係路線）
           ok(await page.locator("#fb .feedback.bad").count() === 1, "走錯：即時顯示「走錯了」");
@@ -136,7 +139,7 @@ async function scenario(browser, name, init, fn) {
     await page.goto(BASE + "openings.html"); await page.waitForTimeout(400);
     await page.locator("[data-route='b-scholar']").click(); await page.waitForSelector("cg-board");
     ok((await rect(page)).flipped, "執黑：黑方在下面");
-    await page.waitForFunction(() => /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelector("#status").dataset.turn === "me", null, { timeout: 15000 });
     ok(await page.locator("#route-log div").count() === 1, "白方先自動走 e4，並顯示想法");
     await shot(page, "08-openings-black");
   });
@@ -173,7 +176,7 @@ async function scenario(browser, name, init, fn) {
     ok((await page.locator("#reminder").textContent()).includes("三問提醒") && !(await page.locator("#reminder").textContent()).includes("先想三問"), "可以收起");
     await page.locator("#rem-toggle").click();
     await move(page, "e2", "e4");
-    await page.waitForFunction(() => /輪到你/.test(document.querySelector("#status").textContent), null, { timeout: 20000 });
+    await page.waitForFunction(() => document.querySelector("#status").dataset.turn === "me", null, { timeout: 20000 });
     ok(await page.locator("#reminder:not(.dim)").count() === 1 && await page.locator("#reminder.hidden").count() === 0, "電腦走完，再輪到玩家時回復清晰（電腦思考時只係變淡，唔收起）");
     await page.goto(BASE + "settings.html"); await page.waitForTimeout(300);
     ok(await page.locator("#three-reminder").isChecked(), "設定「對局中顯示三問提醒」預設開");

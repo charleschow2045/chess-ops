@@ -30,6 +30,20 @@
       }
     },
 
+    /* ---------- 電腦出棋速度（設定頁「電腦出棋速度」：慢／中／快，預設慢；js/speed.js） ----------
+     * 適用於電腦同 App 自動走嘅對手步（對電腦下棋、殘局、戰術謎題嘅對手步、開局對方步、兵仗、一步將死）。
+     * pauseMin／pauseMax＝出棋前停頓（毫秒，隨機）；anim＝對手棋子移動動畫（毫秒）。玩家自己走棋嘅動畫一律 PLAYER_ANIM_MS，唔拖慢。
+     * 「快」就係第 3 階段之前嘅速度（同下面 THINK_PAUSE 一致）。 */
+    COMPUTER_SPEED: {
+      DEFAULT: "slow",
+      PLAYER_ANIM_MS: 180,
+      LEVELS: {
+        slow:   { label: "慢", pauseMin: 1200, pauseMax: 1800, anim: 500 },
+        medium: { label: "中", pauseMin: 800,  pauseMax: 1200, anim: 350 },
+        fast:   { label: "快", pauseMin: 400,  pauseMax: 800,  anim: 180 }
+      }
+    },
+
     /* ---------- 電腦出棋前嘅停頓（毫秒）：令玩家睇得清電腦嘅棋 ---------- */
     THINK_PAUSE: { minMs: 400, maxMs: 800 },
 

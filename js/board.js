@@ -15,7 +15,7 @@
  *   viewOnly       true = 只供觀看（唔綁定操作／觸控事件，頁面自己處理點擊）
  *   onMove(move)   走完一步之後呼叫（move 係 chess.js 嘅 Move 物件）。呼叫者可以用 board.load()／board.undo() 退回。
  *
- * 方法：load(fen,{lastMove}) loadMoves(ucis) play({from,to,promotion}) flip() setOrientation(c) setInteractive(m) undo() lock() unlock()
+ * 方法：load(fen,{lastMove}) loadMoves(ucis) play({from,to,promotion},{duration}) flip() setOrientation(c) setInteractive(m) undo() lock() unlock()
  *       setShapes(list) arrow(from,to,brush) circle(sq,brush) clearShapes() feedback(ok) destroy()
  *       屬性：game（chess.js 實例）、cg（Chessground API）、el
  *
@@ -29,6 +29,8 @@ import "./feedback.js";
 const CO = window.ChessOps;
 const COLOR = { w: "white", b: "black" };
 
+const DEFAULT_ANIM = 180;                         // 玩家自己走棋嘅動畫（毫秒）
+
 /* 共用基本設定（阻止捲動、高亮；showNames = 設定「顯示格名」，開咗先喺每格印 e4 這類名稱） */
 function baseConfig(showNames) {
   return {
@@ -38,7 +40,7 @@ function baseConfig(showNames) {
     disableContextMenu: true,
     highlight: { lastMove: true, check: true },
     premovable: { enabled: false },
-    animation: { enabled: true, duration: 180 },
+    animation: { enabled: true, duration: DEFAULT_ANIM },
     draggable: { enabled: true, showGhost: true, distance: 6 },
     selectable: { enabled: true }
   };
@@ -150,11 +152,13 @@ export function createBoard(el, opts = {}) {
       sync();
       return true;
     },
-    /* 程式走一步（例如電腦走棋）：會有動畫，並會呼叫 onMove */
-    play(m) {
+    /* 程式走一步（例如電腦走棋）：會有動畫，並會呼叫 onMove。o.duration＝呢一步嘅動畫毫秒（電腦出棋速度設定）；玩家自己走嘅動畫保持預設 180ms */
+    play(m, o) {
       const move = game.move({ from: m.from, to: m.to, promotion: m.promotion });
       lastMove = [m.from, m.to];
+      if (o && o.duration) cg.set({ animation: { duration: o.duration } });
       sync();
+      if (o && o.duration) cg.set({ animation: { duration: DEFAULT_ANIM } });     // 動畫喺開始時已經讀取咗時間，之後立即還原
       if (opts.onMove) opts.onMove(move);
       return move;
     },

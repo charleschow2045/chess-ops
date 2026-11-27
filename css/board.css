@@ -43,6 +43,9 @@ cg-board {
 .promo-list piece { position: static !important; display: block; width: 100% !important; height: 100% !important; background-size: cover; }
 .promo-cancel { margin-top: 12px; }
 
+/* 最後一步嘅起點同終點：顏色要夠深，喺淺色同深色格都睇得清楚（黃色底＋橙褐色內框） */
+cg-board square.last-move { background-color: rgba(250, 196, 20, .72); box-shadow: inset 0 0 0 4px rgba(176, 96, 0, .85); }
+
 /* 棋步記錄、狀態列、計時 */
 /* 狀態行：固定高度、單行（太長用省略號），唔可以因為文字長短而推動棋盤 */
 .status-line { height: 28px; line-height: 28px; font-size: 18px; font-weight: 700; margin: 8px 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
