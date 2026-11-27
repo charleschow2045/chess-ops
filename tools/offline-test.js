@@ -36,9 +36,10 @@ const turnMe = (page, t) => page.waitForFunction(() => { const s = document.quer
   async function open(url) {
     const page = await ctx.newPage();
     // 「我的對局」離線時故意去讀 chess.com：瀏覽器會記一個 ERR_INTERNET_DISCONNECTED（預期，頁面會顯示「需要網絡才能讀取對局」）
-    page.on("console", m => { if (m.type() === "error" && !(current === "我的對局" && /ERR_INTERNET_DISCONNECTED/.test(m.text()))) errors.push(current + " → console：" + m.text()); });
+    page.on("console", m => { const u = m.location() && m.location().url; if (m.type() === "error" && !(u && !u.startsWith(BASE)) && !(current === "我的對局" && /ERR_INTERNET_DISCONNECTED/.test(m.text()))) errors.push(current + " → console：" + m.text() + (u ? "（" + u.replace(BASE, "").slice(0, 60) + "）" : "")); });
     page.on("pageerror", e => errors.push(current + " → 頁面錯誤：" + e.message));
-    page.on("requestfailed", r => { if (!/chess\.com/.test(r.url())) errors.push(current + " → 請求失敗：" + r.url().replace(BASE, "")); });
+    // 只計 App 自己（BASE 之下）嘅請求；瀏覽器自己對網站根目錄嘅隨機路徑請求（Edge 內建功能，唔係 App 發出）唔計
+    page.on("requestfailed", r => { if (r.url().startsWith(BASE)) errors.push(current + " → 請求失敗：" + r.url().replace(BASE, "")); });
     await page.goto(BASE + url);
     return page;
   }

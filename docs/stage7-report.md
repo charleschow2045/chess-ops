@@ -62,3 +62,9 @@ Playwright 先正常打開一次首頁，確認 service worker 已啟用、快�
 - 錯題、我的謎題嘅間隔重溫（過幾日自動提醒再做）。
 - 開局路線加入更多選擇、殘局加入更多課題（例如象馬殺王）。
 - 對電腦下棋加入時限（棋鐘）模式。
+
+## 五、線上網址驗證（https://charleschow2045.github.io/chess-ops/）
+- 已合併入 main，GitHub Pages 已更新；`manifest.webmanifest`、三個圖示、`sw.js`、設定頁、報告同截圖總覽全部 HTTP 200。
+- 用同一套 `tools/offline-test.js` 喺線上網址（HTTPS）重新跑：service worker 啟用、快取 `chessops-v1.0.0-3f47d2b5`、99 個檔案（同清單一致），設定離線後 36 項檢查全部通過。
+- 備註：喺線上網址跑時，Edge 會自己對網站根目錄發出一個隨機路徑嘅請求（失敗），唔係 App 發出（路徑唔喺 `/chess-ops/` 之下，本機測試冇出現），測試工具已經只計 App 自己嘅請求同 console 錯誤。
+- 更新機制測試（`tools/update-test.js`）會暫時改 `sw.js`，只喺本機跑，已通過。
