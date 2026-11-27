@@ -251,7 +251,7 @@ const waitMyTurn = (page, t) => page.waitForFunction(() => /輪到你/.test(docu
     const top0 = (await rect(page)).y;
     await page.waitForFunction(() => !document.querySelector("#engine-box .card"), null, { timeout: 30000 });
     await page.waitForTimeout(300);
-    ok((await rect(page)).y < top0 - 20, "引擎提示消失後棋盤向上移位（" + Math.round(top0) + " → " + Math.round((await rect(page)).y) + "）");
+    ok(Math.abs((await rect(page)).y - top0) <= 1, "引擎提示消失後棋盤唔會移位（" + Math.round(top0) + " → " + Math.round((await rect(page)).y) + "）");
     await move(page, "e2", "e4");
     ok(await page.locator("#moves .mv").count() >= 1, "移位之後第一次點擊走棋仍然成功");
   });

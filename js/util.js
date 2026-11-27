@@ -21,11 +21,28 @@
     (children || []).forEach(function (c) { e.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
     return e;
   }
+  /*
+   * 棋盤上方嘅題目文字，每題長短唔同會令棋盤上下跳。做法：喺 host 入面用同一個 class 量度所有可能嘅文字要幾高，
+   * 取最高者做 element 嘅 min-height（視窗大細改變時重新量度）。
+   */
+  function fixTextHeight(element, host, cls, texts) {
+    function measure() {
+      var probe = document.createElement("div");
+      probe.className = cls; probe.style.visibility = "hidden"; probe.style.minHeight = "0";
+      host.appendChild(probe);
+      var h = 0;
+      texts.forEach(function (t) { probe.textContent = t; h = Math.max(h, probe.offsetHeight); });
+      host.removeChild(probe);
+      element.style.minHeight = h + "px";
+    }
+    measure();
+    window.addEventListener("resize", function () { if (document.body.contains(element)) measure(); });
+  }
   function shuffle(a, rng) {
     rng = rng || Math.random;
     a = a.slice();
     for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(rng() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
     return a;
   }
-  return { qs: qs, el: el, shuffle: shuffle };
+  return { qs: qs, el: el, shuffle: shuffle, fixTextHeight: fixTextHeight };
 });

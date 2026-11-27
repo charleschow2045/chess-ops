@@ -28,7 +28,7 @@ css/                theme.css（設計 A token）、board.css、test.css
 js/                 board.js（正式棋盤）、config.js（可調數字）、play*.js／review-logic.js／engine-manager.js、state.js、pickmove.js、engine.js、quiz*.js、game-*.js、knight-maze.js、pawnwar.js…
 data/               rules-quiz.js（手寫）、puzzles/（Lichess 謎題子集）、mate1.js（Lichess mateIn1）、check-find.js／knight-maze.js（tools/gen-games.js 產生）
 vendor/             第三方檔案（chess.js、Chessground、Stockfish.js 19 lite）
-tools/              serve.js、build-puzzles.js（由 Lichess 資料庫篩謎題）、gen-games.js、gen-content.js、gen-stage2-content.js、gen-stage4-content.js、gen-stage5-content.js、endgames-tb.js／build-endgames.js（殘局局面：殘局庫篩選＋Stockfish 驗證）、shots.js…shots6.js（Playwright 流程測試同截圖）、measure3.js（量度引擎時間）
+tools/              serve.js、build-puzzles.js（由 Lichess 資料庫篩謎題）、gen-games.js、gen-content.js、gen-stage2-content.js、gen-stage4-content.js、gen-stage5-content.js、layout-check.js（棋盤唔移位量度，見 docs/layout-fix-report.md）、endgames-tb.js／build-endgames.js（殘局局面：殘局庫篩選＋Stockfish 驗證）、shots.js…shots6.js（Playwright 流程測試同截圖）、measure3.js（量度引擎時間）
 tests/run-all.js    純邏輯測試
 design-preview/     三個設計風格預覽
 docs/               報告、題目清單、截圖、授權說明

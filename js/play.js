@@ -133,12 +133,14 @@ function startGame(init) {
   let remCollapsed = false;
   const remText = el("span", { class: "rtxt", text: "先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？" });
   const remBtn = el("button", { class: "rbtn", id: "rem-toggle", type: "button", text: "收起", onclick() { remCollapsed = !remCollapsed; refresh(); } });
-  const reminder = el("div", { class: "reminder hidden", id: "reminder" }, [remText, remBtn]);
+  // 提醒行：設定開啟就由開局起一直佔位（固定高度）；電腦思考／對局結束時變淡，唔收起，棋盤先唔會移位。設定關閉就完全唔出現。
+  const useReminder = getS().settings.threeReminder;
+  const reminder = el("div", { class: "reminder dim", id: "reminder" }, [remText, remBtn]);
   const resignBtn = el("button", { class: "btn danger", id: "resign", type: "button", text: "認輸", onclick: doResign });
   btnRow.append(undoBtn, hintBtn, resignBtn);
   stage.append(
     el("div", { class: "player-row" }, [el("span", { class: "who", text: "電腦" }), el("span", { class: "lvl-badge", text: "第 " + G.level + " 級" }), oppCaps]),
-    status, reminder, wrap,
+    status, ...(useReminder ? [reminder] : []), wrap,
     el("div", { class: "player-row" }, [el("span", { class: "who", text: "你（" + sideName(G.color) + "）" }), meCaps]),
     fb, endBox, btnRow, movesBox);
 
@@ -188,8 +190,7 @@ function startGame(init) {
   function refresh() {
     const g = board.game;
     renderCaps(); renderMoves();
-    const showRem = getS().settings.threeReminder && !G.over && !G.thinking && g.turn() === G.color;
-    reminder.classList.toggle("hidden", !showRem);
+    reminder.classList.toggle("dim", G.over || G.thinking || g.turn() !== G.color);
     remText.textContent = remCollapsed ? "三問提醒" : "先想三問：對方想做甚麼？我有機會嗎？這步安全嗎？";
     remBtn.textContent = remCollapsed ? "展開" : "收起";
     status.textContent = G.over ? "對局結束" : G.thinking ? "電腦思考中…" : g.turn() === G.color ? "輪到你（" + sideName(G.color) + "）" + (g.inCheck() ? "：你被將軍！" : "") : "輪到電腦";

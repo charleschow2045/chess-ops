@@ -27,7 +27,9 @@ function showQuestion() {
   const wrap = el("div", { id: "board" });
   const fb = el("div", { id: "fb", "aria-live": "polite" });
   const next = el("button", { class: "btn primary hidden", type: "button", text: index === questions.length - 1 ? "看結果" : "下一題 ›" });
-  stage.append(el("div", { class: "q-text", text: q.prompt }), wrap);
+  const qEl = el("div", { class: "q-text", text: q.prompt });
+  stage.append(qEl, wrap);
+  CO.Util.fixTextHeight(qEl, stage, "q-text", questions.map(x => x.prompt));          // 每題題目長短唔同：固定高度，棋盤唔會跳
   const line = movesLine(q);
   if (line) stage.append(el("div", { class: "moves", text: line }));
   let answered = false;

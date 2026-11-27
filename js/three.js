@@ -40,6 +40,10 @@ function startRound() {
   })();
 }
 
+const Q1_TEXT = "① 對方上一步想做甚麼？　假如現在輪到對方走，對方可以白吃你的哪些棋子？請點選這些棋子，再按「確定」；或者選擇下面的選項。";
+const Q2_TEXT = "② 我有沒有機會？　你可以白吃對方的哪些棋子？請點選這些棋子，再按「確定」；或者選擇下面的選項。";
+const Q3_TEXT = "③ 這一步安全嗎？　下面三步棋，哪一步會送子（或者走完會被將死）？";
+
 /* 一個局面：Q1 → Q2 → Q3 */
 function runPosition(p, index, soFar) {
   return new Promise(resolve => {
@@ -54,6 +58,7 @@ function runPosition(p, index, soFar) {
     const fb = el("div", { id: "fb", "aria-live": "polite" });
     const nextBtn = el("button", { class: "btn primary hidden", id: "next", type: "button" });
     stage.append(head, qText, wrap, ctrl, fb, el("div", { class: "btn-row" }, [nextBtn]));
+    CO.Util.fixTextHeight(qText, stage, "q-text", [Q1_TEXT, Q2_TEXT, Q3_TEXT]);          // 三條題目長短唔同：固定高度，棋盤唔會跳
     window.__chessopsThree = { current: () => p };            // 供 tools/shots4.js 自動測試使用
     const board = createBoard(wrap, { fen: p.fen, orientation, interactive: false, viewOnly: true });
     let selected = [];
@@ -93,9 +98,7 @@ function runPosition(p, index, soFar) {
         const q = step === 1 ? p.q1 : p.q2;
         const mateLabel = step === 1 ? "對方威脅將死" : "可以將死";
         const noneLabel = step === 1 ? "沒有直接威脅" : "沒有";
-        qText.textContent = step === 1
-          ? "① 對方上一步想做甚麼？　假如現在輪到對方走，對方可以白吃你的哪些棋子？請點選這些棋子，再按「確定」；或者選擇下面的選項。"
-          : "② 我有沒有機會？　你可以白吃對方的哪些棋子？請點選這些棋子，再按「確定」；或者選擇下面的選項。";
+        qText.textContent = step === 1 ? Q1_TEXT : Q2_TEXT;
         pickable = true;
         confirmBtn = el("button", { class: "btn primary", id: "confirm", type: "button", text: "確定（我點選的棋子）", disabled: true, onclick() { finish(step, q.kind === "squares" && sameSet(selected, q.squares), q, answerShapes(q, selected)); } });
         ctrl.append(el("div", { class: "btn-row" }, [confirmBtn,
@@ -103,7 +106,7 @@ function runPosition(p, index, soFar) {
           el("button", { class: "btn", id: "opt-none", type: "button", text: noneLabel, onclick() { finish(step, q.kind === "none", q, answerShapes(q, [])); } })]));
       } else {
         const q = p.q3;
-        qText.textContent = "③ 這一步安全嗎？　下面三步棋，哪一步會送子（或者走完會被將死）？";
+        qText.textContent = Q3_TEXT;
         board.setShapes(q.options.map(o => ({ orig: o.uci.slice(0, 2), dest: o.uci.slice(2, 4), brush: "blue" })));
         const box = el("div", { class: "opt-list" });
         q.options.forEach(o => box.append(el("button", { class: "opt", type: "button", "data-uci": o.uci, text: "走 " + o.san, onclick() {
